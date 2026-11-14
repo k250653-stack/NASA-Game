@@ -1,5 +1,5 @@
 {
-  "_note": "All numbers are approximate placeholders from TECH_STACK.md section 5 and must be verified against the NASA source URLs before the demo. transitDays and signalDelaySec are one-way; Mars values vary with the launch window.",
+  "_note": "Approximate, verify. All numbers are placeholders to be checked against the NASA source URLs before the demo. transitDays and signalDelaySec are one-way; Mars values vary with the launch window. lightFraction, darkPeriodHours, dustLossPerDay and contactHoursPerDay are game-balance estimates (Moon south pole ridges see ~70% sunlight with dark spells up to ~100 h; Mars sols are ~24.6 h with ~12-13 h night).",
   "items": [
     {
       "id": "moon",
@@ -7,6 +7,10 @@
       "transitDays": 3,
       "signalDelaySec": 1.3,
       "sunlightFactor": 1.0,
+      "lightFraction": 0.7,
+      "darkPeriodHours": 100,
+      "dustLossPerDay": 0.0005,
+      "contactHoursPerDay": 24,
       "gravityG": 0.17,
       "resupplyPossible": true,
       "hazards": ["dust", "cold-night", "solar-flare"],
@@ -18,6 +22,10 @@
       "transitDays": 210,
       "signalDelaySec": 600,
       "sunlightFactor": 0.43,
+      "lightFraction": 0.5,
+      "darkPeriodHours": 13,
+      "dustLossPerDay": 0.002,
+      "contactHoursPerDay": 8,
       "gravityG": 0.38,
       "resupplyPossible": false,
       "hazards": ["dust-storm", "radiation", "solar-flare"],

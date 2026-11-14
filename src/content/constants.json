@@ -1,0 +1,21 @@
+{
+  "_note": "Approximate, verify. Engine-wide constants. perCrewPerDay values are typical planning figures for crewed missions and must be checked against a NASA life-support baseline before the demo. Every 'TODO' source must be replaced with a URL.",
+  "perCrewPerDay": {
+    "oxygenKg": 0.84,
+    "foodKg": 1.8,
+    "waterKg": 3.0,
+    "source": "TODO"
+  },
+  "reserveDaysRequired": { "value": 3, "source": "TODO" },
+  "powerMarginTarget": { "value": 0.2, "source": "TODO" },
+  "massMarginTarget": { "value": 0.05, "source": "TODO" },
+  "crewMassKg": { "value": 100, "source": "TODO" },
+  "dataReturnWarnRatio": { "value": 0.5, "source": "TODO" },
+  "evaMinSystemsSkill": { "value": 2, "source": "TODO" },
+  "teamRules": {
+    "noPracticalRepairSuccess": -0.25,
+    "noLeaderDecisionActions": -1,
+    "multiLeaderMoraleDrift": -2,
+    "source": "TODO"
+  }
+}

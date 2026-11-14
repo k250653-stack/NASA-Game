@@ -3,6 +3,7 @@ import { ContentValidationError, RAW_CONTENT, loadContent, validateContent } fro
 
 /** Deep-clones the bundled JSON so a test can break one field without touching the others. */
 function cloneRaw(): {
+  constants: unknown
   destinations: unknown
   scenarios: unknown
   crew: unknown
@@ -20,7 +21,8 @@ describe('content loading', () => {
     expect(content.destinations.map((d) => d.id)).toEqual(['moon', 'mars'])
     expect(content.scenarios).toHaveLength(1)
     expect(content.crew).toHaveLength(4)
-    expect(content.parts).toHaveLength(8)
+    expect(content.parts.length).toBeGreaterThanOrEqual(16)
+    expect(content.constants.perCrewPerDay.oxygenKg).toBe(0.84)
     expect(content.rockets).toHaveLength(3)
     expect(content.events).toHaveLength(2)
     expect(content.lessons).toHaveLength(1)
@@ -47,6 +49,23 @@ describe('content loading', () => {
     parts.items[0]!['colour'] = 'red'
     expect(() => validateContent(raw)).toThrow(/parts\.json/)
     expect(() => validateContent(raw)).toThrow(/colour/)
+  })
+
+  it('rejects an unknown part stat key', () => {
+    const raw = cloneRaw()
+    const parts = raw.parts as { items: Array<{ stats: Record<string, number> }> }
+    parts.items[0]!.stats = { warpFactor: 9 }
+    expect(() => validateContent(raw)).toThrow(/parts\.json/)
+    expect(() => validateContent(raw)).toThrow(
+      /items\[0\]\.stats \(id "solar-array-5kw"\): Unrecognized key: "warpFactor"/,
+    )
+  })
+
+  it('every part category has at least two options', () => {
+    const counts = new Map<string, number>()
+    loadContent().parts.forEach((p) => counts.set(p.category, (counts.get(p.category) ?? 0) + 1))
+    expect(counts.size).toBe(9)
+    counts.forEach((n) => expect(n).toBeGreaterThanOrEqual(2))
   })
 
   it('rejects crew priorities that do not sum to 1', () => {

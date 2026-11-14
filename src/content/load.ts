@@ -4,6 +4,8 @@
  */
 import { z } from 'zod'
 import {
+  ConstantsSchema,
+  type Constants,
   CrewMemberSchema,
   DestinationSchema,
   GameEventSchema,
@@ -26,8 +28,10 @@ import partsJson from './parts.json'
 import rocketsJson from './rockets.json'
 import eventsJson from './events.json'
 import lessonsJson from './lessons.json'
+import constantsJson from './constants.json'
 
 export interface GameContent {
+  constants: Constants
   destinations: Destination[]
   scenarios: Scenario[]
   crew: CrewMember[]
@@ -91,6 +95,18 @@ export function parseContentFile<T extends z.ZodType>(
   return result.data.items
 }
 
+/** constants.json is a single object, not an items list. */
+export function parseConstants(data: unknown): Constants {
+  const result = ConstantsSchema.safeParse(data)
+  if (!result.success) {
+    throw new ContentValidationError(
+      'constants.json',
+      result.error.issues.map((issue) => `${describePath(issue.path, data)}: ${issue.message}`),
+    )
+  }
+  return result.data
+}
+
 function assertUniqueIds(file: string, items: ReadonlyArray<{ id: string }>): void {
   const seen = new Set<string>()
   const dupes = items.filter((i) => (seen.has(i.id) ? true : (seen.add(i.id), false)))
@@ -147,6 +163,7 @@ function checkReferences(content: GameContent): void {
 
 /** Validates raw JSON objects (exported so tests can feed in deliberately broken data). */
 export function validateContent(raw: {
+  constants: unknown
   destinations: unknown
   scenarios: unknown
   crew: unknown
@@ -156,6 +173,7 @@ export function validateContent(raw: {
   lessons: unknown
 }): GameContent {
   const content: GameContent = {
+    constants: parseConstants(raw.constants),
     destinations: parseContentFile('destinations.json', DestinationSchema, raw.destinations),
     scenarios: parseContentFile('scenarios.json', ScenarioSchema, raw.scenarios),
     crew: parseContentFile('crew.json', CrewMemberSchema, raw.crew),
@@ -180,6 +198,7 @@ export function validateContent(raw: {
 }
 
 export const RAW_CONTENT = {
+  constants: constantsJson,
   destinations: destinationsJson,
   scenarios: scenariosJson,
   crew: crewJson,

@@ -17,18 +17,45 @@ export const PartCategorySchema = z.enum(PART_CATEGORIES, {
 })
 export type PartCategory = z.infer<typeof PartCategorySchema>
 
+/** Stat keys the engine understands. A part lists only the ones it needs. */
+export const PART_STAT_KEYS = [
+  'ratedPowerW', // solar array output at 1 AU in full sun, W
+  'capacityWh', // battery / fuel cell storage, Wh
+  'dataRateMbps', // comms link rate, Mbps
+  'scienceDataGbPerDay', // data an instrument produces, GB/day
+  'sciencePointsPerDay', // science score an instrument or rover adds per day
+  'waterRecoveryRate', // share of water recycled, 0-1
+  'suitCount', // EVA suits provided
+  'spareKits', // repair kits provided
+  'storageKg', // supply storage the part provides, kg
+  'crewCapacity', // crew the habitat can house
+] as const
+export const PartStatKeySchema = z.enum(PART_STAT_KEYS, {
+  error: () => `stat key must be one of: ${PART_STAT_KEYS.join(', ')}`,
+})
+export type PartStatKey = z.infer<typeof PartStatKeySchema>
+
+export const PartStatsSchema = z
+  .partialRecord(PartStatKeySchema, z.number().nonnegative({ error: 'stats must be >= 0' }))
+  .refine((s) => s.waterRecoveryRate === undefined || s.waterRecoveryRate <= 1, {
+    error: 'stats.waterRecoveryRate is a share and must be <= 1',
+  })
+
 export const PartSchema = z.strictObject({
   id: IdSchema,
   name: NonEmptyString,
   category: PartCategorySchema,
   massKg: z.number().nonnegative({ error: 'massKg must be >= 0' }),
-  /** Watts. Negative = consumes power, positive = produces power. */
+  /**
+   * Constant electrical power in W. Negative = steady draw, positive = steady production that
+   * does not depend on sunlight (e.g. fission). Solar arrays use 0 here and stats.ratedPowerW.
+   */
   powerW: z.number(),
   costM: z.number().nonnegative({ error: 'costM must be >= 0 (millions USD)' }),
   /** Which crew role owns decisions about this part. */
   ownerRole: RoleSchema,
-  /** Free-form numeric stats the engine reads, e.g. { sciencePerDay: 4 }. */
-  stats: z.record(NonEmptyString, z.number()),
+  /** Numeric stats the engine reads, e.g. { capacityWh: 50000 }. Only known keys allowed. */
+  stats: PartStatsSchema,
   description: NonEmptyString,
   /** Tabler icon component name, e.g. "IconBattery". */
   icon: z.string().regex(/^Icon[A-Z][A-Za-z0-9]*$/, {
