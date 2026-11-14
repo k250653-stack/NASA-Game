@@ -306,12 +306,17 @@ export function detectRepairFailures(c: CauseContext): CauseChain | null {
     ? { field: 'crewIds', value: c.design.crewIds.join(', '), label: 'Crew recruited' }
     : sparesMatter
       ? { field: 'partIds', value: c.totals.spareKits, label: 'Spare kits packed' }
-      : { field: 'crewIds', value: c.design.crewIds.join(', '), label: 'Crew workload' }
+      : tired.length > 0
+        ? { field: 'crewIds', value: c.design.crewIds.join(', '), label: 'Crew workload' }
+        : { field: 'crewIds', value: c.design.crewIds.join(', '), label: 'Repair odds' }
+  const avgChance = failed.length ? failed.reduce((a, d) => a + d.chance, 0) / failed.length : 0
   const suggestion = noPractical
     ? `Recruit a Practical crew member${practical ? ` such as ${practical.name}` : ''} to lift repair odds.`
     : sparesMatter
       ? `Pack the ${crate?.name ?? 'spares crate'} (+${fmt(crate?.stats.spareKits ?? 3)} kits, +${fmt(crate?.massKg ?? 0)} kg).`
-      : 'Rest tired crew before repairs: fatigue costs up to 20% success chance.'
+      : tired.length > 0
+        ? 'Rest tired crew before repairs: fatigue costs up to 20% success chance.'
+        : `Even ${fmtPct(avgChance)} odds fail sometimes: a second Practical crew member or a backup option (spares, a fallback mode) softens unlucky rolls.`
   const n = failed.length + blocked.length
   return {
     id: 'repair-failures',

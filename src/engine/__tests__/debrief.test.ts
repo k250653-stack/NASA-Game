@@ -179,7 +179,9 @@ describe('cause detectors (hand-built histories)', () => {
       handledBy: 'ai',
     })
     const chain = detect(s, MOON_GOOD_DESIGN, 'repair-failures')[0]!
-    expect(chain.rootDesignDecision.label).toBe('Crew workload')
+    // Rested crew (energy 90) and an 82% chance: it was bad luck, not workload.
+    expect(chain.rootDesignDecision.label).toBe('Repair odds')
+    expect(chain.suggestion).toMatch(/^Even 82% odds fail sometimes/)
     expect(chain.steps.join(' ')).not.toMatch(/Spare kits ran out/)
   })
 
