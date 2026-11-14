@@ -16,6 +16,7 @@ interface CrewCardProps {
 export function CrewCard({ member, selected, onSelect, disabled }: CrewCardProps) {
   return (
     <Card
+      testId={`crew-card-${member.id}`}
       selected={selected}
       onSelect={onSelect}
       disabled={disabled}

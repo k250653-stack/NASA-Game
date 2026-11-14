@@ -18,6 +18,7 @@ export function RoleCard({ role, selected, onSelect }: RoleCardProps) {
       selected={selected}
       onSelect={onSelect}
       label={role.name}
+      testId={`role-card-${role.id}`}
       className={`border-t-4 ${c.topBorder}`}
     >
       <div className="flex items-center gap-2">

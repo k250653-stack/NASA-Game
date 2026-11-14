@@ -100,7 +100,7 @@ export function ResourceBar({
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
-                className={`absolute right-full mr-2 text-xs ${delta.amount > 0 ? 'text-success' : 'text-danger'}`}
+                className={`absolute right-0 bottom-full mb-0.5 text-xs leading-none ${delta.amount > 0 ? 'text-success' : 'text-danger'}`}
               >
                 {delta.amount > 0 ? '+' : '−'}
                 {fmt(Math.abs(delta.amount))}

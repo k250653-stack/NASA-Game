@@ -28,7 +28,12 @@ export default function Title() {
             engineering behind every failure.
           </p>
           <div className="mt-10 flex items-center gap-3">
-            <Button size="lg" onClick={nextPhase} icon={<Icon name="IconRocket" size={20} />}>
+            <Button
+              size="lg"
+              onClick={nextPhase}
+              data-testid="start-mission-button"
+              icon={<Icon name="IconRocket" size={20} />}
+            >
               Start mission
             </Button>
             <Button size="lg" variant="secondary" onClick={() => setPhase('codex')}>

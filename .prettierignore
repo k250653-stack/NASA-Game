@@ -3,3 +3,5 @@ dist
 coverage
 pnpm-lock.yaml
 public/assets
+e2e/screenshots
+e2e/test-results

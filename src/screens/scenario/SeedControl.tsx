@@ -15,10 +15,13 @@ export function SeedControl() {
   if (!editing) {
     return (
       <div className="flex shrink-0 items-center gap-2 text-xs text-subtle">
-        <span className="font-mono tabular-nums">Seed: {seed}</span>
+        <span className="font-mono tabular-nums" data-testid="seed-value">
+          Seed: {seed}
+        </span>
         <Button
           size="sm"
           variant="ghost"
+          data-testid="seed-change"
           onClick={() => {
             setDraft(String(seed))
             setEditing(true)
@@ -50,10 +53,15 @@ export function SeedControl() {
         aria-invalid={!valid}
         className="h-8 w-28 rounded-md border border-border-strong bg-surface px-2 font-mono text-sm text-primary"
       />
-      <Button size="sm" type="submit" disabled={!valid}>
+      <Button size="sm" type="submit" disabled={!valid} data-testid="seed-set">
         Set
       </Button>
-      <Button size="sm" variant="ghost" onClick={() => setDraft(String(DEMO_SEED))}>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => setDraft(String(DEMO_SEED))}
+        data-testid="seed-demo"
+      >
         Demo
       </Button>
       <Button

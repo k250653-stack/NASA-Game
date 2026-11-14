@@ -41,15 +41,18 @@ export function PhaseShell({
 
   const footer = (
     <div className="flex items-start justify-between gap-6 border-t border-border pt-4">
-      <Button variant="secondary" onClick={prevPhase}>
+      <Button variant="secondary" onClick={prevPhase} data-testid="back-button">
         ← {backLabel}
       </Button>
       <div className="flex flex-col items-end gap-2">
         {isLast ? (
-          <Button onClick={() => setPhase('title')}>Back to title</Button>
+          <Button onClick={() => setPhase('title')} data-testid="next-button">
+            Back to title
+          </Button>
         ) : (
           <Button
             onClick={nextPhase}
+            data-testid="next-button"
             disabled={nextDisabled}
             aria-describedby={nextHint ? 'next-hint' : undefined}
           >

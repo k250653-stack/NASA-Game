@@ -13,6 +13,8 @@ interface CardProps {
   label?: string
   /** Inner padding (default true). Turn off for edge-to-edge art. */
   padded?: boolean
+  /** data-testid for end-to-end tests. */
+  testId?: string
 }
 
 const BASE =
@@ -27,6 +29,7 @@ export function Card({
   className = '',
   label,
   padded = true,
+  testId,
 }: CardProps) {
   const pad = padded ? 'p-4' : ''
   const state = selected
@@ -34,12 +37,17 @@ export function Card({
     : 'border-border shadow-panel hover:border-border-strong'
 
   if (!onSelect) {
-    return <div className={`${BASE} ${pad} ${state} ${className}`}>{children}</div>
+    return (
+      <div data-testid={testId} className={`${BASE} ${pad} ${state} ${className}`}>
+        {children}
+      </div>
+    )
   }
 
   return (
     <motion.button
       type="button"
+      data-testid={testId}
       aria-pressed={selected}
       aria-label={label}
       disabled={disabled}

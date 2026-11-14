@@ -80,6 +80,7 @@ export function TeamSidebar(p: TeamSidebarProps) {
           variant="secondary"
           size="sm"
           onClick={p.onSuggest}
+          data-testid="suggest-team-button"
           disabled={!p.canSuggest}
         >
           Suggested team

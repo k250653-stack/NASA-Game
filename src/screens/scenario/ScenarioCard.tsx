@@ -17,7 +17,13 @@ interface ScenarioCardProps {
 export function ScenarioCard({ scenario: s, difficulty, selected, onSelect }: ScenarioCardProps) {
   const budget = effectiveBudgetM(s, difficulty, getContent())
   return (
-    <Card selected={selected} onSelect={onSelect} label={s.name} padded={false}>
+    <Card
+      selected={selected}
+      onSelect={onSelect}
+      label={s.name}
+      padded={false}
+      testId={`scenario-card-${s.id}`}
+    >
       <div className="grid grid-cols-[18rem_minmax(0,1fr)]">
         <AssetImage
           kind="backgrounds"

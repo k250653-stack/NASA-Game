@@ -70,3 +70,17 @@ The Zod schemas in `src/schemas/` are the contract between lanes. Change them to
   placeholder. Sounds: `playSound(id)` from `src/ui/sound.ts`; missing files warn once and stay
   silent. Expected files are listed in `public/assets/ASSETS.md`; credits go in `CREDITS.md`.
 - TypeScript is pinned to 5.9 because typescript-eslint does not yet support TypeScript 7.
+
+## Definition of done (every task)
+
+- Run `pnpm check`. All must pass.
+- Then use the Playwright MCP browser to open the dev server, play through the screens you changed like a real player, look at the screenshots, and read the browser console.
+- If anything is broken, overlapping, unreadable, or logs errors: fix it and repeat. Max 3 fix rounds; if still failing, stop and report exactly what's wrong.
+- Extend e2e/smoke.spec.ts whenever you add a new screen or interaction.
+- End every task with a short "Verified in browser:" list of what you checked.
+
+`pnpm check` = lint + unit tests + build + `pnpm e2e` (Playwright, headless, both 1280x720 and
+1920x1080). The smoke test reuses a running `pnpm dev` on port 5173 or starts one, and writes
+screenshots to `e2e/screenshots/` (gitignored). Navigation buttons and selectable cards carry
+`data-testid` attributes (`next-button`, `back-button`, `destination-card-<id>`, ...): keep them
+when editing components.

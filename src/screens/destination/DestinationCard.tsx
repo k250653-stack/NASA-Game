@@ -20,6 +20,7 @@ export function DestinationCard({ destination: d, selected, onSelect }: Destinat
       onSelect={onSelect}
       label={`${d.name}: ${d.recommendation.label}`}
       padded={false}
+      testId={`destination-card-${d.id}`}
     >
       <AssetImage
         kind="backgrounds"
