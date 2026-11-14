@@ -1,38 +1,25 @@
 /**
- * Walkable-world state: the current room, where to stand on arrival, the open station popup,
- * the fade-to-black overlay, and progress the game store doesn't keep.
- * Read with selectors only: useWorld((s) => s.roomId).
+ * Walkable-world state: the player's saved world position, the open station popup, and
+ * progress the game store doesn't keep. Read with selectors only: useWorld((s) => s.popup).
  */
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { useStore } from '@/store'
-import { LOBBY_ID, type Door, type Step } from './rooms/room'
+import type { Point } from './geometry'
+import type { Step } from './rooms/room'
 import { STEP_SCREENS } from './steps'
 
-const FADE_MS = 300
-/** Fade back in even if the next room never reports ready (e.g. a missing image). */
-const FADE_TIMEOUT_MS = 2000
-
 interface WorldState {
-  roomId: string
-  /** Door to stand in front of on arrival (null = centre of the floor). */
-  spawnDoorId: string | null
-  /** Step whose screens are open in the popup over the room. */
+  /** Player feet in world pixels (null = centre of the lobby). */
+  playerPos: Point | null
+  /** Step whose screens are open in the popup over the HQ. */
   popup: Step | null
   /** The player finished the Briefing (Planning Board) with Next. Unlocks Launch Control. */
   planningDone: boolean
-  /** Black overlay opacity and how long the change to it takes. */
-  fade: { opacity: number; ms: number }
   resetWorld: () => void
 }
 
-const initial = {
-  roomId: LOBBY_ID,
-  spawnDoorId: null,
-  popup: null,
-  planningDone: false,
-  fade: { opacity: 0, ms: 0 },
-}
+const initial = { playerPos: null, popup: null, planningDone: false }
 
 export const useWorld = create<WorldState>()(
   persist(
@@ -42,10 +29,12 @@ export const useWorld = create<WorldState>()(
     }),
     {
       name: 'mission-control-world',
+      version: 2,
+      // v1 saved a current room instead of a world position; start those in the lobby.
+      migrate: (persisted) => ({ ...initial, ...(persisted as object), playerPos: null }),
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
-        roomId: s.roomId,
-        spawnDoorId: s.spawnDoorId,
+        playerPos: s.playerPos,
         popup: s.popup,
         planningDone: s.planningDone,
       }),
@@ -53,24 +42,11 @@ export const useWorld = create<WorldState>()(
   ),
 )
 
-let fadeTimer: number | undefined
-
-/** Fade to black, switch room (the scene calls roomReady when drawn), fade back in. */
-export function travel(door: Door): void {
-  useWorld.setState({ fade: { opacity: 1, ms: FADE_MS } })
-  window.setTimeout(() => {
-    useWorld.setState({ roomId: door.to, spawnDoorId: door.arrive ?? null })
-    fadeTimer = window.setTimeout(roomReady, FADE_TIMEOUT_MS)
-  }, FADE_MS)
+export function savePlayerPos(p: Point): void {
+  useWorld.setState({ playerPos: [Math.round(p[0]), Math.round(p[1])] })
 }
 
-/** Called by the room scene once the room is drawn. */
-export function roomReady(): void {
-  window.clearTimeout(fadeTimer)
-  if (useWorld.getState().fade.opacity > 0) useWorld.setState({ fade: { opacity: 0, ms: FADE_MS } })
-}
-
-/** Opens a station's screens in the popup over the room. */
+/** Opens a station's screens in the popup over the HQ. */
 export function openStep(step: Step): void {
   useWorld.setState({ popup: step })
   useStore.getState().setPhase(STEP_SCREENS[step].entry)

@@ -1,0 +1,69 @@
+{
+  "corridorWidth": 52,
+  "rooms": [
+    {
+      "id": "hq-lobby",
+      "at": [0, 0]
+    },
+    {
+      "id": "mission-planning",
+      "at": [-1698, -20]
+    },
+    {
+      "id": "personnel",
+      "at": [-778, -480]
+    },
+    {
+      "id": "briefing",
+      "at": [822, -498]
+    },
+    {
+      "id": "launch-control",
+      "at": [1742, -38]
+    }
+  ],
+  "corridors": [
+    {
+      "id": "to-planning",
+      "door": "door-planning",
+      "room": "mission-planning",
+      "path": [
+        [475, 410],
+        [170, 257],
+        [-628, 657],
+        [-822, 560],
+        [-1223, 390]
+      ]
+    },
+    {
+      "id": "to-personnel",
+      "door": "door-personnel",
+      "room": "personnel",
+      "path": [
+        [598, 350],
+        [98, 100],
+        [-303, -70]
+      ]
+    },
+    {
+      "id": "to-briefing",
+      "door": "door-briefing",
+      "room": "briefing",
+      "path": [
+        [788, 346],
+        [1328, 76],
+        [1297, -88]
+      ]
+    },
+    {
+      "id": "to-launch",
+      "door": "door-launch",
+      "room": "launch-control",
+      "path": [
+        [900, 404],
+        [1345, 181],
+        [1947, 482]
+      ]
+    }
+  ]
+}

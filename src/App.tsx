@@ -15,7 +15,6 @@ import MissionControl from '@/screens/MissionControl'
 import FailureReview from '@/screens/FailureReview'
 import Codex from '@/screens/Codex'
 import Styleguide from '@/screens/styleguide/Styleguide'
-import { FadeOverlay } from '@/world/FadeOverlay'
 // Also installs the "finishing a step closes the station popup" rule.
 import { useWorld } from '@/world/worldStore'
 
@@ -57,7 +56,6 @@ export default function App() {
         {inWorld ? <HQWorld popup={phase !== 'hq' ? <Screen /> : null} /> : <Screen />}
       </Suspense>
       <Toaster />
-      <FadeOverlay />
     </MotionConfig>
   )
 }

@@ -35,24 +35,42 @@ export function centroid(poly: Polygon): Point {
   return [sum[0] / poly.length, sum[1] / poly.length]
 }
 
-/** Inside the walkable polygon and outside every blocked one. */
-export function canStand(p: Point, walkable: Polygon, blocked: readonly Polygon[]): boolean {
-  return pointInPolygon(p, walkable) && !blocked.some((b) => pointInPolygon(p, b))
+/** Inside any walkable polygon and outside every blocked one. */
+export function canStand(p: Point, walkable: readonly Polygon[], blocked: readonly Polygon[]): boolean {
+  return walkable.some((w) => pointInPolygon(p, w)) && !blocked.some((b) => pointInPolygon(p, b))
+}
+
+export function translate(poly: Polygon, [dx, dy]: Point): Polygon {
+  return poly.map(([x, y]) => [x + dx, y + dy] as const)
 }
 
 /**
- * The first standable point on the line from `from` towards `to` (in 2% steps), or `to`.
- * Used to put the player just in front of a door, on the floor.
+ * Walkable polygons for a path of straight segments `width` wide: one quad per segment plus a
+ * square at each inner corner so elbows have no gaps.
  */
-export function nearestStandable(
-  from: Point,
-  to: Point,
-  walkable: Polygon,
-  blocked: readonly Polygon[],
-): Point {
-  for (let t = 0; t <= 1; t += 0.02) {
-    const p: Point = [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t]
-    if (canStand(p, walkable, blocked)) return p
+export function stripPolygons(path: readonly Point[], width: number): Polygon[] {
+  const h = width / 2
+  const out: Polygon[] = []
+  for (let i = 1; i < path.length; i++) {
+    const [ax, ay] = path[i - 1]!
+    const [bx, by] = path[i]!
+    const len = Math.hypot(bx - ax, by - ay) || 1
+    const nx = (-(by - ay) / len) * h
+    const ny = ((bx - ax) / len) * h
+    out.push([
+      [ax + nx, ay + ny],
+      [bx + nx, by + ny],
+      [bx - nx, by - ny],
+      [ax - nx, ay - ny],
+    ])
   }
-  return to
+  for (const [x, y] of path.slice(1, -1)) {
+    out.push([
+      [x - h, y - h],
+      [x + h, y - h],
+      [x + h, y + h],
+      [x - h, y + h],
+    ])
+  }
+  return out
 }

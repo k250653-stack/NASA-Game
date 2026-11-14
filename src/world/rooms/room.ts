@@ -18,7 +18,7 @@ const doorSchema = z.object({
   /** Theme colour token name (index.css), e.g. "role-comms", "success". */
   color: z.string(),
   area: polygon,
-  /** Room id this door leads to. */
+  /** Room id this door leads to (rooms outside the HQ map). */
   to: z.string(),
   /** Door id in that room to arrive in front of (centre of the floor if missing). */
   arrive: z.string().optional(),
@@ -47,7 +47,8 @@ const roomSchema = z.object({
   size: z.tuple([z.number().int().positive(), z.number().int().positive()]),
   /** Character sprite scale in room pixels. */
   playerScale: z.number().positive(),
-  walkable: polygon,
+  /** Floor polygons the player can stand on (their union). */
+  walkable: z.array(polygon).min(1),
   blocked: z.array(polygon),
   doors: z.array(doorSchema),
   stations: z.array(stationSchema),
@@ -59,7 +60,7 @@ export type Station = z.infer<typeof stationSchema>
 
 export const LOBBY_ID = 'hq-lobby'
 
-const files = import.meta.glob<unknown>('./*.json', { eager: true, import: 'default' })
+const files = import.meta.glob<unknown>(['./*.json', '!./hq-map.json'], { eager: true, import: 'default' })
 let rooms: Map<string, Room> | null = null
 
 function loadRooms(): Map<string, Room> {

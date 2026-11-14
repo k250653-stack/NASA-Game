@@ -1,63 +1,59 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useStore } from '@/store'
-import { centroid, nearestStandable, type Point, type Polygon } from './geometry'
+import { getHqMap } from './hqMap'
+import type { SceneCallbacks, Target } from './HQScene'
 import { InteractPrompt, promptTransform } from './InteractPrompt'
 import { PauseMenu, type PauseState } from './PauseMenu'
 import { PopupPanel } from './PopupPanel'
-import type { SceneCallbacks, Target } from './RoomScene'
-import { getRoom, type Room } from './rooms/room'
 import { doorLockReason } from './steps'
 import { WorldCanvas } from './WorldCanvas'
-import { closePopup, openStep, roomReady, travel, useWorld } from './worldStore'
-
-/** Centre of the floor, or just in front of the door the player arrives through. */
-function spawnPoint(room: Room, doorId: string | null): Point {
-  const floor = centroid(room.walkable as Polygon)
-  const door = room.doors.find((d) => d.id === doorId)
-  if (!door) return floor
-  const { walkable, blocked } = room
-  return nearestStandable(centroid(door.area as Polygon), floor, walkable as Polygon, blocked as Polygon[])
-}
+import { closePopup, openStep, savePlayerPos, useWorld } from './worldStore'
 
 function interact(target: Target): void {
-  const { roomId, planningDone } = useWorld.getState()
-  const room = getRoom(roomId)
-  if (target.kind === 'station') {
-    const station = room.stations.find((s) => s.id === target.id)
-    if (station) openStep(station.opens)
-    return
-  }
-  const door = room.doors.find((d) => d.id === target.id)
-  if (door && !doorLockReason(door, planningDone)) travel(door)
+  if (target.kind === 'station') openStep(target.opens)
+}
+
+/** Lock reason per gated room id; recomputed when the progress it depends on changes. */
+function useRoomLocks(): Record<string, string | null> {
+  const planningDone = useWorld((s) => s.planningDone)
+  const scenarioId = useStore((s) => s.game.scenarioId)
+  const roleChoice = useStore((s) => s.game.roleChoice)
+  const difficulty = useStore((s) => s.game.difficulty)
+  const recruitedIds = useStore((s) => s.crew.recruitedIds)
+  const launched = useStore((s) => s.mission.run !== null)
+  return useMemo(() => {
+    void [scenarioId, roleChoice, difficulty, recruitedIds, launched] // inputs of doorLockReason
+    const locks: Record<string, string | null> = {}
+    for (const c of getHqMap().corridors) locks[c.roomId] = doorLockReason(c.door, planningDone)
+    return locks
+  }, [planningDone, scenarioId, roleChoice, difficulty, recruitedIds, launched])
 }
 
 /**
- * The walkable HQ (phase "hq", or a station popup open). Phaser draws the room; the backdrop,
- * prompt, popup and pause menu are React.
+ * The walkable HQ (phase "hq", or a station popup open). Phaser draws the connected rooms; the
+ * backdrop, prompt, popup and pause menu are React.
  */
 export default function HQWorld({ popup }: { popup?: ReactNode }) {
-  const roomId = useWorld((s) => s.roomId)
-  const spawnDoorId = useWorld((s) => s.spawnDoorId)
   const popupStep = useWorld((s) => s.popup)
-  const planningDone = useWorld((s) => s.planningDone)
   const setPhase = useStore((s) => s.setPhase)
-  const room = getRoom(roomId)
-  const spawn = useMemo(() => spawnPoint(room, spawnDoorId), [room, spawnDoorId])
+  const [spawn] = useState(() => useWorld.getState().playerPos)
+  const locks = useRoomLocks()
   const [target, setTarget] = useState<Target | null>(null)
   const [menu, setMenu] = useState<PauseState>(null)
   const promptRef = useRef<HTMLDivElement>(null)
   const anchor = useRef({ x: 0, y: 0 })
-  const paused = useRef(false)
+  const live = useRef({ paused: false, locks })
   useEffect(() => {
-    paused.current = popupStep !== null || menu !== null
-  }, [popupStep, menu])
+    live.current = { paused: popupStep !== null || menu !== null, locks }
+  }, [popupStep, menu, locks])
 
   const callbacks = useMemo<SceneCallbacks>(
     () => ({
       onTarget: setTarget,
       onInteract: interact,
-      onReady: roomReady,
-      isPaused: () => paused.current,
+      onPlayerMoved: savePlayerPos,
+      isPaused: () => live.current.paused,
+      locks: () => live.current.locks,
       onPlayerScreen: (x, y) => {
         anchor.current = { x, y }
         if (promptRef.current) promptRef.current.style.transform = promptTransform(x, y)
@@ -77,26 +73,24 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const door = target?.kind === 'door' ? room.doors.find((d) => d.id === target.id) : undefined
-  const station = target?.kind === 'station' ? room.stations.find((s) => s.id === target.id) : undefined
-  const showPrompt = (door || station) && !popupStep && !menu
+  const showPrompt = target && !popupStep && !menu
 
   return (
-    <main className="fixed inset-0 overflow-hidden blueprint-grid" data-testid="hq-world" data-room={room.id}>
-      <WorldCanvas room={room} spawn={spawn} callbacks={callbacks} />
+    <main className="fixed inset-0 overflow-hidden blueprint-grid" data-testid="hq-world">
+      <WorldCanvas spawn={spawn} callbacks={callbacks} />
       <div className="pointer-events-none absolute inset-0 bg-radial from-transparent from-55% to-bg/85" />
       {showPrompt && (
         <InteractPrompt
           ref={promptRef}
-          action={door ? `Enter ${door.label}` : `Use ${station!.label}`}
-          lockedLabel={door?.label}
-          lockReason={door ? doorLockReason(door, planningDone) : null}
+          action={`Use ${target.label}`}
+          lockedLabel={target.label}
+          lockReason={target.kind === 'locked' ? (locks[target.roomId] ?? null) : null}
           x={anchor.current.x}
           y={anchor.current.y}
         />
       )}
       <p className="pointer-events-none absolute bottom-4 left-4 font-mono text-xs text-subtle">
-        {room.name} · WASD / arrows move · Shift run · E use · Esc pause
+        WASD / arrows move · Shift run · E use · Esc pause · F2 debug
       </p>
       {popupStep && popup && <PopupPanel onClose={closePopup}>{popup}</PopupPanel>}
       <PauseMenu
