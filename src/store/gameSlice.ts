@@ -14,7 +14,8 @@ export const PHASES = [
   'review',
   'codex',
 ] as const
-export type Phase = (typeof PHASES)[number]
+/** 'styleguide' is a dev-only screen outside the game flow; Next/Back from it go to the title. */
+export type Phase = (typeof PHASES)[number] | 'styleguide'
 
 /** Fixed seed used by the "demo run" button so the judged run is always the same. */
 export const DEMO_SEED = 20261114
@@ -47,8 +48,9 @@ export const initialGameState: GameState = {
   seed: DEMO_SEED,
 }
 
+/** Position in the game flow, or -1 for screens outside it (styleguide). */
 export function phaseIndex(phase: Phase): number {
-  return PHASES.indexOf(phase)
+  return (PHASES as readonly Phase[]).indexOf(phase)
 }
 
 export const createGameSlice: SliceCreator<GameSlice> = (set, get) => ({

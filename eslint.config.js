@@ -27,6 +27,20 @@ export default defineConfig([
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
       ],
+      // UI rule: colours and fonts come from tokens in src/index.css, never hex literals in code.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Literal[value=/#[0-9a-fA-F]{3,8}\\b/]',
+          message:
+            'No hex colours in code. Add a token in src/index.css and use its Tailwind class.',
+        },
+        {
+          selector: 'TemplateElement[value.raw=/#[0-9a-fA-F]{3,8}\\b/]',
+          message:
+            'No hex colours in code. Add a token in src/index.css and use its Tailwind class.',
+        },
+      ],
       // CLAUDE.md rule 7: all randomness goes through src/engine/rng.ts.
       'no-restricted-properties': [
         'error',

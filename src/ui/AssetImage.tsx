@@ -89,7 +89,7 @@ function toInitials(text: string): string {
   const words = text
     .replace(/^crew-/, '')
     .split(/[^a-zA-Z0-9]+/)
-    .filter(Boolean)
+    .filter((w) => w && !/^(dr|mr|mrs|ms|prof|capt|cdr)$/i.test(w))
   if (words.length === 0) return '?'
   if (words.length === 1) return (words[0] ?? '').slice(0, 2).toUpperCase()
   return words

@@ -1,26 +1,24 @@
 import type { ReactNode } from 'react'
 import { PHASES, phaseIndex, useStore } from '@/store'
 import { Button } from './Button'
+import { Panel } from './Panel'
+import { ScreenLayout } from './ScreenLayout'
 
 interface PhaseShellProps {
   title: string
   description: string
   children?: ReactNode
-  /** Hide the Back button (used on the title screen). */
-  hideBack?: boolean
+  sidebar?: ReactNode
   nextLabel?: string
   backLabel?: string
 }
 
-/**
- * Shared layout for every screen stub: phase name, one-line description, Back/Next.
- * Navigation is just the store's phase; there is no router.
- */
+/** Layout for phase screens: heading, main panel, Back/Next. Navigation is the store's phase. */
 export function PhaseShell({
   title,
   description,
   children,
-  hideBack = false,
+  sidebar,
   nextLabel = 'Next',
   backLabel = 'Back',
 }: PhaseShellProps) {
@@ -30,57 +28,37 @@ export function PhaseShell({
   const setPhase = useStore((s) => s.setPhase)
 
   const index = phaseIndex(phase)
-  const isFirst = index === 0
   const isLast = index === PHASES.length - 1
 
+  const footer = (
+    <div className="flex items-center justify-between border-t border-border pt-4">
+      <Button variant="secondary" onClick={prevPhase}>
+        ← {backLabel}
+      </Button>
+      {isLast ? (
+        <Button onClick={() => setPhase('title')}>Back to title</Button>
+      ) : (
+        <Button onClick={nextPhase}>{nextLabel} →</Button>
+      )}
+    </div>
+  )
+
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col px-6 py-10">
-      <header className="mb-8">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent">
+    <ScreenLayout sidebar={sidebar} footer={footer}>
+      <div>
+        <p className="font-mono text-xs tracking-[0.3em] text-accent uppercase">
           Phase {index + 1} / {PHASES.length} · {phase}
         </p>
-        <h1 className="mt-2 text-4xl font-bold tracking-tight text-slate-50">{title}</h1>
-        <p className="mt-3 text-base text-slate-400">{description}</p>
-      </header>
-
-      <section className="flex-1 rounded-lg border border-space-700 bg-space-900/70 p-6 shadow-inner">
+        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-primary">
+          {title}
+        </h1>
+        <p className="mt-2 max-w-3xl text-base text-muted">{description}</p>
+      </div>
+      <Panel title="Status" subtitle="Screen stub">
         {children ?? (
-          <p className="text-sm text-slate-500">
-            Screen stub. Gameplay for this phase has not been built yet.
-          </p>
+          <p className="text-sm text-muted">Gameplay for this phase has not been built yet.</p>
         )}
-      </section>
-
-      <footer className="mt-8 flex items-center justify-between">
-        <div>
-          {!hideBack && !isFirst && (
-            <Button variant="ghost" onClick={prevPhase}>
-              ← {backLabel}
-            </Button>
-          )}
-        </div>
-        <ol className="hidden gap-1.5 sm:flex" aria-label="Phase progress">
-          {PHASES.map((p, i) => (
-            <li key={p}>
-              <button
-                type="button"
-                title={p}
-                onClick={() => setPhase(p)}
-                className={`block h-2 w-2 rounded-full transition ${
-                  i === index ? 'bg-accent' : i < index ? 'bg-accent/40' : 'bg-space-500'
-                }`}
-              />
-            </li>
-          ))}
-        </ol>
-        <div>
-          {isLast ? (
-            <Button onClick={() => setPhase('title')}>Back to title</Button>
-          ) : (
-            <Button onClick={nextPhase}>{nextLabel} →</Button>
-          )}
-        </div>
-      </footer>
-    </main>
+      </Panel>
+    </ScreenLayout>
   )
 }

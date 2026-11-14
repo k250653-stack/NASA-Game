@@ -31,6 +31,19 @@ Review → Redesign (back to Planning Board). A Codex collects every NOVA lesson
 
 Rules 1 and 7 are also enforced by ESLint (`pnpm lint`).
 
+## UI rules
+
+- Build screens ONLY from the tokens and components in `src/ui/` (see the "Dev: UI kit" screen
+  and [THEME.md](THEME.md)). Need something new? Add it to `src/ui/` and the styleguide first.
+- No hardcoded hex colours or font names outside `src/index.css`. ESLint rejects hex literals.
+- Minimum supported size is 1280x720; layouts must not break at 1920x1080.
+- Keyboard accessible: visible focus rings, every control reachable with Tab, Esc closes modals.
+- Text contrast must meet WCAG AA on the dark background. Use `text-primary`, `text-muted` or
+  `text-subtle`; never dim text with opacity.
+- Numbers use `font-mono tabular-nums` so values do not jump when they change.
+- Animate with Motion; the app root sets `reducedMotion="user"`.
+- Content icons are Tabler names registered in `src/ui/icons.ts`.
+
 ## Folder ownership (work lanes)
 
 | Lane                  | Owns                                                 | Folders                           |

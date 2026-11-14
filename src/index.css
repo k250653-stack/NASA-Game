@@ -1,26 +1,76 @@
 @import 'tailwindcss';
 
 /*
- * Mission Control theme.
- * Near-black space background, one accent colour (amber, like old console readouts).
- * This is the ONLY CSS file in the project (CLAUDE.md rule 9). Everything else is Tailwind.
+ * Mission Control design tokens. THE single source of truth for the look of the game.
+ * See THEME.md. Every token below becomes a Tailwind utility, e.g.
+ *   --color-accent   -> bg-accent, text-accent, border-accent, ring-accent, bg-accent/20
+ *   --radius-md      -> rounded-md
+ *   --shadow-panel   -> shadow-panel
+ *   --font-mono      -> font-mono
+ * Change a value here and it changes everywhere. No hex colours or font names anywhere else.
  */
 @theme {
-  --color-space-950: #05070d;
-  --color-space-900: #0b0f1a;
-  --color-space-800: #131a2b;
-  --color-space-700: #1e2740;
-  --color-space-500: #3b4766;
+  /* Wipe Tailwind's default palette and fonts so only our tokens exist. */
+  --color-*: initial;
+  --font-*: initial;
 
-  --color-accent: #f5a524;
-  --color-accent-soft: #fbd38d;
-  --color-accent-deep: #b86e00;
+  /* Surfaces, darkest to lightest */
+  --color-bg: #060a13; /* page background */
+  --color-surface: #0b111d; /* top bar, wells, inputs, bar tracks */
+  --color-panel: #101827; /* panels and cards */
+  --color-panel-raised: #172135; /* hover, secondary buttons, modals */
 
-  --color-danger: #ef4444;
-  --color-ok: #22c55e;
+  /* Lines */
+  --color-border: #1f2b40;
+  --color-border-strong: #33435f;
 
-  --font-display: 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'Cascadia Mono', 'JetBrains Mono', ui-monospace, monospace;
+  /* Text */
+  --color-primary: #e6edf7; /* main text */
+  --color-muted: #9aa8bf; /* secondary text, labels */
+  --color-subtle: #7d8ba3; /* hints, units (still AA on panel) */
+
+  /* Accents */
+  --color-accent: #22d3ee; /* primary accent: cyan */
+  --color-accent-strong: #67e8f9; /* accent hover */
+  --color-on-accent: #04121a; /* text on accent fills */
+  --color-alert: #f5a524; /* alert accent: amber, warnings */
+  --color-danger: #f05252;
+  --color-success: #34d399;
+
+  /* Crew trait tags */
+  --color-trait-thinker: #a78bfa;
+  --color-trait-practical: #a3e635;
+  --color-trait-leader: #fb7185;
+
+  /* Background decoration */
+  --color-star: #cfe3ff;
+  --color-grid: #ffffff08;
+
+  /* Fonts (self-hosted via @fontsource, imported in main.tsx) */
+  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Mono', ui-monospace, monospace;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Spacing: base unit plus named layout sizes (h-topbar, w-sidebar, ...) */
+  --spacing: 0.25rem;
+  --spacing-topbar: 3.5rem;
+  --spacing-sidebar: 19rem;
+
+  /* Max content width (max-w-content); keeps 1920x1080 from stretching lines too far */
+  --container-content: 96rem;
+
+  /* Shadows */
+  --shadow-panel: inset 0 1px 0 0 #ffffff08, 0 10px 30px -18px #000000cc;
+  --shadow-glow:
+    0 0 0 1px var(--color-accent),
+    0 0 22px -6px color-mix(in oklab, var(--color-accent) 55%, transparent);
+  --shadow-modal: 0 24px 64px -12px #000000e6;
 }
 
 html,
@@ -31,12 +81,24 @@ body,
 
 body {
   margin: 0;
-  background-color: var(--color-space-950);
-  color: var(--color-slate-200);
-  font-family: var(--font-display);
+  background-color: var(--color-bg);
+  color: var(--color-primary);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* Faint grid, calm, never neon. */
   background-image:
-    radial-gradient(ellipse at 20% 0%, rgba(245, 165, 36, 0.08), transparent 55%),
-    radial-gradient(ellipse at 80% 100%, rgba(59, 71, 102, 0.35), transparent 60%);
-  background-attachment: fixed;
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 48px 48px;
+  min-width: 1280px;
+}
+
+/* One focus ring for every interactive element (keyboard only). */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 35%, transparent);
 }

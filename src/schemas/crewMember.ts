@@ -1,11 +1,14 @@
 import { z } from 'zod'
 import { EffectSchema, IdSchema, NonEmptyString, RoleSchema, TraitSchema } from './shared'
 
+/** Highest crew skill level. */
+export const SKILL_MAX = 5
+
 const SkillLevel = z
   .number()
   .int({ error: 'skill levels are whole numbers' })
   .min(0, { error: 'skill level must be >= 0' })
-  .max(5, { error: 'skill level must be <= 5' })
+  .max(SKILL_MAX, { error: `skill level must be <= ${SKILL_MAX}` })
 
 export const SkillsSchema = z.strictObject({
   power: SkillLevel,
