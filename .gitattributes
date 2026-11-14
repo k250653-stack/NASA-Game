@@ -1,0 +1,10 @@
+# Normalise line endings to LF in the repo so a 4-person team on mixed OSes gets no CRLF churn.
+* text=auto eol=lf
+
+# Binary assets
+*.webp binary
+*.png binary
+*.jpg binary
+*.mp3 binary
+*.ogg binary
+*.woff2 binary
