@@ -30,3 +30,12 @@ dist-ssr
 e2e/screenshots/
 e2e/test-results/
 playwright-report/
+
+# Added for publishing
+.env*
+e2e/screenshots
+playwright-report
+test-results
+CLAUDE.md
+.claude/
+.mcp.json
