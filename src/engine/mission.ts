@@ -8,6 +8,7 @@ import { computeTotals, marginRatio, resolveDesign } from './budget'
 import { chooseResponse, eventOwner } from './crewAI'
 import { resolveEvent, rollEvents } from './events'
 import { fmt } from './format'
+import { recordChange, recordSnapshot } from './history'
 import {
   activeParts,
   averageMorale,
@@ -74,6 +75,7 @@ export function initMission(design: Design, content: EngineContent, seed: number
       scienceGb: 0,
       sciencePoints: 0,
       dataBacklogGb: 0,
+      pendingSciencePoints: 0,
     },
     crew: Object.fromEntries(
       design.crewIds.map((id) => [
@@ -98,6 +100,9 @@ export function initMission(design: Design, content: EngineContent, seed: number
     lastPower: { genW: t.powerGenW, useW: t.powerUseW },
     abortedEarly: false,
     outcome: null,
+    turnHistory: [],
+    changes: [],
+    decisions: [],
   }
 }
 
@@ -145,6 +150,14 @@ function stepPower(s: MissionState, ctx: MissionContext, turn: Turn, dest: Desti
     if (broken.length > 0 && s.resources.spareKits >= 1 && s.resources.suits >= 1) {
       broken.forEach((id) => delete s.disabledParts[id])
       s.resources.spareKits -= 1
+      recordChange(
+        s,
+        'spareKits',
+        -1,
+        'option',
+        'standing-order:repair_eva',
+        'EVA repair of the power system',
+      )
       log(
         'decision',
         'Battery running flat: crew went on an EVA and repaired the power system (standing order).',
@@ -166,11 +179,21 @@ function stepPower(s: MissionState, ctx: MissionContext, turn: Turn, dest: Desti
     degraded = true
     log('alarm', 'Power shortfall: life support is running degraded and crew health is falling.')
   }
+  const before = s.resources.batteryWh
   s.resources.batteryWh = clamp(battery, 0, batteryCapacityWh(s, ctx))
+  recordChange(
+    s,
+    'batteryWh',
+    s.resources.batteryWh - before,
+    degraded ? 'failure' : 'consumption',
+    'power-balance',
+    `${fmt(p.genW)} W generated vs ${fmt(p.useW)} W used for ${turn.days} days`,
+  )
   s.resources.power = p.genW - p.useW
   s.lastPower = { genW: p.genW, useW: p.useW }
   if (surface) s.dustLevel = 1 - (1 - s.dustLevel) * Math.pow(1 - dest.dustLossPerDay, turn.days)
-  return { scienceShed, degraded }
+  const batteryEmpty = s.resources.batteryWh <= 0 && p.genW < p.useW
+  return { scienceShed, degraded, batteryEmpty }
 }
 
 /** 1. Life support: consume O2/food/water with recycling; ration or abort when short. */
@@ -225,20 +248,24 @@ function stepLifeSupport(
     foodKg: need.food * mult * (rationing ? C.mission.rationFoodFactor : 1),
     waterKg: need.water * mult,
   }
-  let failure: { name: string; dayLasted: number } | null = null
+  let failure: { name: 'oxygen' | 'food' | 'water'; dayLasted: number } | null = null
+  const note = `${alive} crew × ${turn.days} days, ${Math.round(recW * 100)}% water / ${Math.round(recO * 100)}% O2 recycled${rationing ? ', rationed' : ''}`
   for (const key of ['oxygenKg', 'foodKg', 'waterKg'] as const) {
+    const name = key === 'oxygenKg' ? 'oxygen' : key === 'foodKg' ? 'food' : 'water'
     if (r[key] < want[key]) {
       const dayLasted = (r[key] / want[key]) * turn.days
-      if (!failure || dayLasted < failure.dayLasted)
-        failure = { name: key.replace('Kg', ''), dayLasted }
+      if (!failure || dayLasted < failure.dayLasted) failure = { name, dayLasted }
     }
+    const before = r[key]
     r[key] = Math.max(0, r[key] - want[key])
+    recordChange(s, key, r[key] - before, 'consumption', 'life-support', note)
   }
   if (failure) {
     const phase = dest.phases.find((ph) => ph.id === turn.phaseId)?.name ?? turn.phaseId
     s.day += Math.floor(failure.dayLasted)
     s.outcome = 'failed'
     s.failReason = `${cap(failure.name)} ran out on day ${s.day} during ${phase}.`
+    s.failure = { kind: 'supply', resource: failure.name, day: s.day }
     log('alarm', s.failReason)
   }
   return { rationing, abort }
@@ -266,21 +293,75 @@ function stepScience(
     dataReturnedGbPerDay(sumStat(parts, 'dataRateMbps'), hours) *
     turn.days *
     modifier(s, 'dataRate')
-  let backlog = s.resources.dataBacklogGb + dataGen
+  const r = s.resources
+  // Points travel with their data: they are credited only when the data reaches Earth.
+  // Points from parts that make no data are credited at once.
+  if (dataGen > 0) r.pendingSciencePoints += points
+  const creditedDirect = dataGen > 0 ? 0 : points
+  let backlog = r.dataBacklogGb + dataGen
   const sent = Math.min(backlog, capacity)
+  const sentShare = backlog > 0 ? sent / backlog : 0
+  const credited = r.pendingSciencePoints * sentShare + creditedDirect
+  r.pendingSciencePoints *= 1 - sentShare
   backlog -= sent
+  let lost = 0
   if (backlog > M.dataStorageGb) {
+    lost = backlog - M.dataStorageGb
+    const lostPoints = r.pendingSciencePoints * (lost / backlog)
+    r.pendingSciencePoints -= lostPoints
     log(
       'warning',
-      `Data storage full: ${fmt(backlog - M.dataStorageGb, 1)} GB of science data lost.`,
+      `Data storage full: ${fmt(lost, 1)} GB of science data lost (${fmt(lostPoints, 1)} points).`,
+    )
+    recordChange(
+      s,
+      'dataLostGb',
+      lost,
+      'failure',
+      'data-storage',
+      `storage holds ${fmt(M.dataStorageGb)} GB`,
+    )
+    recordChange(
+      s,
+      'pendingSciencePoints',
+      -lostPoints,
+      'failure',
+      'data-storage',
+      'points lost with the data',
     )
     backlog = M.dataStorageGb
   }
-  s.resources.sciencePoints += points
-  s.resources.scienceGb += sent
-  s.resources.dataBacklogGb = backlog
-  if (points > 0 || sent > 0)
-    log('science', `+${fmt(points, 1)} science points, ${fmt(sent, 1)} GB sent home.`)
+  r.sciencePoints += credited
+  r.scienceGb += sent
+  const backlogDelta = backlog - r.dataBacklogGb
+  r.dataBacklogGb = backlog
+  recordChange(
+    s,
+    'sciencePoints',
+    credited,
+    'design',
+    'instruments',
+    `${fmt(sent, 1)} GB reached Earth`,
+  )
+  recordChange(
+    s,
+    'scienceGb',
+    sent,
+    'design',
+    'comms',
+    `link capacity ${fmt(capacity, 1)} GB this turn`,
+  )
+  recordChange(
+    s,
+    'dataBacklogGb',
+    backlogDelta,
+    'design',
+    'instruments',
+    `${fmt(dataGen, 1)} GB generated`,
+  )
+  if (credited > 0 || sent > 0)
+    log('science', `+${fmt(credited, 1)} science points returned, ${fmt(sent, 1)} GB sent home.`)
+  return { lost }
 }
 
 /** 4. Crew: energy recovers when not busy, morale drifts, health falls without life support. */
@@ -293,13 +374,24 @@ function stepCrew(
 ) {
   const M = ctx.content.constants.mission
   const drift = teamModifiers(ctx).moraleDrift + (rationing ? M.rationMoralePerTurn : 0)
-  for (const c of Object.values(s.crew)) {
+  for (const [id, c] of Object.entries(s.crew)) {
     if (c.health <= 0) continue
     if (c.busyTurns > 0) c.busyTurns -= 1
     else c.energy = clamp(c.energy + M.energyRecoveryPerDay * turn.days, 0, 100)
     c.morale = clamp(c.morale + drift, 0, 100)
     const dh = degraded ? -M.healthLossPerDayNoLifeSupport : M.healthRecoveryPerDay
+    const before = c.health
     c.health = clamp(c.health + dh * turn.days, 0, 100)
+    if (degraded) {
+      recordChange(
+        s,
+        `health:${id}`,
+        c.health - before,
+        'failure',
+        'power-shortfall',
+        'life support degraded',
+      )
+    }
   }
 }
 
@@ -308,6 +400,7 @@ function checkCrewHealth(s: MissionState, ctx: MissionContext): void {
   const down = Object.entries(s.crew).find(([, c]) => c.health <= 0)
   if (down) {
     s.outcome = 'failed'
+    s.failure = { kind: 'crew-health', crewId: down[0], day: s.day }
     s.failReason = `${crewName(ctx, down[0])}'s health reached 0 on day ${s.day}.`
     s.eventLog.push({ turnIndex: s.turnIndex, day: s.day, kind: 'alarm', text: s.failReason })
   }
@@ -389,11 +482,24 @@ export function advanceTurn(
 
   const power = stepPower(s, ctx, turn, dest, log)
   const supply = stepLifeSupport(s, ctx, turn, dest, power.degraded, log)
-  if (s.outcome) return { state: s, newEvents: [] }
-  stepScience(s, ctx, turn, dest, power.scienceShed, log)
+  const flags = (dataLostGb: number) => ({
+    dataLostGb,
+    batteryEmpty: power.batteryEmpty,
+    scienceShed: power.scienceShed,
+    lifeSupportDegraded: power.degraded,
+    rationing: supply.rationing,
+  })
+  if (s.outcome) {
+    recordSnapshot(s, turn, [], flags(0))
+    return { state: s, newEvents: [] }
+  }
+  const science = stepScience(s, ctx, turn, dest, power.scienceShed, log)
   stepCrew(s, ctx, turn, power.degraded, supply.rationing)
   checkCrewHealth(s, ctx)
-  if (s.outcome) return { state: s, newEvents: [] }
+  if (s.outcome) {
+    recordSnapshot(s, turn, [], flags(science.lost))
+    return { state: s, newEvents: [] }
+  }
 
   // Effects and outages that applied this turn tick down before new events add fresh ones.
   s.activeEffects = s.activeEffects
@@ -422,6 +528,12 @@ export function advanceTurn(
     next = dispatchEvent(next, e, ctx, rng)
   }
   checkCrewHealth(next, ctx)
+  recordSnapshot(
+    next,
+    turn,
+    fired.map((e) => e.id),
+    flags(science.lost),
+  )
   if (next.outcome) return { state: next, newEvents: fired }
 
   next.day += turn.days

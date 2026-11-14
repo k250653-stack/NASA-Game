@@ -12,6 +12,8 @@ import type { MissionState } from '@/engine/types'
 import { Badge } from '@/ui/Badge'
 import { Button } from '@/ui/Button'
 import { Panel } from '@/ui/Panel'
+import { autoRun } from '@/engine/autopilot'
+import { DebriefPanel } from './DebriefPanel'
 import { MissionLog } from './MissionLog'
 import { MissionReadout } from './MissionReadout'
 import { PendingEvents } from './PendingEvents'
@@ -93,6 +95,13 @@ export function SimulatePanel() {
         <Button variant="secondary" onClick={() => step(Infinity)} disabled={over}>
           Run to end
         </Button>
+        <Button
+          variant="secondary"
+          onClick={() => setMission(autoRun(mission, design, getContent(), rng()))}
+          disabled={over}
+        >
+          Auto-run to end
+        </Button>
         <Button variant="ghost" onClick={() => reset()}>
           Reset
         </Button>
@@ -100,6 +109,11 @@ export function SimulatePanel() {
         {over && mission.outcome !== 'failed' && <Badge variant="success">Mission complete</Badge>}
       </div>
       {mission.failReason && <p className="mt-3 text-sm text-danger">{mission.failReason}</p>}
+      {over && (
+        <div className="mt-4">
+          <DebriefPanel mission={mission} design={design} />
+        </div>
+      )}
 
       <div className="mt-4 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4">
         <MissionReadout mission={mission} />

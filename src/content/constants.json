@@ -1,5 +1,5 @@
 {
-  "_note": "Approximate, verify. Engine-wide constants. perCrewPerDay values are typical planning figures for crewed missions and must be checked against a NASA life-support baseline before the demo. Every 'TODO' source must be replaced with a URL. settings and mission are turn-loop tuning values (approximate, verify by playtesting).",
+  "_note": "Approximate, verify. Engine-wide constants. perCrewPerDay values are typical planning figures for crewed missions and must be checked against a NASA life-support baseline before the demo. Every 'TODO' source must be replaced with a URL. settings and mission are turn-loop tuning values (approximate, verify by playtesting). scoring holds debrief weights and thresholds (game design values).",
   "perCrewPerDay": {
     "oxygenKg": 0.84,
     "foodKg": 1.8,
@@ -60,6 +60,35 @@
     "lowMoraleThreshold": 40,
     "lowMoraleScienceFactor": 0.75,
     "transitLightFraction": 1,
+    "source": "TODO"
+  },
+  "scoring": {
+    "weights": {
+      "science": 0.4,
+      "safety": 0.25,
+      "efficiency": 0.2,
+      "teamwork": 0.15
+    },
+    "outcomeThresholds": {
+      "success": 70,
+      "partial": 40
+    },
+    "starThresholds": [50, 70, 90],
+    "failedCap": 39,
+    "deathPenalty": 30,
+    "reservePointsPerDay": 2,
+    "reserveMaxPoints": 10,
+    "massMarginBand": {
+      "min": 0.05,
+      "max": 0.25
+    },
+    "powerMarginBand": {
+      "min": 0.2,
+      "max": 0.6
+    },
+    "conflictPenalty": 10,
+    "tradeBonus": 5,
+    "conflictEventIds": ["crew-argument"],
     "source": "TODO"
   }
 }

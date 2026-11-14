@@ -16,7 +16,21 @@
         "crewInjury": "rest",
         "lowSupplies": "ration",
         "eva": "best_available"
-      }
+      },
+      "bonusObjectives": [
+        {
+          "id": "all-data-home",
+          "label": "Return 100% of data",
+          "condition": "allDataReturned",
+          "points": 5
+        },
+        {
+          "id": "no-injuries",
+          "label": "No crew injuries",
+          "condition": "noInjuries",
+          "points": 5
+        }
+      ]
     },
     {
       "id": "jezero-long-stay",
@@ -33,7 +47,22 @@
         "crewInjury": "rest",
         "lowSupplies": "ration",
         "eva": "only_practical"
-      }
+      },
+      "bonusObjectives": [
+        {
+          "id": "under-budget",
+          "label": "Finish under budget by 10%",
+          "condition": "underBudgetPct",
+          "value": 10,
+          "points": 5
+        },
+        {
+          "id": "no-injuries",
+          "label": "No crew injuries",
+          "condition": "noInjuries",
+          "points": 5
+        }
+      ]
     }
   ]
 }

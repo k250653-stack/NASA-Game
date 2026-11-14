@@ -76,7 +76,47 @@ export const ConstantsSchema = z.strictObject({
   }),
 })
 
-export type Constants = z.infer<typeof ConstantsSchema>
+const Ratio = z.number().min(0).max(1)
+const Band = z
+  .strictObject({ min: z.number(), max: z.number() })
+  .refine((b) => b.min <= b.max, { error: 'band min must be <= max' })
+
+/** Scoring tuning (see engine/score.ts). */
+export const ScoringSchema = z
+  .strictObject({
+    weights: z.strictObject({ science: Ratio, safety: Ratio, efficiency: Ratio, teamwork: Ratio }),
+    outcomeThresholds: z.strictObject({ success: z.number(), partial: z.number() }),
+    /** Totals needed for 1, 2 and 3 stars. */
+    starThresholds: z.tuple([z.number(), z.number(), z.number()]),
+    /** A failed mission's total never exceeds this. */
+    failedCap: z.number(),
+    /** Safety points lost per crew member whose health reached 0. */
+    deathPenalty: z.number().nonnegative(),
+    /** Safety points per day of supplies left at the end, up to reserveMaxPoints. */
+    reservePointsPerDay: z.number().nonnegative(),
+    reserveMaxPoints: z.number().nonnegative(),
+    /** Mass margin in this band scores 100; outside it drops off. */
+    massMarginBand: Band,
+    /** Power margin in this band scores 100; outside it drops off. */
+    powerMarginBand: Band,
+    conflictPenalty: z.number().nonnegative(),
+    tradeBonus: z.number().nonnegative(),
+    /** Events that count as crew conflicts for teamwork. */
+    conflictEventIds: z.array(z.string()),
+    source: NonEmptyString,
+  })
+  .refine(
+    (s) =>
+      Math.abs(
+        s.weights.science + s.weights.safety + s.weights.efficiency + s.weights.teamwork - 1,
+      ) < 1e-6,
+    { error: 'scoring.weights must sum to 1' },
+  )
+
+export const ConstantsWithScoringSchema = ConstantsSchema.extend({ scoring: ScoringSchema })
+
+export type Constants = z.infer<typeof ConstantsWithScoringSchema>
+export type ScoringTuning = Constants['scoring']
 export type MissionTuning = Constants['mission']
 export type PerCrewPerDay = Constants['perCrewPerDay']
 export type TeamRules = Constants['teamRules']

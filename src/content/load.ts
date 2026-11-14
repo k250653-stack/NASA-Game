@@ -6,7 +6,7 @@ import { z } from 'zod'
 import {
   isCrewTarget,
   PART_CATEGORIES,
-  ConstantsSchema,
+  ConstantsWithScoringSchema,
   type Constants,
   CrewMemberSchema,
   DestinationSchema,
@@ -99,7 +99,7 @@ export function parseContentFile<T extends z.ZodType>(
 
 /** constants.json is a single object, not an items list. */
 export function parseConstants(data: unknown): Constants {
-  const result = ConstantsSchema.safeParse(data)
+  const result = ConstantsWithScoringSchema.safeParse(data)
   if (!result.success) {
     throw new ContentValidationError(
       'constants.json',

@@ -128,7 +128,66 @@ export interface CrewStatus {
 export interface MissionResources extends Record<ResourceKey, number> {
   /** Net power last turn (generation − use), W. Information only. */
   power: number
+  /**
+   * Science points whose data is still onboard. They only move to sciencePoints when the
+   * data reaches Earth, and are lost with lost data. sciencePoints = credited (returned) points.
+   */
+  pendingSciencePoints: number
 }
+
+export type ChangeSource = 'consumption' | 'event' | 'option' | 'failure' | 'design'
+
+/** One recorded change to a resource, modifier or crew stat. */
+export interface ChangeRecord {
+  turn: number
+  day: number
+  /** Resource key, modifier key, "dataLostGb", "health:<crewId>", "part:<category>", ... */
+  resource: string
+  delta: number
+  sourceType: ChangeSource
+  /** "life-support", "power-balance", an event id, "<eventId>:<optionId>", ... */
+  sourceId: string
+  note: string
+}
+
+/** One answered event (by the player, an AI teammate or standing orders). */
+export interface DecisionRecord {
+  turn: number
+  day: number
+  eventId: string
+  optionId: string
+  crewId: string | null
+  success: boolean
+  chance: number
+  /** Energy of the acting crew member before acting (fatigue analysis). */
+  crewEnergy: number | null
+  handledBy: 'player' | 'ai' | 'standing-orders'
+}
+
+/** Compact per-turn snapshot (numbers only) for the debrief and cause analysis. */
+export interface TurnSnapshot {
+  turn: number
+  /** Day the turn started. */
+  day: number
+  days: number
+  phaseId: string
+  location: Location
+  resources: Record<string, number>
+  /** crewId -> [energy, morale, health] at the end of the turn. */
+  crew: Record<string, [number, number, number]>
+  /** Events that fired this turn. */
+  eventIds: string[]
+  disabledParts: string[]
+  dataLostGb: number
+  batteryEmpty: boolean
+  scienceShed: boolean
+  lifeSupportDegraded: boolean
+  rationing: boolean
+}
+
+export type MissionFailure =
+  | { kind: 'supply'; resource: 'oxygen' | 'food' | 'water'; day: number }
+  | { kind: 'crew-health'; crewId: string; day: number }
 
 /** A temporary multiplier from an event (e.g. solarOutput × 0.3 for 2 turns). */
 export interface ActiveEffect {
@@ -189,4 +248,9 @@ export interface MissionState {
   abortedEarly: boolean
   outcome: MissionOutcome
   failReason?: string
+  /** Structured version of failReason for cause analysis. */
+  failure?: MissionFailure
+  turnHistory: TurnSnapshot[]
+  changes: ChangeRecord[]
+  decisions: DecisionRecord[]
 }

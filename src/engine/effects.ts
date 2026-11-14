@@ -10,6 +10,7 @@ import {
   type ResourceKey,
 } from '@/schemas'
 import { fmt } from './format'
+import { recordChange } from './history'
 import { batteryCapacityWh, clamp, crewName } from './missionHelpers'
 import type { Rng } from './rng'
 import type { MissionContext, MissionState } from './types'
@@ -44,18 +45,24 @@ export function applyEffect(
     let after = Math.max(0, applyOp(before, e.op, e.value))
     if (t === 'batteryWh') after = Math.min(after, batteryCapacityWh(s, ctx))
     s.resources[t] = after
-    return `${t} ${fmt(before, 1)} → ${fmt(after, 1)}`
+    const text = `${t} ${fmt(before, 1)} → ${fmt(after, 1)}`
+    recordChange(s, t, after - before, 'event', eventId, text)
+    return text
   }
 
   if (isModifier(t)) {
     s.activeEffects.push({ target: t, value: e.value, turnsLeft: turns, sourceEventId: eventId })
-    return `${t} ×${e.value} for ${turns} turn${turns === 1 ? '' : 's'}`
+    const text = `${t} ×${e.value} for ${turns} turn${turns === 1 ? '' : 's'}`
+    recordChange(s, t, e.value - 1, 'event', eventId, text)
+    return text
   }
 
   if (t === 'dustLevel') {
     const before = s.dustLevel
     s.dustLevel = clamp(applyOp(before, e.op, e.value), 0, 1)
-    return `dust ${Math.round(before * 100)}% → ${Math.round(s.dustLevel * 100)}%`
+    const text = `dust ${Math.round(before * 100)}% → ${Math.round(s.dustLevel * 100)}%`
+    recordChange(s, 'dustLevel', s.dustLevel - before, 'event', eventId, text)
+    return text
   }
 
   if (t.startsWith('part:')) {
@@ -68,9 +75,12 @@ export function applyEffect(
       ),
     ]
     ids.forEach((id) => (s.disabledParts[id] = Math.max(s.disabledParts[id] ?? 0, turns)))
-    return ids.length > 0
-      ? `${category} offline for ${turns} turn${turns === 1 ? '' : 's'}`
-      : `no ${category} affected`
+    const text =
+      ids.length > 0
+        ? `${category} offline for ${turns} turn${turns === 1 ? '' : 's'}`
+        : `no ${category} affected`
+    if (ids.length > 0) recordChange(s, t, -turns, 'event', eventId, text)
+    return text
   }
 
   // Crew target.
@@ -92,7 +102,16 @@ export function applyEffect(
   for (const id of ids) {
     const c = s.crew[id]
     if (!c) continue
+    const before = c[stat]
     c[stat] = clamp(applyOp(c[stat], e.op, e.value), 0, 100)
+    recordChange(
+      s,
+      `${stat}:${id}`,
+      c[stat] - before,
+      'event',
+      eventId,
+      `${crewName(ctx, id)} ${stat}`,
+    )
     changed.push(crewName(ctx, id))
   }
   const who = t === 'allCrew' ? 'all crew' : changed.join(', ') || 'nobody'

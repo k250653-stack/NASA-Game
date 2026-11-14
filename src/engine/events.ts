@@ -11,6 +11,7 @@ import type {
   Trait,
 } from '@/schemas'
 import { applyEffect } from './effects'
+import { recordChange } from './history'
 import {
   activeParts,
   averageMorale,
@@ -246,22 +247,38 @@ export function resolveEvent(
   const s = cloneState(state)
   const c = option.consumes
   const crewCount = Object.values(s.crew).filter((m) => m.health > 0).length
-  s.resources.suits -= c.suits ?? 0
-  s.resources.spareKits -= c.spareKits ?? 0
-  s.resources.foodKg = Math.max(
-    0,
-    s.resources.foodKg -
-      (c.rationDays ?? 0) * crewCount * ctx.content.constants.perCrewPerDay.foodKg,
-  )
-  s.resources.batteryWh -= c.powerWh ?? 0
+  const source = `${event.id}:${option.id}`
+  const spend = (key: 'suits' | 'spareKits' | 'foodKg' | 'batteryWh', amount: number) => {
+    const before = s.resources[key]
+    s.resources[key] = Math.max(0, before - amount)
+    recordChange(s, key, s.resources[key] - before, 'option', source, option.label)
+  }
+  spend('suits', c.suits ?? 0)
+  spend('spareKits', c.spareKits ?? 0)
+  spend('foodKg', (c.rationDays ?? 0) * crewCount * ctx.content.constants.perCrewPerDay.foodKg)
+  spend('batteryWh', c.powerWh ?? 0)
+  const crewEnergy = crew ? (s.crew[crew.id]?.energy ?? 0) : null
   if (crew) {
     const cs = s.crew[crew.id]!
+    const before = cs.energy
     cs.energy = Math.max(0, cs.energy - (c.crewEnergy ?? 0))
+    recordChange(s, `energy:${crew.id}`, cs.energy - before, 'option', source, option.label)
     if ((c.crewEnergy ?? 0) > 0) cs.busyTurns += 1
   }
 
   const chance = successChance(state, event, option, crew, ctx)
   const success = rng.chance(chance)
+  s.decisions.push({
+    turn: s.turnIndex,
+    day: s.day,
+    eventId: event.id,
+    optionId: option.id,
+    crewId: crew?.id ?? null,
+    success,
+    chance,
+    crewEnergy,
+    handledBy,
+  })
   const effectsApplied = (success ? option.onSuccess : option.onFail).map((fx) =>
     applyEffect(s, fx, ctx, rng, crew?.id ?? null, event.id),
   )
