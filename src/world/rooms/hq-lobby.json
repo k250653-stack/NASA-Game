@@ -1,8 +1,12 @@
 {
   "id": "hq-lobby",
-  "image": { "kind": "backgrounds", "id": "hq-lobby", "ext": "jpg" },
+  "name": "HQ Lobby",
+  "image": {
+    "kind": "backgrounds",
+    "id": "hq-lobby",
+    "ext": "jpg"
+  },
   "size": [1376, 768],
-  "fit": [1180, 700],
   "playerScale": 0.7,
   "walkable": [
     [690, 300],
@@ -55,7 +59,9 @@
         [512, 410],
         [478, 434]
       ],
-      "target": "planning",
+      "to": "mission-planning",
+      "arrive": "exit",
+      "gate": "planning",
       "locked": false
     },
     {
@@ -68,7 +74,9 @@
         [634, 352],
         [600, 372]
       ],
-      "target": "personnel",
+      "to": "personnel",
+      "arrive": "exit",
+      "gate": "personnel",
       "locked": false
     },
     {
@@ -81,7 +89,9 @@
         [824, 348],
         [790, 368]
       ],
-      "target": "briefing",
+      "to": "briefing",
+      "arrive": "exit",
+      "gate": "briefing",
       "locked": false
     },
     {
@@ -94,7 +104,9 @@
         [938, 404],
         [902, 426]
       ],
-      "target": "launch",
+      "to": "launch-control",
+      "arrive": "exit",
+      "gate": "launch",
       "locked": false
     }
   ],

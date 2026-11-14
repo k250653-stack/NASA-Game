@@ -14,6 +14,21 @@ export function pointInPolygon([x, y]: Point, poly: Polygon): boolean {
   return inside
 }
 
+/** 0 inside the polygon, otherwise the distance to its nearest edge. */
+export function distanceToPolygon(p: Point, poly: Polygon): number {
+  if (pointInPolygon(p, poly)) return 0
+  let best = Infinity
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ax, ay] = poly[j]!
+    const [bx, by] = poly[i]!
+    const dx = bx - ax
+    const dy = by - ay
+    const t = Math.max(0, Math.min(1, ((p[0] - ax) * dx + (p[1] - ay) * dy) / (dx * dx + dy * dy || 1)))
+    best = Math.min(best, Math.hypot(p[0] - (ax + t * dx), p[1] - (ay + t * dy)))
+  }
+  return best
+}
+
 /** Average of the corners (good enough for convex-ish shapes). */
 export function centroid(poly: Polygon): Point {
   const sum = poly.reduce((acc, [x, y]) => [acc[0] + x, acc[1] + y], [0, 0])

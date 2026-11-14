@@ -1,0 +1,61 @@
+{
+  "id": "mission-planning",
+  "name": "Mission Planning",
+  "image": {
+    "kind": "backgrounds",
+    "id": "missionplanning",
+    "ext": "jpg"
+  },
+  "size": [1376, 768],
+  "playerScale": 0.7,
+  "walkable": [
+    [690, 300],
+    [1062, 492],
+    [690, 668],
+    [322, 480]
+  ],
+  "blocked": [
+    [
+      [738, 330],
+      [776, 300],
+      [850, 318],
+      [968, 400],
+      [978, 452],
+      [940, 482],
+      [880, 470],
+      [748, 452],
+      [740, 400]
+    ]
+  ],
+  "doors": [
+    {
+      "id": "exit",
+      "label": "HQ Lobby",
+      "color": "role-comms",
+      "area": [
+        [440, 404],
+        [474, 386],
+        [512, 410],
+        [478, 434]
+      ],
+      "to": "hq-lobby",
+      "arrive": "door-planning",
+      "locked": false
+    }
+  ],
+  "stations": [
+    {
+      "id": "star-map",
+      "label": "Holo Star Map",
+      "area": [
+        [748, 355],
+        [800, 322],
+        [960, 392],
+        [958, 432],
+        [900, 462],
+        [750, 392]
+      ],
+      "opens": "planning"
+    }
+  ]
+}

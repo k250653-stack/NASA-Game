@@ -1,0 +1,65 @@
+{
+  "id": "briefing",
+  "name": "Briefing",
+  "image": {
+    "kind": "backgrounds",
+    "id": "breifing",
+    "ext": "jpg"
+  },
+  "size": [1376, 768],
+  "playerScale": 0.7,
+  "walkable": [
+    [690, 300],
+    [1062, 492],
+    [690, 668],
+    [322, 480]
+  ],
+  "blocked": [
+    [
+      [655, 355],
+      [705, 318],
+      [950, 408],
+      [948, 462],
+      [880, 498],
+      [800, 492],
+      [655, 402]
+    ],
+    [
+      [562, 350],
+      [690, 290],
+      [702, 306],
+      [578, 366]
+    ]
+  ],
+  "doors": [
+    {
+      "id": "exit",
+      "label": "HQ Lobby",
+      "color": "alert",
+      "area": [
+        [440, 404],
+        [474, 386],
+        [512, 410],
+        [478, 434]
+      ],
+      "to": "hq-lobby",
+      "arrive": "door-briefing",
+      "locked": false
+    }
+  ],
+  "stations": [
+    {
+      "id": "meeting-table",
+      "label": "Meeting Table",
+      "area": [
+        [665, 345],
+        [710, 318],
+        [948, 410],
+        [948, 442],
+        [880, 472],
+        [665, 368]
+      ],
+      "opens": "briefing"
+    }
+  ]
+}

@@ -52,6 +52,7 @@
   /* Background decoration */
   --color-star: #cfe3ff;
   --color-grid: #ffffff08;
+  --color-blueprint: #22d3ee0f; /* HQ world backdrop grid */
 
   /* Fonts (self-hosted via @fontsource, imported in main.tsx) */
   --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
@@ -126,4 +127,13 @@ body {
 [data-flash] {
   outline: 2px solid var(--color-alert);
   outline-offset: 4px;
+}
+
+/* HQ world backdrop around the rooms: very dark navy with a faint blueprint grid. */
+.blueprint-grid {
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(var(--color-blueprint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-blueprint) 1px, transparent 1px);
+  background-size: 32px 32px;
 }

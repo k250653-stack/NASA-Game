@@ -16,11 +16,11 @@ import FailureReview from '@/screens/FailureReview'
 import Codex from '@/screens/Codex'
 import Styleguide from '@/screens/styleguide/Styleguide'
 import { FadeOverlay } from '@/world/FadeOverlay'
-// Also installs the "leaving a door's screens returns to the HQ lobby" rule.
-import '@/world/worldStore'
+// Also installs the "finishing a step closes the station popup" rule.
+import { useWorld } from '@/world/worldStore'
 
-/** Phaser is large, so the walkable world loads only when the lobby is first opened. */
-const HQLobby = lazy(() => import('@/world/HQLobby'))
+/** Phaser is large, so the walkable world loads only when the HQ is first opened. */
+const HQWorld = lazy(() => import('@/world/HQWorld'))
 
 /** No router: the current phase in the store decides which screen is shown. */
 const SCREENS: Record<Phase, ComponentType> = {
@@ -34,7 +34,7 @@ const SCREENS: Record<Phase, ComponentType> = {
   mission: MissionControl,
   review: FailureReview,
   codex: Codex,
-  hq: HQLobby,
+  hq: HQWorld,
   styleguide: Styleguide,
 }
 
@@ -42,6 +42,9 @@ export default function App() {
   const phase = useStore((s) => s.game.phase)
   const Screen = SCREENS[phase] ?? Title
   const reducedMotion = useSettings((s) => s.reducedMotion)
+  // A station popup shows the phase's screen inside the HQ world instead of full screen.
+  const popup = useWorld((s) => s.popup)
+  const inWorld = phase === 'hq' || popup !== null
   // Each screen opens at the top (runs before a screen's own effects, e.g. Fix in Planning).
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
@@ -51,7 +54,7 @@ export default function App() {
     <MotionConfig reducedMotion={reducedMotion ? 'always' : 'user'}>
       <Starfield />
       <Suspense fallback={null}>
-        <Screen />
+        {inWorld ? <HQWorld popup={phase !== 'hq' ? <Screen /> : null} /> : <Screen />}
       </Suspense>
       <Toaster />
       <FadeOverlay />
