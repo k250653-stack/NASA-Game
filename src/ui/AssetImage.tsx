@@ -8,6 +8,8 @@ interface AssetImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src
   label?: string
   /** Tried if `id` fails to load (e.g. an expression portrait falling back to the normal one). */
   fallbackId?: string
+  /** File extension when it differs from the kind's default (e.g. 'png'). */
+  ext?: string
 }
 
 /**
@@ -19,13 +21,14 @@ export function AssetImage({
   kind,
   id,
   fallbackId,
+  ext,
   label,
   alt,
   className,
   ...rest
 }: AssetImageProps) {
-  const primary = getAsset(kind, id)
-  const fallback = fallbackId ? getAsset(kind, fallbackId) : null
+  const primary = getAsset(kind, id, ext)
+  const fallback = fallbackId ? getAsset(kind, fallbackId, ext) : null
   // Tracking failed *srcs* (not a boolean) means a new id automatically retries the real file.
   const [failed, setFailed] = useState<string[]>([])
   const text = label ?? id

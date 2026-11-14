@@ -1,10 +1,10 @@
 import { Icon } from './Icon'
 import { Tooltip } from './Tooltip'
-import { useUi } from './uiStore'
+import { useSettings } from './settingsStore'
 
 export function SoundToggle() {
-  const soundOn = useUi((s) => s.soundOn)
-  const setSoundOn = useUi((s) => s.setSoundOn)
+  const soundOn = useSettings((s) => s.soundOn)
+  const setSoundOn = useSettings((s) => s.setSoundOn)
   return (
     <Tooltip content={soundOn ? 'Mute sound' : 'Unmute sound'} side="bottom">
       <button

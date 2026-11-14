@@ -57,6 +57,8 @@
   --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
   --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Mono', ui-monospace, monospace;
+  /* Main menu title and items (public/assets/fonts) */
+  --font-title: 'Barlow Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
 
   /* Radii */
   --radius-sm: 4px;
@@ -80,6 +82,14 @@
   --shadow-modal: 0 24px 64px -12px #000000e6;
 }
 
+@font-face {
+  font-family: 'Barlow Condensed';
+  src: url('/assets/fonts/BarlowCondensed-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 html,
 body,
 #root {
@@ -99,10 +109,13 @@ body {
   background-size: 48px 48px;
 }
 
-/* One focus ring for every interactive element (keyboard only). */
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+/* One focus ring for every interactive element (keyboard only). In the base layer so a
+   component can opt out with a utility (the main menu uses its own arrow highlight). */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 }
 
 ::selection {

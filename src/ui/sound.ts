@@ -8,6 +8,7 @@ import { getAsset, type AudioAssetKind } from './assets'
 const howls = new Map<string, Howl>()
 const warned = new Set<string>()
 let muted = false
+let musicMuted = false
 
 function warnOnce(src: string, reason: string): void {
   if (warned.has(src)) return
@@ -39,7 +40,7 @@ export function playSound(id: string): void {
 
 /** Starts a looping track from public/assets/music/<id>.mp3 (restarts if already playing). */
 export function playMusic(id: string): void {
-  if (muted) return
+  if (musicMuted) return
   const howl = getHowl('music', id)
   if (!howl.playing()) howl.play()
 }
@@ -55,6 +56,12 @@ export function stopAllSounds(): void {
 export function setMuted(value: boolean): void {
   muted = value
   if (muted) stopAllSounds()
+}
+
+/** Music has its own toggle (Settings); sound effects use setMuted. */
+export function setMusicMuted(value: boolean): void {
+  musicMuted = value
+  if (musicMuted) howls.forEach((h, src) => src.includes('/music/') && h.stop())
 }
 
 export function isMuted(): boolean {

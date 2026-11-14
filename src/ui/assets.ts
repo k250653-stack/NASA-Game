@@ -18,7 +18,7 @@ const EXTENSION: Record<AssetKind, string> = {
 }
 
 /** `getAsset('portraits', 'crew-mina-okafor')` -> "/assets/portraits/crew-mina-okafor.webp" */
-export function getAsset(kind: AssetKind, id: string): string {
+export function getAsset(kind: AssetKind, id: string, ext: string = EXTENSION[kind]): string {
   const base = import.meta.env.BASE_URL.replace(/\/$/, '')
-  return `${base}/assets/${kind}/${id}.${EXTENSION[kind]}`
+  return `${base}/assets/${kind}/${id}.${ext}`
 }

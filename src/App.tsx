@@ -3,6 +3,7 @@ import { MotionConfig } from 'motion/react'
 import { useStore, type Phase } from '@/store'
 import { Starfield } from '@/ui/Starfield'
 import { Toaster } from '@/ui/Toaster'
+import { useSettings } from '@/ui/settingsStore'
 import Title from '@/screens/Title'
 import DestinationSelect from '@/screens/DestinationSelect'
 import ScenarioSelect from '@/screens/ScenarioSelect'
@@ -33,13 +34,14 @@ const SCREENS: Record<Phase, ComponentType> = {
 export default function App() {
   const phase = useStore((s) => s.game.phase)
   const Screen = SCREENS[phase] ?? Title
+  const reducedMotion = useSettings((s) => s.reducedMotion)
   // Each screen opens at the top (runs before a screen's own effects, e.g. Fix in Planning).
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
   }, [phase])
   return (
-    // reducedMotion="user": Motion skips transform animations when the OS asks for less motion.
-    <MotionConfig reducedMotion="user">
+    // Motion skips transform animations when the OS asks for less motion, or Settings does.
+    <MotionConfig reducedMotion={reducedMotion ? 'always' : 'user'}>
       <Starfield />
       <Screen />
       <Toaster />

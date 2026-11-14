@@ -6,7 +6,7 @@ test('styleguide renders every component, modal closes with Esc, focus ring visi
   page,
 }, info) => {
   const w = watch(page)
-  await page.goto('/')
+  await page.goto('/?dev=1')
   await page.evaluate(() => localStorage.clear())
   await page.reload()
   await page.getByRole('button', { name: 'Dev: UI kit' }).click()

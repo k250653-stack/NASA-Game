@@ -1,52 +1,79 @@
+import { useState } from 'react'
 import { motion } from 'motion/react'
-import { useStore } from '@/store'
-import { Button } from '@/ui/Button'
-import { Icon } from '@/ui/Icon'
-import { ScreenLayout } from '@/ui/ScreenLayout'
+import { resetAll, useStore } from '@/store'
+import { resumePhase, useSettings } from '@/ui/settingsStore'
+import { useUi } from '@/ui/uiStore'
+import { AboutModal } from './menu/AboutModal'
+import { MenuBackground } from './menu/MenuBackground'
+import { MenuList, type MenuItem } from './menu/MenuList'
+import { SettingsModal } from './menu/SettingsModal'
 
+/** The UI kit (styleguide) is only reachable with ?dev=1 in the URL. */
+const DEV = new URLSearchParams(window.location.search).get('dev') === '1'
+
+/** Main menu: full-screen pixel-art backdrop, title, and a short text menu. */
 export default function Title() {
-  const nextPhase = useStore((s) => s.nextPhase)
   const setPhase = useStore((s) => s.setPhase)
+  const hasSave = useStore((s) => s.game.destinationId !== null)
+  const lastPhase = useSettings((s) => s.lastPhase)
+  const setSandboxStart = useUi((s) => s.setSandboxStart)
+  const [modal, setModal] = useState<'settings' | 'about' | null>(null)
+  const canContinue = hasSave && lastPhase !== null
+
+  const newGame = (sandbox: boolean) => {
+    resetAll()
+    setSandboxStart(sandbox)
+    setPhase('destination')
+  }
+
+  const items: MenuItem[] = [
+    { id: 'start-mission-button', label: 'Play game', onSelect: () => newGame(false) },
+    {
+      id: 'menu-continue',
+      label: 'Continue game',
+      disabled: !canContinue,
+      hint: canContinue ? undefined : 'No saved mission yet',
+      onSelect: () => {
+        const phase = resumePhase()
+        if (phase) setPhase(phase)
+      },
+    },
+    { id: 'menu-sandbox', label: 'Sandbox mode', onSelect: () => newGame(true) },
+    { id: 'menu-settings', label: 'Settings', onSelect: () => setModal('settings') },
+    { id: 'menu-about', label: 'About the event', onSelect: () => setModal('about') },
+  ]
 
   return (
-    <ScreenLayout showSteps={false}>
-      <section className="flex flex-1 flex-col items-center justify-center py-16 text-center">
+    <main className="relative min-h-screen overflow-hidden" data-testid="main-menu">
+      <MenuBackground />
+      <div className="relative flex min-h-screen flex-col justify-center px-[8vw] py-16">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="flex flex-col items-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
         >
-          <p className="font-mono text-xs tracking-[0.4em] text-accent uppercase">
-            NASA Space Apps Challenge 2026
-          </p>
-          <h1 className="mt-5 font-display text-7xl font-bold tracking-tight text-primary">
+          <h1 className="font-title text-6xl font-medium tracking-[0.3em] text-primary uppercase xl:text-8xl">
             Mission Control
           </h1>
-          <p className="mt-5 max-w-xl text-lg text-muted">
-            Design a crewed mission to the Moon or Mars, fly it day by day, and learn the real
-            engineering behind every failure.
+          <p className="mt-4 font-title text-sm tracking-[0.4em] text-muted uppercase">
+            Design a crewed mission to the Moon or Mars
           </p>
-          <div className="mt-10 flex items-center gap-3">
-            <Button
-              size="lg"
-              onClick={nextPhase}
-              data-testid="start-mission-button"
-              icon={<Icon name="IconRocket" size={20} />}
-            >
-              Start mission
-            </Button>
-            <Button size="lg" variant="secondary" onClick={() => setPhase('codex')}>
-              Codex
-            </Button>
-          </div>
+          <nav aria-label="Main menu" className="mt-14">
+            <MenuList items={items} />
+          </nav>
         </motion.div>
-      </section>
-      <div className="flex justify-end">
-        <Button variant="ghost" size="sm" onClick={() => setPhase('styleguide')}>
-          Dev: UI kit
-        </Button>
       </div>
-    </ScreenLayout>
+      {DEV && (
+        <button
+          type="button"
+          onClick={() => setPhase('styleguide')}
+          className="absolute right-4 bottom-4 font-mono text-xs text-subtle hover:text-primary"
+        >
+          Dev: UI kit
+        </button>
+      )}
+      <SettingsModal open={modal === 'settings'} onClose={() => setModal(null)} />
+      <AboutModal open={modal === 'about'} onClose={() => setModal(null)} />
+    </main>
   )
 }

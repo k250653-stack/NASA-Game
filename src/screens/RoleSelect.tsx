@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import { getContent } from '@/content/load'
 import { CALLSIGN_MAX_LENGTH as CALLSIGN_MAX, validateCallsign } from '@/engine/recruitment'
 import { useStore } from '@/store'
 import { Panel } from '@/ui/Panel'
 import { PhaseShell } from '@/ui/PhaseShell'
+import { useUi } from '@/ui/uiStore'
 import { RoleCard } from './role/RoleCard'
 
 export default function RoleSelect() {
@@ -11,6 +13,14 @@ export default function RoleSelect() {
   const setRoleChoice = useStore((s) => s.setRoleChoice)
   const callsign = useStore((s) => s.game.callsign)
   const setCallsign = useStore((s) => s.setCallsign)
+  const sandboxStart = useUi((s) => s.sandboxStart)
+  const setSandboxStart = useUi((s) => s.setSandboxStart)
+  // Sandbox Mode from the main menu: pre-pick the Mission Director seat once.
+  useEffect(() => {
+    if (!sandboxStart) return
+    setSandboxStart(false)
+    if (!roleChoice) setRoleChoice('director')
+  }, [sandboxStart, roleChoice, setRoleChoice, setSandboxStart])
   const check = validateCallsign(callsign)
   const hint = !roleChoice ? 'Pick your seat to continue.' : !check.ok ? check.reason : undefined
 

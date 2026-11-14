@@ -1,9 +1,8 @@
 /**
- * UI-only state (toasts, sound toggle). Not saved, not game state.
+ * UI-only state (toasts, sandbox start). Not saved, not game state.
  * Read with selectors only: useUi((s) => s.toasts).
  */
 import { create } from 'zustand'
-import { setMuted } from './sound'
 
 export type ToastKind = 'info' | 'warning' | 'danger' | 'success'
 
@@ -18,13 +17,14 @@ export interface ToastItem {
 
 interface UiState {
   toasts: ToastItem[]
-  soundOn: boolean
+  /** Set by the menu's Sandbox Mode; Role select then pre-picks the Mission Director. */
+  sandboxStart: boolean
+  setSandboxStart: (on: boolean) => void
   /** Planning Board panel to scroll to and focus on arrival ("Fix in Planning"). */
   focusPanel: string | null
   setFocusPanel: (id: string | null) => void
   pushToast: (toast: Omit<ToastItem, 'id'>) => number
   dismissToast: (id: number) => void
-  setSoundOn: (on: boolean) => void
 }
 
 /** Toasts kept on screen at once; older ones are dropped. */
@@ -33,7 +33,8 @@ let nextToastId = 1
 
 export const useUi = create<UiState>()((set) => ({
   toasts: [],
-  soundOn: true,
+  sandboxStart: false,
+  setSandboxStart: (sandboxStart) => set({ sandboxStart }),
   focusPanel: null,
   setFocusPanel: (focusPanel) => set({ focusPanel }),
   pushToast: (toast) => {
@@ -42,10 +43,6 @@ export const useUi = create<UiState>()((set) => ({
     return id
   },
   dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
-  setSoundOn: (on) => {
-    setMuted(!on)
-    set({ soundOn: on })
-  },
 }))
 
 /** Shorthand: toast.warning('Battery low', 'Below 20% before nightfall'). */
