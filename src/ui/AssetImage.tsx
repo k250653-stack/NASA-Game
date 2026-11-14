@@ -6,6 +6,8 @@ interface AssetImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src
   id: string
   /** Human label used for alt text and placeholder initials. Defaults to the id. */
   label?: string
+  /** Tried if `id` fails to load (e.g. an expression portrait falling back to the normal one). */
+  fallbackId?: string
 }
 
 /**
@@ -13,22 +15,33 @@ interface AssetImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src
  * generated SVG placeholder (coloured rounded rect with initials) so the game never shows a
  * broken-image icon.
  */
-export function AssetImage({ kind, id, label, alt, className, ...rest }: AssetImageProps) {
-  const src = getAsset(kind, id)
-  // Tracking the failed *src* (not a boolean) means a new id automatically retries the real file.
-  const [failedSrc, setFailedSrc] = useState<string | null>(null)
+export function AssetImage({
+  kind,
+  id,
+  fallbackId,
+  label,
+  alt,
+  className,
+  ...rest
+}: AssetImageProps) {
+  const primary = getAsset(kind, id)
+  const fallback = fallbackId ? getAsset(kind, fallbackId) : null
+  // Tracking failed *srcs* (not a boolean) means a new id automatically retries the real file.
+  const [failed, setFailed] = useState<string[]>([])
   const text = label ?? id
+  const src = [primary, fallback].find((x): x is string => x !== null && !failed.includes(x))
 
-  if (failedSrc === src) {
+  if (!src) {
     return <PlaceholderImage text={text} alt={alt ?? text} className={className} />
   }
 
   return (
     <img
+      key={src}
       src={src}
       alt={alt ?? text}
       className={className}
-      onError={() => setFailedSrc(src)}
+      onError={() => setFailed((f) => [...f, src])}
       {...rest}
     />
   )

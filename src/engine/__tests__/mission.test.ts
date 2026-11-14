@@ -76,7 +76,7 @@ describe('invariants over many seeded runs', () => {
         })
       }
     }
-  })
+  }, 30_000) // 100 full missions
 
   it('advanceTurn after the mission is over returns the same state', () => {
     const { state } = play(MOON_GOOD_DESIGN, 3)

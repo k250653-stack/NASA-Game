@@ -58,6 +58,15 @@ export const CrewMemberSchema = z
      * One per role plus the Mission Director; ids are player-<role>.
      */
     isPlayer: z.boolean().default(false),
+    /** Short lines for the Negotiation panel, chosen deterministically. */
+    dialogue: z
+      .strictObject({
+        accept: z.array(NonEmptyString).min(1),
+        refuse: z.array(NonEmptyString).min(1),
+        counter: z.array(NonEmptyString).min(1),
+        request: z.array(NonEmptyString).min(1),
+      })
+      .optional(),
   })
   .refine((m) => m.isPlayer || m.traits.length > 0, {
     error: 'every recruitable crew member needs at least one trait',

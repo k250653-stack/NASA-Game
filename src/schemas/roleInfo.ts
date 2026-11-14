@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { PartCategorySchema } from './part'
 import { NonEmptyString, ROLES } from './shared'
 
 /** The seats a player can choose: the four crew roles plus the sandbox Mission Director. */
@@ -29,6 +30,15 @@ export const RoleInfoSchema = z.strictObject({
   learn: z.array(NonEmptyString).min(1),
   difficultyHint: NonEmptyString,
   sandbox: z.boolean().default(false),
+  /** What this seat controls on the Planning Board. */
+  owns: z.strictObject({
+    categories: z.array(PartCategorySchema),
+    /** Packed water, food and oxygen. */
+    supplies: z.boolean().default(false),
+    rocket: z.boolean().default(false),
+    /** May veto trades that push the team over budget. */
+    budgetVeto: z.boolean().default(false),
+  }),
   note: NonEmptyString.optional(),
 })
 export type RoleInfo = z.infer<typeof RoleInfoSchema>

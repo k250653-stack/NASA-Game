@@ -1,5 +1,5 @@
 {
-  "_note": "Role select content. Text is invented and should be reviewed by the team.",
+  "_note": "Role select content. Text is invented and should be reviewed by the team. owns lists what each seat edits on the Planning Board; habitat sits with Power & Life Support.",
   "items": [
     {
       "id": "science",
@@ -13,7 +13,13 @@
         "Why water ice matters",
         "Data budgets and downlink"
       ],
-      "difficultyHint": "Gentle start: most crises land on other seats."
+      "difficultyHint": "Gentle start: most crises land on other seats.",
+      "owns": {
+        "categories": ["instrument", "rover"],
+        "supplies": false,
+        "rocket": false,
+        "budgetVeto": false
+      }
     },
     {
       "id": "power_life",
@@ -27,7 +33,13 @@
         "Supplies and rationing"
       ],
       "learn": ["Solar power, dust and long nights", "Battery sizing", "Closed-loop life support"],
-      "difficultyHint": "Hardest seat: most urgent events are yours."
+      "difficultyHint": "Hardest seat: most urgent events are yours.",
+      "owns": {
+        "categories": ["power", "battery", "life_support", "suit", "spares", "habitat"],
+        "supplies": true,
+        "rocket": false,
+        "budgetVeto": false
+      }
     },
     {
       "id": "comms_nav",
@@ -41,7 +53,13 @@
         "Data rates and contact windows",
         "Orbits and transfer trajectories"
       ],
-      "difficultyHint": "Medium: comms outages and radiation warnings."
+      "difficultyHint": "Medium: comms outages and radiation warnings.",
+      "owns": {
+        "categories": ["comms"],
+        "supplies": false,
+        "rocket": false,
+        "budgetVeto": false
+      }
     },
     {
       "id": "launch_budget",
@@ -59,7 +77,13 @@
         "Why every kilogram costs money",
         "Team dynamics on long missions"
       ],
-      "difficultyHint": "Medium: few emergencies, many trade-offs."
+      "difficultyHint": "Medium: few emergencies, many trade-offs.",
+      "owns": {
+        "categories": [],
+        "supplies": false,
+        "rocket": true,
+        "budgetVeto": true
+      }
     },
     {
       "id": "director",
@@ -71,6 +95,22 @@
       "learn": ["How all the systems depend on each other"],
       "difficultyHint": "Sandbox: you answer every event.",
       "sandbox": true,
+      "owns": {
+        "categories": [
+          "instrument",
+          "rover",
+          "power",
+          "battery",
+          "life_support",
+          "suit",
+          "spares",
+          "habitat",
+          "comms"
+        ],
+        "supplies": true,
+        "rocket": true,
+        "budgetVeto": true
+      },
       "note": "You control every system; no AI teammates."
     }
   ]

@@ -12,10 +12,18 @@ interface ScreenLayoutProps {
   footer?: ReactNode
   /** Hide the phase stepper (title screen). */
   showSteps?: boolean
+  /** Extra content at the right of the top bar. */
+  topBarExtra?: ReactNode
 }
 
 /** Every screen sits inside this: top bar (title, stepper, sound), content, optional sidebar. */
-export function ScreenLayout({ children, sidebar, footer, showSteps = true }: ScreenLayoutProps) {
+export function ScreenLayout({
+  children,
+  sidebar,
+  footer,
+  showSteps = true,
+  topBarExtra,
+}: ScreenLayoutProps) {
   const phase = useStore((s) => s.game.phase)
   const setPhase = useStore((s) => s.setPhase)
 
@@ -32,8 +40,9 @@ export function ScreenLayout({ children, sidebar, footer, showSteps = true }: Sc
             Mission Control
           </button>
           <nav className="flex min-w-0 flex-1 justify-center">
-            {showSteps && <ProgressSteps current={phase} />}
+            {showSteps && <ProgressSteps current={phase} compact={topBarExtra !== undefined} />}
           </nav>
+          {topBarExtra}
           <SoundToggle />
         </div>
       </header>

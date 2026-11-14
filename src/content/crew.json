@@ -1,5 +1,5 @@
 {
-  "_note": "Approximate, verify. INVENTED placeholder roster (no ASSET_BRIEF.md was found): the team should review names, backstories, skills and salaries. Salaries are millions USD for the whole mission including training. Best specialists cost the most; Maya and Sana are the cheap-but-weak options. player-* entries are the player's own character per seat (not recruitable, no salary, no traits); player-director uses role launch_budget as a placeholder because the Mission Director covers every system.",
+  "_note": "Approximate, verify. INVENTED placeholder roster (no ASSET_BRIEF.md was found): the team should review names, backstories, skills and salaries. Salaries are millions USD for the whole mission including training. Best specialists cost the most; Maya and Sana are the cheap-but-weak options. player-* entries are the player's own character per seat (not recruitable, no salary, no traits); player-director uses role launch_budget as a placeholder because the Mission Director covers every system. dialogue lines are placeholders for the team to replace.",
   "items": [
     {
       "id": "ayesha",
@@ -34,7 +34,29 @@
         "cost": 0.15
       },
       "backstory": "Planetary geologist who spent three winters drilling ice cores in Antarctica. The best scientist available, and priced like it.",
-      "portrait": "crew-ayesha"
+      "portrait": "crew-ayesha",
+      "dialogue": {
+        "accept": [
+          "Fine, as long as the drill keeps turning.",
+          "Agreed. The data will still be worth it.",
+          "I can live with that. Barely."
+        ],
+        "refuse": [
+          "No. That guts the science, and science is why we are going.",
+          "Absolutely not: we would fly all that way to collect nothing.",
+          "I won't sign off on a mission with no instruments."
+        ],
+        "counter": [
+          "Not that, but I could downsize instead.",
+          "Meet me halfway and you have a deal.",
+          "Try this version: you get most of the savings, I keep the core science."
+        ],
+        "request": [
+          "Any spare mass? One more instrument would double our return.",
+          "The lab is tight on power. Can someone help?",
+          "We're over budget and my instruments are first on the chopping block. Talk to me first."
+        ]
+      }
     },
     {
       "id": "maya",
@@ -69,7 +91,27 @@
         "cost": 0.2
       },
       "backstory": "Field technician turned junior researcher. Cheap, hands-on and keen, but still learning the science.",
-      "portrait": "crew-maya"
+      "portrait": "crew-maya",
+      "dialogue": {
+        "accept": [
+          "Sure, I'll make it work.",
+          "No problem, I can rig something.",
+          "Deal. Less to carry anyway."
+        ],
+        "refuse": [
+          "Sorry, then I've got nothing to work with out there.",
+          "That leaves me with no gear. Can't do it."
+        ],
+        "counter": [
+          "How about a smaller swap?",
+          "I could give up part of that, not all of it.",
+          "Halfway works for me."
+        ],
+        "request": [
+          "Could I get one more instrument? Even a small one.",
+          "We're heavy. I can trim if someone else does too."
+        ]
+      }
     },
     {
       "id": "bilal",
@@ -104,7 +146,28 @@
         "cost": 0.25
       },
       "backstory": "Former submarine electrician. Believes every system should survive two failures before anyone notices.",
-      "portrait": "crew-bilal"
+      "portrait": "crew-bilal",
+      "dialogue": {
+        "accept": [
+          "Fine. The margins still hold.",
+          "Accepted. I ran the numbers twice.",
+          "That works. We'll survive the night."
+        ],
+        "refuse": [
+          "No. That leaves us with no margin when things break.",
+          "Not happening: the batteries would not last the dark.",
+          "I don't trade away life support."
+        ],
+        "counter": [
+          "Smaller cut, and I keep a backup.",
+          "I can trim, not remove. Here is what I can do.",
+          "Half that and I will agree."
+        ],
+        "request": [
+          "Power's thin. I need more generation or less load.",
+          "We are cutting it close on supplies. I want a bigger buffer."
+        ]
+      }
     },
     {
       "id": "lin",
@@ -139,7 +202,28 @@
         "cost": 0.25
       },
       "backstory": "Deep-space network engineer who once talked a probe through a safe-mode recovery with a 20-minute round-trip delay.",
-      "portrait": "crew-lin"
+      "portrait": "crew-lin",
+      "dialogue": {
+        "accept": [
+          "Agreed. Let's keep everyone talking.",
+          "Good trade. I can work with that.",
+          "Done. I will tell the team."
+        ],
+        "refuse": [
+          "No: without that link we lose contact with Earth.",
+          "I hear you, but that puts the whole crew at risk.",
+          "Not this one. Bring me something better."
+        ],
+        "counter": [
+          "Let us find the middle: here is my version.",
+          "I can offer a lighter option instead.",
+          "How about this instead? Everyone gives a little."
+        ],
+        "request": [
+          "We are over the limit. Can each of us find some savings?",
+          "The downlink is saturated. I need a faster antenna."
+        ]
+      }
     },
     {
       "id": "sana",
@@ -174,7 +258,27 @@
         "cost": 0.2
       },
       "backstory": "Energy-systems PhD with more simulation hours than field hours. A bargain for planning, weaker at the workbench.",
-      "portrait": "crew-sana"
+      "portrait": "crew-sana",
+      "dialogue": {
+        "accept": [
+          "The model says that is fine. Accepted.",
+          "Okay, the forecast still closes.",
+          "Agreed: margins stay positive."
+        ],
+        "refuse": [
+          "My forecast says we run flat. I cannot accept that.",
+          "No: the numbers do not close afterwards."
+        ],
+        "counter": [
+          "A smaller change keeps the forecast green.",
+          "Try half of that: I ran it, it works.",
+          "I can offer a lighter swap instead."
+        ],
+        "request": [
+          "I am forecasting a shortfall: can we find more power?",
+          "Supplies look tight on my model. A bit more buffer, please."
+        ]
+      }
     },
     {
       "id": "kofi",
@@ -209,7 +313,28 @@
         "cost": 0.5
       },
       "backstory": "Launch-campaign manager who has never missed a window or a budget, and has the spreadsheets to prove it.",
-      "portrait": "crew-kofi"
+      "portrait": "crew-kofi",
+      "dialogue": {
+        "accept": [
+          "Cheaper and lighter? Signed.",
+          "Approved. That is good for the books.",
+          "Done. The budget thanks you."
+        ],
+        "refuse": [
+          "No. That puts us over budget, and I will not sign it.",
+          "Rejected: the numbers do not add up.",
+          "Too expensive. Try again."
+        ],
+        "counter": [
+          "I can approve a cheaper version.",
+          "Halfway, and the budget still closes.",
+          "Here is what I would sign instead."
+        ],
+        "request": [
+          "We are over the limit. Somebody has to cut.",
+          "This rocket is full. What can we drop?"
+        ]
+      }
     },
     {
       "id": "omar",
@@ -244,7 +369,20 @@
         "cost": 0.3
       },
       "backstory": "Ham-radio enthusiast and ex-airline navigator. Solid and affordable, not a star.",
-      "portrait": "crew-omar"
+      "portrait": "crew-omar",
+      "dialogue": {
+        "accept": ["Sure. I can make the link work.", "Fine by me.", "Okay, I will rig it."],
+        "refuse": ["That leaves us deaf to Earth. No.", "Cannot do that one, sorry."],
+        "counter": [
+          "Smaller change, same idea?",
+          "I can give you some of it.",
+          "How about a lighter dish instead?"
+        ],
+        "request": [
+          "The link is maxed out. Any room for a better antenna?",
+          "We are heavy. My gear is light, check the others first."
+        ]
+      }
     },
     {
       "id": "zara",
@@ -279,7 +417,24 @@
         "cost": 0.3
       },
       "backstory": "Former flight director at a commercial launch provider. Used to running the room.",
-      "portrait": "crew-zara"
+      "portrait": "crew-zara",
+      "dialogue": {
+        "accept": ["Good. Decision made.", "Agreed. Moving on.", "Done. Next item."],
+        "refuse": [
+          "No. That is the wrong call for this mission.",
+          "I am not approving that.",
+          "Bring me a better offer."
+        ],
+        "counter": [
+          "Here is how we do it instead.",
+          "Counter-offer: take it or leave it.",
+          "Half now, and we revisit later."
+        ],
+        "request": [
+          "We are over the limit. I want proposals from everyone.",
+          "The budget is tight. Who is cutting first?"
+        ]
+      }
     },
     {
       "id": "player-science",

@@ -15,5 +15,7 @@ export default defineConfig({
     // Engine + content tests only (pure TypeScript, no DOM).
     include: ['src/**/*.test.ts'],
     environment: 'node',
+    // Some engine tests simulate hundreds of seeded missions.
+    testTimeout: 30_000,
   },
 })

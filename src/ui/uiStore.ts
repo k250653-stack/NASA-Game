@@ -12,6 +12,8 @@ export interface ToastItem {
   kind: ToastKind
   title: string
   message?: string
+  /** Optional button, e.g. "View". */
+  action?: { label: string; onClick: () => void }
 }
 
 interface UiState {

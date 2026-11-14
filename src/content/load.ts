@@ -16,6 +16,8 @@ import {
   RocketSchema,
   RoleInfoSchema,
   type RoleInfo,
+  BaseSlotsSchema,
+  type BaseSlots,
   ScenarioSchema,
   type CrewMember,
   type Destination,
@@ -34,6 +36,7 @@ import eventsJson from './events.json'
 import lessonsJson from './lessons.json'
 import constantsJson from './constants.json'
 import rolesJson from './roles.json'
+import baseSlotsJson from './baseSlots.json'
 
 export interface GameContent {
   constants: Constants
@@ -45,6 +48,7 @@ export interface GameContent {
   events: GameEvent[]
   lessons: Lesson[]
   roles: RoleInfo[]
+  baseSlots: BaseSlots[]
 }
 
 export class ContentValidationError extends Error {
@@ -147,6 +151,18 @@ function checkReferences(content: GameContent): void {
     }
   })
   const partIds = new Set(content.parts.map((p) => p.id))
+  // A part's ownerRole must match the seat that owns its category in roles.json.
+  content.parts.forEach((p) => {
+    const owner = content.roles.find(
+      (r) => r.id !== 'director' && r.owns.categories.includes(p.category),
+    )
+    if (owner && owner.id !== p.ownerRole) {
+      problems.push([
+        'parts.json',
+        `part "${p.id}" -> ownerRole "${p.ownerRole}" but roles.json gives "${p.category}" to "${owner.id}"`,
+      ])
+    }
+  })
   const crewIds = new Set(content.crew.map((c) => c.id))
   const categories: readonly string[] = PART_CATEGORIES
   content.events.forEach((e) => {
@@ -208,6 +224,7 @@ export function validateContent(raw: {
   events: unknown
   lessons: unknown
   roles: unknown
+  baseSlots: unknown
 }): GameContent {
   const content: GameContent = {
     constants: parseConstants(raw.constants),
@@ -219,6 +236,7 @@ export function validateContent(raw: {
     events: parseContentFile('events.json', GameEventSchema, raw.events),
     lessons: parseContentFile('lessons.json', LessonSchema, raw.lessons),
     roles: parseContentFile('roles.json', RoleInfoSchema, raw.roles),
+    baseSlots: parseContentFile('baseSlots.json', BaseSlotsSchema, raw.baseSlots),
   }
   ;(
     [
@@ -245,6 +263,7 @@ export const RAW_CONTENT = {
   events: eventsJson,
   lessons: lessonsJson,
   roles: rolesJson,
+  baseSlots: baseSlotsJson,
 } as const
 
 let cached: GameContent | null = null

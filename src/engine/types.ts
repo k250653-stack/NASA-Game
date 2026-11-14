@@ -111,7 +111,15 @@ export interface Margins {
 /** Content the engine reads. Same shape as the validated game content. */
 export type EngineContent = Pick<
   GameContent,
-  'constants' | 'destinations' | 'scenarios' | 'crew' | 'parts' | 'rockets' | 'events'
+  | 'constants'
+  | 'destinations'
+  | 'scenarios'
+  | 'crew'
+  | 'parts'
+  | 'rockets'
+  | 'events'
+  | 'roles'
+  | 'baseSlots'
 >
 
 /** Design + content: everything the mission functions need besides the state. */

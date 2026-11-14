@@ -5,10 +5,16 @@ import { PHASE_LABEL, STEPPER_PHASES } from './labels'
 interface ProgressStepsProps {
   current: Phase
   steps?: readonly Phase[]
+  /** Only the current step shows its label (narrow top bars). */
+  compact?: boolean
 }
 
 /** Game-loop stepper: done steps dim accent, current step bright accent, future steps grey. */
-export function ProgressSteps({ current, steps = STEPPER_PHASES }: ProgressStepsProps) {
+export function ProgressSteps({
+  current,
+  steps = STEPPER_PHASES,
+  compact = false,
+}: ProgressStepsProps) {
   const currentIndex = steps.indexOf(current)
   return (
     <ol className="flex items-center gap-1.5" aria-label="Mission progress">
@@ -38,7 +44,7 @@ export function ProgressSteps({ current, steps = STEPPER_PHASES }: ProgressSteps
                 {i + 1}
               </span>
               <span
-                className={`text-xs font-medium ${
+                className={`text-xs font-medium ${compact && state !== 'current' ? 'sr-only 2xl:not-sr-only' : ''} ${
                   state === 'current'
                     ? 'text-primary'
                     : state === 'done'

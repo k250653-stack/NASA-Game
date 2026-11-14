@@ -8,6 +8,8 @@ import { CardsSection } from './CardsSection'
 import { OverlaysSection } from './OverlaysSection'
 import { NavigationSection } from './NavigationSection'
 import { SidebarDemo } from './SidebarDemo'
+import { EngineDebug } from '../planning/EngineDebug'
+import { SimulatePanel } from '../planning/SimulatePanel'
 
 /** Dev-only screen: every UI kit component in all its variants and states. */
 export default function Styleguide() {
@@ -32,6 +34,8 @@ export default function Styleguide() {
       <NavigationSection />
       <OverlaysSection />
       <CardsSection />
+      <EngineDebug />
+      <SimulatePanel />
     </ScreenLayout>
   )
 }

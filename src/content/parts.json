@@ -254,7 +254,7 @@
       "massKg": 130,
       "powerW": 0,
       "costM": 15,
-      "ownerRole": "science",
+      "ownerRole": "power_life",
       "stats": {
         "suitCount": 1
       },
@@ -268,7 +268,7 @@
       "massKg": 240,
       "powerW": 0,
       "costM": 28,
-      "ownerRole": "science",
+      "ownerRole": "power_life",
       "stats": {
         "suitCount": 2
       },
@@ -282,7 +282,7 @@
       "massKg": 60,
       "powerW": 0,
       "costM": 6,
-      "ownerRole": "launch_budget",
+      "ownerRole": "power_life",
       "stats": {
         "spareKits": 1
       },
@@ -296,7 +296,7 @@
       "massKg": 150,
       "powerW": 0,
       "costM": 15,
-      "ownerRole": "launch_budget",
+      "ownerRole": "power_life",
       "stats": {
         "spareKits": 3
       },
@@ -310,7 +310,7 @@
       "massKg": 320,
       "powerW": -400,
       "costM": 70,
-      "ownerRole": "comms_nav",
+      "ownerRole": "science",
       "location": "surface",
       "stats": {
         "sciencePointsPerDay": 2,
@@ -326,7 +326,7 @@
       "massKg": 3000,
       "powerW": -1000,
       "costM": 250,
-      "ownerRole": "comms_nav",
+      "ownerRole": "science",
       "location": "surface",
       "stats": {
         "sciencePointsPerDay": 5,

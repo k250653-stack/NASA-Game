@@ -33,6 +33,8 @@ export interface GameState {
   /** Player callsign; empty means "You". */
   callsign: string
   seed: number
+  /** Concepts the player has met (see store/concepts.ts). */
+  conceptsSeen: string[]
 }
 
 export interface GameSlice {
@@ -59,6 +61,7 @@ export const initialGameState: GameState = {
   difficulty: 'engineer',
   callsign: '',
   seed: DEMO_SEED,
+  conceptsSeen: [],
 }
 
 /** Position in the game flow, or -1 for screens outside it (styleguide). */

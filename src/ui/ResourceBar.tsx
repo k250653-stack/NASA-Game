@@ -20,6 +20,8 @@ interface ResourceBarProps {
    */
   mode?: 'depleting' | 'filling'
   decimals?: number
+  /** Overrides the thresholds with the engine's verdict. */
+  status?: 'ok' | 'warn' | 'fail'
 }
 
 /** How long the "+/-" delta stays visible after a change, in ms. */
@@ -47,9 +49,12 @@ export function ResourceBar({
   dangerAt,
   mode = 'depleting',
   decimals = 0,
+  status: statusOverride,
 }: ResourceBarProps) {
   const id = useId()
-  const status = statusOf(value, warnAt, dangerAt, mode === 'filling')
+  const status: Tone = statusOverride
+    ? ({ ok: 'accent', warn: 'alert', fail: 'danger' } as const)[statusOverride]
+    : statusOf(value, warnAt, dangerAt, mode === 'filling')
   const pct = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0
   const fmt = (n: number) =>
     n.toLocaleString(undefined, {

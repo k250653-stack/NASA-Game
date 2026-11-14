@@ -7,10 +7,12 @@ export default defineConfig({
   testDir: '.',
   outputDir: './test-results',
   fullyParallel: true,
+  // The dev server is shared; more workers make every page slower than it really is.
+  workers: 2,
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: [['list']],
-  timeout: 60_000,
+  timeout: 120_000,
   use: {
     baseURL: `http://localhost:${PORT}`,
     headless: true,

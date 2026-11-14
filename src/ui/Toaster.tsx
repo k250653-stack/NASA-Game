@@ -20,7 +20,10 @@ const KIND: Record<ToastKind, { icon: string; text: string; border: string }> = 
 export function Toaster() {
   const toasts = useUi((s) => s.toasts)
   return (
-    <div className="pointer-events-none fixed top-[calc(var(--spacing-topbar)+1rem)] right-6 z-[60] flex w-96 flex-col gap-2">
+    <div
+      data-overlay
+      className="pointer-events-none fixed top-[calc(var(--spacing-topbar)+1rem)] right-6 z-[60] flex w-96 flex-col gap-2"
+    >
       <AnimatePresence initial={false}>
         {toasts.map((t) => (
           <ToastView key={t.id} toast={t} />
@@ -53,6 +56,18 @@ function ToastView({ toast }: { toast: ToastItem }) {
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-primary">{toast.title}</p>
         {toast.message && <p className="mt-0.5 text-sm text-muted">{toast.message}</p>}
+        {toast.action && (
+          <button
+            type="button"
+            onClick={() => {
+              toast.action?.onClick()
+              dismiss(toast.id)
+            }}
+            className="mt-2 rounded-sm text-sm font-semibold text-accent hover:text-accent-strong"
+          >
+            {toast.action.label} →
+          </button>
+        )}
       </div>
       <button
         type="button"

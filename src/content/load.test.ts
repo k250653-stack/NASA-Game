@@ -12,6 +12,7 @@ function cloneRaw(): {
   events: unknown
   lessons: unknown
   roles: unknown
+  baseSlots: unknown
 } {
   return structuredClone(RAW_CONTENT)
 }

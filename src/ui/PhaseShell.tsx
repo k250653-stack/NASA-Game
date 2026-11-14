@@ -12,6 +12,8 @@ interface PhaseShellProps {
   sidebar?: ReactNode
   /** Small content at the top right of the heading (e.g. the seed). */
   headerAside?: ReactNode
+  /** Extra content in the top bar. */
+  topBarExtra?: ReactNode
   nextLabel?: string
   backLabel?: string
   /** Disables Continue; nextHint explains why. */
@@ -26,6 +28,7 @@ export function PhaseShell({
   children,
   sidebar,
   headerAside,
+  topBarExtra,
   nextLabel = 'Next',
   backLabel = 'Back',
   nextDisabled = false,
@@ -69,7 +72,7 @@ export function PhaseShell({
   )
 
   return (
-    <ScreenLayout sidebar={sidebar} footer={footer}>
+    <ScreenLayout sidebar={sidebar} footer={footer} topBarExtra={topBarExtra}>
       <div className="flex items-start justify-between gap-6">
         <div>
           <p className="font-mono text-xs tracking-[0.3em] text-accent uppercase">
