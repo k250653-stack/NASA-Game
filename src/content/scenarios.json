@@ -1,0 +1,16 @@
+{
+  "_note": "Budget, duration and science target are approximate game-balance placeholders, not real mission figures.",
+  "items": [
+    {
+      "id": "shackleton-ice-hunt",
+      "destinationId": "moon",
+      "name": "Shackleton Ice Hunt",
+      "objective": "Land near Shackleton crater, survive one full lunar day-night cycle and confirm water ice in a permanently shadowed region.",
+      "durationDays": 28,
+      "crewSize": 4,
+      "budgetM": 1200,
+      "scienceTarget": 100,
+      "difficulty": "cadet"
+    }
+  ]
+}

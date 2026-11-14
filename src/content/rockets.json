@@ -1,0 +1,29 @@
+{
+  "_note": "Generic launchers, deliberately not real brand names yet. Capacity, cost and reliability are approximate game-balance placeholders. A missing destination key means the rocket cannot reach it.",
+  "items": [
+    {
+      "id": "light-lunar-launcher",
+      "name": "Light Lunar Launcher",
+      "capacityKgByDestination": { "moon": 3000 },
+      "costM": 60,
+      "reliability": 0.9,
+      "source": "https://www.nasa.gov/humans-in-space/commercial-space/commercial-lunar-payload-services/"
+    },
+    {
+      "id": "medium-lunar-launcher",
+      "name": "Medium Lunar Launcher",
+      "capacityKgByDestination": { "moon": 8000, "mars": 3000 },
+      "costM": 150,
+      "reliability": 0.95,
+      "source": "https://www.nasa.gov/humans-in-space/commercial-space/commercial-lunar-payload-services/"
+    },
+    {
+      "id": "heavy-lunar-launcher",
+      "name": "Heavy Lunar Launcher",
+      "capacityKgByDestination": { "moon": 20000, "mars": 8000 },
+      "costM": 400,
+      "reliability": 0.97,
+      "source": "https://www.nasa.gov/reference/space-launch-system/"
+    }
+  ]
+}

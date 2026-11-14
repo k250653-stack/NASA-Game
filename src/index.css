@@ -1,0 +1,42 @@
+@import 'tailwindcss';
+
+/*
+ * Mission Control theme.
+ * Near-black space background, one accent colour (amber, like old console readouts).
+ * This is the ONLY CSS file in the project (CLAUDE.md rule 9). Everything else is Tailwind.
+ */
+@theme {
+  --color-space-950: #05070d;
+  --color-space-900: #0b0f1a;
+  --color-space-800: #131a2b;
+  --color-space-700: #1e2740;
+  --color-space-500: #3b4766;
+
+  --color-accent: #f5a524;
+  --color-accent-soft: #fbd38d;
+  --color-accent-deep: #b86e00;
+
+  --color-danger: #ef4444;
+  --color-ok: #22c55e;
+
+  --font-display: 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Cascadia Mono', 'JetBrains Mono', ui-monospace, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-space-950);
+  color: var(--color-slate-200);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(245, 165, 36, 0.08), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(59, 71, 102, 0.35), transparent 60%);
+  background-attachment: fixed;
+}

@@ -1,0 +1,81 @@
+{
+  "_note": "Sample crew. Salaries (millions USD for the whole mission) and skill levels are approximate game-balance placeholders. Portrait ids follow the convention crew-<id> and resolve to public/assets/portraits/<portrait>.webp.",
+  "items": [
+    {
+      "id": "mina-okafor",
+      "name": "Dr. Mina Okafor",
+      "role": "science",
+      "salaryM": 2.1,
+      "traits": ["thinker"],
+      "skills": { "power": 1, "comms": 2, "science": 5, "systems": 2, "navigation": 1 },
+      "strength": {
+        "text": "Spots patterns in instrument data that others miss.",
+        "effect": { "key": "scienceYield", "value": 0.1 }
+      },
+      "weakness": {
+        "text": "Over-plans and delays decisions under time pressure.",
+        "effect": { "key": "decisionDelayDays", "value": 1 }
+      },
+      "priorities": { "science": 0.6, "safety": 0.25, "cost": 0.15 },
+      "backstory": "Planetary geologist who spent three winters at an Antarctic ice-core station. Wants to be the first person to hold lunar ice.",
+      "portrait": "crew-mina-okafor"
+    },
+    {
+      "id": "jonas-reyes",
+      "name": "Jonas Reyes",
+      "role": "power_life",
+      "salaryM": 1.8,
+      "traits": ["practical"],
+      "skills": { "power": 5, "comms": 1, "science": 1, "systems": 4, "navigation": 1 },
+      "strength": {
+        "text": "Fixes hardware fast with whatever is on hand.",
+        "effect": { "key": "repairSpeed", "value": 0.2 }
+      },
+      "weakness": {
+        "text": "Cuts science time to protect power and life-support margins.",
+        "effect": { "key": "scienceYield", "value": -0.05 }
+      },
+      "priorities": { "science": 0.15, "safety": 0.6, "cost": 0.25 },
+      "backstory": "Former submarine electrician. Believes every system should survive two failures before anyone notices.",
+      "portrait": "crew-jonas-reyes"
+    },
+    {
+      "id": "priya-natarajan",
+      "name": "Priya Natarajan",
+      "role": "comms_nav",
+      "salaryM": 2.4,
+      "traits": ["leader", "thinker"],
+      "skills": { "power": 1, "comms": 5, "science": 2, "systems": 2, "navigation": 4 },
+      "strength": {
+        "text": "Keeps the team calm and talking during long signal delays.",
+        "effect": { "key": "teamMorale", "value": 0.1 }
+      },
+      "weakness": {
+        "text": "Prefers the best hardware, even when it costs more.",
+        "effect": { "key": "costOverrun", "value": 0.05 }
+      },
+      "priorities": { "science": 0.35, "safety": 0.4, "cost": 0.25 },
+      "backstory": "Deep-space network engineer who once talked a probe through a safe-mode recovery with a 20-minute round-trip delay.",
+      "portrait": "crew-priya-natarajan"
+    },
+    {
+      "id": "theo-lindqvist",
+      "name": "Theo Lindqvist",
+      "role": "launch_budget",
+      "salaryM": 1.5,
+      "traits": ["practical", "leader"],
+      "skills": { "power": 2, "comms": 1, "science": 0, "systems": 3, "navigation": 3 },
+      "strength": {
+        "text": "Finds cheaper launch and procurement options.",
+        "effect": { "key": "costSavings", "value": 0.1 }
+      },
+      "weakness": {
+        "text": "Trims safety margins to stay under budget.",
+        "effect": { "key": "safetyMargin", "value": -0.05 }
+      },
+      "priorities": { "science": 0.2, "safety": 0.3, "cost": 0.5 },
+      "backstory": "Launch-campaign manager who has never missed a window or a budget, and has the spreadsheets to prove it.",
+      "portrait": "crew-theo-lindqvist"
+    }
+  ]
+}

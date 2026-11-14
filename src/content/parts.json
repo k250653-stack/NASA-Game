@@ -1,0 +1,101 @@
+{
+  "_note": "Sample parts. Mass, power and cost are approximate game-balance placeholders, not vendor figures. powerW: negative consumes, positive produces. icon is a Tabler icon component name.",
+  "items": [
+    {
+      "id": "ice-drill-spectrometer",
+      "name": "Ice Drill + Spectrometer",
+      "category": "instrument",
+      "massKg": 45,
+      "powerW": -120,
+      "costM": 38,
+      "ownerRole": "science",
+      "stats": { "sciencePerDay": 4, "evaHoursPerUse": 2 },
+      "description": "One-metre drill with an onboard spectrometer to confirm water ice in shadowed regolith.",
+      "icon": "IconMicroscope"
+    },
+    {
+      "id": "solar-array-5kw",
+      "name": "Deployable Solar Array (5 kW)",
+      "category": "power",
+      "massKg": 120,
+      "powerW": 5000,
+      "costM": 22,
+      "ownerRole": "power_life",
+      "stats": { "degradationPerDustEvent": 0.1, "ratedKw": 5 },
+      "description": "Fold-out array rated at Earth-orbit sunlight. Output scales with the destination's sunlight factor and drops when dusty.",
+      "icon": "IconSolarPanel"
+    },
+    {
+      "id": "battery-20kwh",
+      "name": "Lithium Battery Pack (20 kWh)",
+      "category": "battery",
+      "massKg": 150,
+      "powerW": 0,
+      "costM": 12,
+      "ownerRole": "power_life",
+      "stats": { "capacityWh": 20000, "maxDepthOfDischarge": 0.8 },
+      "description": "Stores daytime power for the long, cold lunar night.",
+      "icon": "IconBattery"
+    },
+    {
+      "id": "high-gain-antenna",
+      "name": "High-Gain Antenna",
+      "category": "comms",
+      "massKg": 35,
+      "powerW": -80,
+      "costM": 18,
+      "ownerRole": "comms_nav",
+      "stats": { "dataRateMbps": 10, "pointingToleranceDeg": 0.5 },
+      "description": "Narrow-beam dish for high data rates. Must be pointed precisely at Earth.",
+      "icon": "IconAntenna"
+    },
+    {
+      "id": "eclss-core",
+      "name": "Life Support Core (ECLSS)",
+      "category": "life_support",
+      "massKg": 400,
+      "powerW": -1500,
+      "costM": 95,
+      "ownerRole": "power_life",
+      "stats": { "crewSupported": 4, "consumablesDays": 30, "waterRecoveryRate": 0.9 },
+      "description": "Air revitalisation, water recovery and temperature control for a crew of four.",
+      "icon": "IconLungs"
+    },
+    {
+      "id": "eva-suit",
+      "name": "Surface EVA Suit",
+      "category": "suit",
+      "massKg": 130,
+      "powerW": 0,
+      "costM": 15,
+      "ownerRole": "science",
+      "stats": { "evaHoursPerCharge": 8, "dustResistance": 0.7 },
+      "description": "Pressurised suit for surface work. One suit supports one crew member outside at a time.",
+      "icon": "IconShirt"
+    },
+    {
+      "id": "spares-kit",
+      "name": "Critical Spares Kit",
+      "category": "spares",
+      "massKg": 60,
+      "powerW": 0,
+      "costM": 6,
+      "ownerRole": "launch_budget",
+      "stats": { "repairs": 3 },
+      "description": "Fuses, pumps, seals and connectors for the three most likely failures.",
+      "icon": "IconTool"
+    },
+    {
+      "id": "rover-mini",
+      "name": "Unpressurised Mini Rover",
+      "category": "rover",
+      "massKg": 320,
+      "powerW": -400,
+      "costM": 70,
+      "ownerRole": "comms_nav",
+      "stats": { "rangeKm": 15, "speedKmh": 6, "scienceSiteBonus": 2 },
+      "description": "Two-seat rover that extends the reachable science sites beyond walking distance.",
+      "icon": "IconCar"
+    }
+  ]
+}

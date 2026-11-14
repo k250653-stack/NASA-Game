@@ -1,0 +1,37 @@
+{
+  "_note": "Sample NOVA lesson. Every lesson must have a source URL (CLAUDE.md rule 5) and Lane 3 verifies the physics against that source before the demo. vizParams numbers are approximate.",
+  "items": [
+    {
+      "id": "moon-transfer-orbit",
+      "title": "Why the Moon takes three days",
+      "role": "comms_nav",
+      "trigger": "launch_check_open",
+      "predictQuestion": {
+        "question": "You are in low Earth orbit and fire the engine to speed up. What happens to the far side of your orbit?",
+        "options": [
+          "It gets higher, stretching the orbit into an ellipse",
+          "It gets lower, pulling you back toward Earth",
+          "It stays the same, you just go round faster",
+          "The orbit becomes a perfect circle"
+        ],
+        "correctIndex": 0
+      },
+      "steps": [
+        "Speeding up at one point of an orbit raises the opposite point, so a burn in low Earth orbit stretches the orbit into a long ellipse.",
+        "If the far end of that ellipse reaches the Moon's distance, the spacecraft coasts there with the engine off.",
+        "Coasting along the ellipse to the Moon's distance takes roughly three days; a faster trajectory needs more fuel and a bigger rocket.",
+        "The same idea with a much bigger ellipse around the Sun is why Mars takes months instead of days."
+      ],
+      "viz": "orbit",
+      "vizParams": {
+        "earthRadiusKm": 6371,
+        "parkingOrbitAltKm": 400,
+        "targetDistanceKm": 384400,
+        "coastDays": 3
+      },
+      "formulaLatex": "v = \\sqrt{\\mu \\left( \\frac{2}{r} - \\frac{1}{a} \\right)}",
+      "applyTemplate": "Your {rocketName} must add about {deltaVKms} km/s in low Earth orbit. After that the coast to {destinationName} takes about {transitDays} days with the engine off.",
+      "source": "https://science.nasa.gov/learn/basics-of-space-flight/chapter4-1/"
+    }
+  ]
+}

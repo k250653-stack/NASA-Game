@@ -1,0 +1,27 @@
+{
+  "_note": "All numbers are approximate placeholders from TECH_STACK.md section 5 and must be verified against the NASA source URLs before the demo. transitDays and signalDelaySec are one-way; Mars values vary with the launch window.",
+  "items": [
+    {
+      "id": "moon",
+      "name": "Moon — South Pole",
+      "transitDays": 3,
+      "signalDelaySec": 1.3,
+      "sunlightFactor": 1.0,
+      "gravityG": 0.17,
+      "resupplyPossible": true,
+      "hazards": ["dust", "cold-night", "solar-flare"],
+      "source": "https://science.nasa.gov/moon/facts/"
+    },
+    {
+      "id": "mars",
+      "name": "Mars — Jezero Region",
+      "transitDays": 210,
+      "signalDelaySec": 600,
+      "sunlightFactor": 0.43,
+      "gravityG": 0.38,
+      "resupplyPossible": false,
+      "hazards": ["dust-storm", "radiation", "solar-flare"],
+      "source": "https://science.nasa.gov/mars/facts/"
+    }
+  ]
+}

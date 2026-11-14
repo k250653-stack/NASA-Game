@@ -1,0 +1,61 @@
+{
+  "_note": "Sample events. Chances, resource costs and effect magnitudes are approximate game-balance placeholders. Effects are keyed by engine stat or resource name and applied as deltas.",
+  "items": [
+    {
+      "id": "dust-on-solar-array",
+      "title": "Dust on the Solar Array",
+      "description": "After yesterday's EVA, fine regolith is clinging to the panels. Array output is down and the lunar night is coming.",
+      "type": "environmental",
+      "role": "power_life",
+      "destinations": ["moon"],
+      "trigger": { "minDay": 3, "maxDay": 25, "chance": 0.3, "condition": "afterEva" },
+      "options": [
+        {
+          "label": "Send two crew out to brush the panels",
+          "crewSkill": "systems",
+          "uses": { "evaHours": 2, "powerWh": 500 },
+          "successChance": 0.85,
+          "onSuccess": { "powerFactor": 0.1 },
+          "onFail": { "powerFactor": -0.05, "morale": -0.05 },
+          "explanation": "Lunar dust is electrostatically charged and sticks to surfaces; it is abrasive and hard to remove, so brushing works but costs EVA time and suit wear."
+        },
+        {
+          "label": "Leave it and ration power through the night",
+          "uses": {},
+          "successChance": 1,
+          "onSuccess": { "powerFactor": -0.1, "morale": -0.05 },
+          "onFail": {},
+          "explanation": "No EVA risk, but the array stays dirty, so battery charge going into the 14-day night is lower than planned."
+        }
+      ]
+    },
+    {
+      "id": "antenna-pointing-drift",
+      "title": "Antenna Pointing Drift",
+      "description": "Thermal flexing has pushed the high-gain antenna off its Earth lock. Data rate is dropping and the next science downlink is due.",
+      "type": "technical",
+      "role": "comms_nav",
+      "destinations": ["moon", "mars"],
+      "trigger": { "minDay": 1, "maxDay": 28, "chance": 0.2 },
+      "options": [
+        {
+          "label": "Recalibrate pointing using a star tracker fix",
+          "crewSkill": "comms",
+          "uses": { "crewHours": 4 },
+          "successChance": 0.9,
+          "onSuccess": { "dataRateFactor": 0.0 },
+          "onFail": { "dataRateFactor": -0.3, "sciencePoints": -2 },
+          "explanation": "A narrow high-gain beam must point within a fraction of a degree of Earth; a star tracker gives an absolute attitude reference to re-aim it."
+        },
+        {
+          "label": "Fall back to the low-gain antenna",
+          "uses": {},
+          "successChance": 1,
+          "onSuccess": { "dataRateFactor": -0.5 },
+          "onFail": {},
+          "explanation": "A wide low-gain beam does not need precise pointing but carries far less data, so science downlink slows down."
+        }
+      ]
+    }
+  ]
+}
