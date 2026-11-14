@@ -45,6 +45,23 @@ test('Continue is enabled once a mission is saved and resumes it', async ({ page
   await expect(page.getByTestId('destination-card-mars')).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('Play with a save asks first; Cancel keeps it, Start new wipes it', async ({ page }) => {
+  await page.getByTestId('start-mission-button').click()
+  await page.getByTestId('destination-card-mars').click()
+  await page.getByTestId('back-button').click()
+
+  await page.getByTestId('start-mission-button').click()
+  const dialog = page.getByRole('dialog', { name: 'Start a new mission?' })
+  await expect(dialog).toContainText('Your current progress will be lost.')
+  await dialog.getByRole('button', { name: 'Cancel' }).click()
+  await expect(dialog).toHaveCount(0)
+  await expect(page.getByTestId('menu-continue')).toBeEnabled()
+
+  await page.getByTestId('start-mission-button').click()
+  await page.getByTestId('confirm-new-game').click()
+  await expect(page.getByTestId('destination-card-mars')).toHaveAttribute('aria-pressed', 'false')
+})
+
 test('Sandbox mode pre-picks the Mission Director seat', async ({ page }) => {
   await page.getByTestId('menu-sandbox').click()
   await page.getByTestId('destination-card-moon').click()

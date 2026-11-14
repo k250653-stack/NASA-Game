@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { resetAll, useStore } from '@/store'
+import { Button } from '@/ui/Button'
+import { Modal } from '@/ui/Modal'
 import { resumePhase, useSettings } from '@/ui/settingsStore'
 import { useUi } from '@/ui/uiStore'
 import { AboutModal } from './menu/AboutModal'
@@ -17,7 +19,7 @@ export default function Title() {
   const hasSave = useStore((s) => s.game.destinationId !== null)
   const lastPhase = useSettings((s) => s.lastPhase)
   const setSandboxStart = useUi((s) => s.setSandboxStart)
-  const [modal, setModal] = useState<'settings' | 'about' | null>(null)
+  const [modal, setModal] = useState<'settings' | 'about' | 'new-game' | null>(null)
   const canContinue = hasSave && lastPhase !== null
 
   const newGame = (sandbox: boolean) => {
@@ -27,7 +29,12 @@ export default function Title() {
   }
 
   const items: MenuItem[] = [
-    { id: 'start-mission-button', label: 'Play game', onSelect: () => newGame(false) },
+    {
+      id: 'start-mission-button',
+      label: 'Play game',
+      // A save would be wiped, so ask first.
+      onSelect: () => (hasSave ? setModal('new-game') : newGame(false)),
+    },
     {
       id: 'menu-continue',
       label: 'Continue game',
@@ -74,6 +81,24 @@ export default function Title() {
       )}
       <SettingsModal open={modal === 'settings'} onClose={() => setModal(null)} />
       <AboutModal open={modal === 'about'} onClose={() => setModal(null)} />
+      <Modal
+        open={modal === 'new-game'}
+        onClose={() => setModal(null)}
+        title="Start a new mission?"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setModal(null)}>
+              Cancel
+            </Button>
+            <Button onClick={() => newGame(false)} data-testid="confirm-new-game">
+              Start new
+            </Button>
+          </>
+        }
+      >
+        <p className="text-muted">Your current progress will be lost.</p>
+      </Modal>
     </main>
   )
 }
