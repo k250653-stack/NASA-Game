@@ -43,34 +43,3 @@ export function canStand(p: Point, walkable: readonly Polygon[], blocked: readon
 export function translate(poly: Polygon, [dx, dy]: Point): Polygon {
   return poly.map(([x, y]) => [x + dx, y + dy] as const)
 }
-
-/**
- * Walkable polygons for a path of straight segments `width` wide: one quad per segment plus a
- * square at each inner corner so elbows have no gaps.
- */
-export function stripPolygons(path: readonly Point[], width: number): Polygon[] {
-  const h = width / 2
-  const out: Polygon[] = []
-  for (let i = 1; i < path.length; i++) {
-    const [ax, ay] = path[i - 1]!
-    const [bx, by] = path[i]!
-    const len = Math.hypot(bx - ax, by - ay) || 1
-    const nx = (-(by - ay) / len) * h
-    const ny = ((bx - ax) / len) * h
-    out.push([
-      [ax + nx, ay + ny],
-      [bx + nx, by + ny],
-      [bx - nx, by - ny],
-      [ax - nx, ay - ny],
-    ])
-  }
-  for (const [x, y] of path.slice(1, -1)) {
-    out.push([
-      [x - h, y - h],
-      [x + h, y - h],
-      [x + h, y + h],
-      [x - h, y + h],
-    ])
-  }
-  return out
-}

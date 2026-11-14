@@ -1,7 +1,7 @@
 /**
- * The whole HQ in one Phaser scene: every room image on one world canvas, the corridors between
- * them, the player, collision against the combined walkable area, station glow/clicks, locked
- * rooms (dark + padlock) and their unlock animation, the room-to-room camera, and the F2 overlay.
+ * The whole HQ in one Phaser scene: every room image on one world canvas, the player, collision,
+ * door portals (fade out, camera pan, fade in at the linked door), station glow/clicks, locked
+ * rooms (dark + padlock) and their unlock animation, the room camera, and the F2 overlay.
  * Prompts, popups and menus are React (HQWorld).
  */
 import Phaser from 'phaser'
@@ -9,15 +9,18 @@ import { getAsset } from '@/ui/assets'
 import { playSound } from '@/ui/sound'
 import { animKey, facingFrom, FOOT_Y, FRAME_RATE, FRAME_SIZE, FRAMES_PER_DIR, HEAD_Y, MOTIONS, SHEET_DIRS, SHEET_FILE, sheetDir, type Facing, type Motion } from './character'
 import { canStand, distanceToPolygon, pointInPolygon, type Point, type Polygon } from './geometry'
-import { drawCorridor, drawPadlock, roomLight, tokenColor, type CorridorArt, type RoomLight } from './hqArt'
-import { getHqMap, type Corridor, type HqMap, type PlacedRoom, type PlacedStation } from './hqMap'
+import { drawPadlock, roomLight, tokenColor, type RoomLight } from './hqArt'
+import { gatedRooms, getHqMap, type HqMap, type PlacedDoor, type PlacedRoom, type PlacedStation } from './hqMap'
 import type { Step } from './rooms/room'
 import { addCutOutTexture } from './roomTexture'
 
 const WALK_SPEED = 90
 const RUN_SPEED = 170
-/** Camera smoothing time constant: settles on a new room in ~0.6 s. */
+/** Camera smoothing time constants: following inside a room, and the portal pan (~0.5 s). */
 const CAMERA_TAU_MS = 200
+const PAN_TAU_MS = 110
+const PAN_MS = 500
+const FADE_MS = 180
 /** How much the camera follows the player inside a room (0 = room centre, 1 = player). */
 const ROOM_FOLLOW = 0.35
 /** Visible world size the zoom aims for: the current room fills most of the screen. */
@@ -47,17 +50,21 @@ type Keys = Record<'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd' | 's
 export class HQScene extends Phaser.Scene {
   private readonly cb: () => SceneCallbacks
   private readonly spawn: Point
-  private map!: HqMap
+  private readonly map: HqMap
+  private readonly walkable: Polygon[]
+  private readonly blocked: Polygon[]
   private player!: Phaser.GameObjects.Sprite
   private keys!: Keys
   private facing: Facing = 'S'
   private target: Target | null = null
   private paused = false
+  /** Set while walking through a portal: input off, camera pans to this room. */
+  private transit: PlacedRoom | null = null
+  /** Door the player is standing in (portals trigger on entering, not while standing). */
+  private inDoor: string | null = null
+  private room: PlacedRoom
   private locked = new Map<string, boolean>()
-  private walkable: Polygon[] = []
-  private blocked: Polygon[] = []
   private roomLights = new Map<string, RoomLight>()
-  private corridorArt = new Map<string, CorridorArt>()
   private padlocks = new Map<string, Phaser.GameObjects.Graphics>()
   private glow: Phaser.GameObjects.Graphics | null = null
   private debug: Phaser.GameObjects.Graphics | null = null
@@ -68,7 +75,11 @@ export class HQScene extends Phaser.Scene {
     super('hq')
     this.cb = callbacks
     this.map = getHqMap()
-    this.spawn = spawn ?? this.map.lobby.center
+    this.walkable = this.map.rooms.flatMap((r) => r.floors)
+    this.blocked = this.map.rooms.flatMap((r) => r.blocked)
+    const valid = spawn && canStand(spawn, this.walkable, this.blocked)
+    this.spawn = valid ? spawn : this.map.lobby.center
+    this.room = this.roomAt(this.spawn) ?? this.map.lobby
   }
 
   preload() {
@@ -83,7 +94,6 @@ export class HQScene extends Phaser.Scene {
   }
 
   create() {
-    for (const c of this.map.corridors) this.corridorArt.set(c.id, drawCorridor(this, c, this.map.corridorWidth))
     for (const placed of this.map.rooms) {
       const key = `room-${placed.room.id}`
       if (!this.textures.exists(key)) continue
@@ -91,25 +101,19 @@ export class HQScene extends Phaser.Scene {
       const image = this.add.image(placed.at[0], placed.at[1], `${key}-cut`).setOrigin(0).setDepth(1)
       this.roomLights.set(placed.room.id, roomLight(image))
     }
-    this.blocked = this.map.rooms.flatMap((r) => r.blocked)
     this.applyLocks(false)
 
     this.createAnims()
-    const spawn = canStand(this.spawn, this.walkable, this.blocked) ? this.spawn : this.map.lobby.center
-    this.player = this.add
-      .sprite(spawn[0], spawn[1], 'idle')
-      .setOrigin(0.5, FOOT_Y / FRAME_SIZE)
-      .setScale(this.map.lobby.room.playerScale)
-      .setDepth(5)
+    const [sx, sy] = this.spawn
+    this.player = this.add.sprite(sx, sy, 'idle').setOrigin(0.5, FOOT_Y / FRAME_SIZE).setScale(this.map.lobby.room.playerScale).setDepth(5)
     this.playAnim('idle')
-    this.saved = { at: 0, x: spawn[0], y: spawn[1] }
+    this.saved = { at: 0, x: sx, y: sy }
+    this.inDoor = this.doorAt(this.spawn)?.key ?? null
 
     const kb = this.input.keyboard!
     const K = Phaser.Input.Keyboard.KeyCodes
     this.keys = kb.addKeys({ up: K.UP, down: K.DOWN, left: K.LEFT, right: K.RIGHT, w: K.W, a: K.A, s: K.S, d: K.D, shift: K.SHIFT }) as Keys
-    kb.on('keydown-E', () => {
-      if (this.target?.kind === 'station') this.cb().onInteract(this.target)
-    })
+    kb.on('keydown-E', () => this.onUse())
     kb.addCapture(K.F2)
     kb.on('keydown-F2', () => this.toggleDebug())
     this.input.on('pointerdown', (p: Phaser.Input.Pointer) => this.onPointerDown(p))
@@ -120,8 +124,8 @@ export class HQScene extends Phaser.Scene {
     this.scale.on('resize', this.fit, this)
     this.events.once('shutdown', () => this.scale.off('resize', this.fit, this))
     this.fit()
-    this.cam = { x: spawn[0], y: spawn[1] }
-    this.cameras.main.centerOn(spawn[0], spawn[1])
+    this.cam = { ...this.cameraTarget() }
+    this.cameras.main.centerOn(this.cam.x, this.cam.y)
   }
 
   override update(time: number, deltaMs: number) {
@@ -130,7 +134,7 @@ export class HQScene extends Phaser.Scene {
     const k = this.keys
     const dx = Number(k.right.isDown || k.d.isDown) - Number(k.left.isDown || k.a.isDown)
     const dy = Number(k.down.isDown || k.s.isDown) - Number(k.up.isDown || k.w.isDown)
-    if (!this.paused && (dx || dy)) {
+    if (!this.paused && !this.transit && (dx || dy)) {
       const running = k.shift.isDown
       const step = ((running ? RUN_SPEED : WALK_SPEED) * deltaMs) / 1000 / Math.hypot(dx, dy)
       this.move(dx * step, dy * step)
@@ -139,62 +143,100 @@ export class HQScene extends Phaser.Scene {
     } else {
       this.playAnim('idle')
     }
+    if (!this.transit) {
+      this.room = this.roomAt([this.player.x, this.player.y]) ?? this.room
+      this.checkDoor()
+    }
     this.updateTarget()
     this.updateCamera(deltaMs)
     this.reportPosition(time)
   }
 
-  /** Recomputes the walkable area from the lock state; animates rooms that just unlocked. */
-  private applyLocks(animate: boolean) {
-    const locks = this.cb().locks()
-    let changed = !animate
-    for (const c of this.map.corridors) {
-      const isLocked = !!locks[c.roomId]
-      if (this.locked.get(c.roomId) === isLocked) continue
-      changed = true
-      this.locked.set(c.roomId, isLocked)
-      if (isLocked) this.setLocked(c)
-      else if (animate) this.animateUnlock(c)
-      else this.setUnlocked(c)
+  // ---- doors -------------------------------------------------------------------------------
+
+  private doorAt(p: Point): PlacedDoor | undefined {
+    for (const r of this.map.rooms) for (const d of r.doors) if (d.target && pointInPolygon(p, d.area)) return d
+    return undefined
+  }
+
+  /** Locked if it is a gated lobby door whose room is still locked. */
+  private isDoorLocked(d: PlacedDoor): boolean {
+    return d.roomId === this.map.lobby.room.id && !!this.locked.get(d.door.to)
+  }
+
+  /** Walking into an unlocked door goes through it. */
+  private checkDoor() {
+    const door = this.doorAt([this.player.x, this.player.y])
+    const entered = door && door.key !== this.inDoor
+    this.inDoor = door?.key ?? null
+    if (entered && !this.paused && !this.isDoorLocked(door)) this.portal(door)
+  }
+
+  private onUse() {
+    if (this.transit) return
+    if (this.target?.kind === 'station') {
+      this.cb().onInteract(this.target)
+      return
     }
-    if (!changed) return
-    const open = this.map.corridors.filter((c) => !this.locked.get(c.roomId))
-    const openRooms = this.map.rooms.filter((r) => r === this.map.lobby || open.some((c) => c.roomId === r.room.id))
-    this.walkable = [...openRooms.flatMap((r) => r.floors), ...open.flatMap((c) => c.polys)]
+    const door = this.doorAt([this.player.x, this.player.y])
+    if (door && !this.isDoorLocked(door)) this.portal(door)
   }
 
-  private setLocked(c: Corridor) {
-    this.roomLights.get(c.roomId)?.set(0)
-    const art = this.corridorArt.get(c.id)
-    art?.lights.forEach((l) => l.setFillStyle(art.offColor))
-    const room = this.roomById(c.roomId)
-    if (room && !this.padlocks.has(c.roomId)) this.padlocks.set(c.roomId, drawPadlock(this, [room.center[0], room.center[1] - 40]))
-  }
-
-  private setUnlocked(c: Corridor) {
-    this.roomLights.get(c.roomId)?.set(1)
-    const art = this.corridorArt.get(c.id)
-    art?.lights.forEach((l) => l.setFillStyle(art.color))
-    this.padlocks.get(c.roomId)?.destroy()
-    this.padlocks.delete(c.roomId)
-  }
-
-  /** Lights come on: the room brightens over ~1 s and the corridor lights switch on in order. */
-  private animateUnlock(c: Corridor) {
-    const light = this.roomLights.get(c.roomId)
-    this.tweens.addCounter({ from: 0, to: 1, duration: UNLOCK_MS, onUpdate: (tw) => light?.set(tw.getValue() ?? 1) })
-    const padlock = this.padlocks.get(c.roomId)
-    this.padlocks.delete(c.roomId)
-    if (padlock) this.tweens.add({ targets: padlock, alpha: 0, duration: UNLOCK_MS / 2, onComplete: () => padlock.destroy() })
-    const art = this.corridorArt.get(c.id)
-    art?.lights.forEach((l, i) => {
-      this.time.delayedCall((i / art.lights.length) * UNLOCK_MS, () => {
-        l.setFillStyle(art.color)
-        this.tweens.add({ targets: l, scale: { from: 2.2, to: 1 }, duration: 220 })
+  /** Fade out at the door, pan the camera to the linked room, fade in at its door. */
+  private portal(from: PlacedDoor) {
+    const to = from.target ? this.map.doors.get(from.target) : undefined
+    const dest = to && this.map.rooms.find((r) => r.room.id === to.roomId)
+    if (!to || !dest) return
+    this.transit = dest
+    this.tweens.add({ targets: this.player, alpha: 0, duration: FADE_MS })
+    this.time.delayedCall(PAN_MS, () => {
+      this.player.setPosition(to.arrival[0], to.arrival[1])
+      this.room = dest
+      this.inDoor = null
+      this.tweens.add({
+        targets: this.player,
+        alpha: 1,
+        duration: FADE_MS,
+        onComplete: () => {
+          this.transit = null
+          this.cb().onPlayerMoved(to.arrival)
+        },
       })
     })
+  }
+
+  // ---- locks ------------------------------------------------------------------------------
+
+  /** Syncs locked rooms with React's lock state; animates rooms that just unlocked. */
+  private applyLocks(animate: boolean) {
+    const locks = this.cb().locks()
+    for (const { roomId } of gatedRooms(this.map)) {
+      const isLocked = !!locks[roomId]
+      if (this.locked.get(roomId) === isLocked) continue
+      this.locked.set(roomId, isLocked)
+      if (isLocked) this.setLocked(roomId)
+      else if (animate) this.animateUnlock(roomId)
+      else this.roomLights.get(roomId)?.set(1)
+    }
+  }
+
+  private setLocked(roomId: string) {
+    this.roomLights.get(roomId)?.set(0)
+    const room = this.map.rooms.find((r) => r.room.id === roomId)
+    if (room && !this.padlocks.has(roomId)) this.padlocks.set(roomId, drawPadlock(this, [room.center[0], room.center[1] - 40]))
+  }
+
+  /** Lights come on: the room brightens over ~1 s and its padlock fades away. */
+  private animateUnlock(roomId: string) {
+    const light = this.roomLights.get(roomId)
+    this.tweens.addCounter({ from: 0, to: 1, duration: UNLOCK_MS, onUpdate: (tw) => light?.set(tw.getValue() ?? 1) })
+    const padlock = this.padlocks.get(roomId)
+    this.padlocks.delete(roomId)
+    if (padlock) this.tweens.add({ targets: padlock, alpha: 0, duration: UNLOCK_MS / 2, onComplete: () => padlock.destroy() })
     playSound('unlock')
   }
+
+  // ---- movement, targets, camera ------------------------------------------------------------
 
   private syncPaused() {
     const paused = this.cb().isPaused()
@@ -215,6 +257,10 @@ export class HQScene extends Phaser.Scene {
     if (next) this.player.setPosition(next[0], next[1])
   }
 
+  private roomAt(p: Point): PlacedRoom | undefined {
+    return this.map.rooms.find((r) => r.floors.some((f) => pointInPolygon(p, f)))
+  }
+
   private openStations(): PlacedStation[] {
     return this.map.rooms.filter((r) => !this.locked.get(r.room.id)).flatMap((r) => r.stations)
   }
@@ -223,9 +269,10 @@ export class HQScene extends Phaser.Scene {
   private updateTarget() {
     const p: Point = [this.player.x, this.player.y]
     let target: Target | null = null
-    const door = this.map.corridors.find((c) => this.locked.get(c.roomId) && pointInPolygon(p, c.doorArea))
-    if (door) target = { kind: 'locked', key: door.id, label: door.door.label, roomId: door.roomId }
-    else {
+    const door = this.transit ? undefined : this.doorAt(p)
+    if (door && this.isDoorLocked(door)) {
+      target = { kind: 'locked', key: door.key, label: door.door.label, roomId: door.door.to }
+    } else if (!this.transit) {
       let best = Infinity
       for (const s of this.openStations()) {
         const d = distanceToPolygon(p, s.area)
@@ -257,15 +304,21 @@ export class HQScene extends Phaser.Scene {
     this.glow = g
   }
 
-  /** Inside a room: mostly its centre (pans between rooms). In a corridor: the player. */
+  /** Mostly the current room's centre, leaning towards the player; the portal target while panning. */
+  private cameraTarget(): { x: number; y: number } {
+    const room = this.transit ?? this.room
+    const p = this.transit ? room.center : ([this.player.x, this.player.y] as Point)
+    return {
+      x: room.center[0] + (p[0] - room.center[0]) * ROOM_FOLLOW,
+      y: room.center[1] - 40 + (p[1] - room.center[1]) * ROOM_FOLLOW,
+    }
+  }
+
   private updateCamera(deltaMs: number) {
-    const p: Point = [this.player.x, this.player.y]
-    const room = this.map.rooms.find((r) => r.floors.some((f) => pointInPolygon(p, f)))
-    const tx = room ? room.center[0] + (p[0] - room.center[0]) * ROOM_FOLLOW : p[0]
-    const ty = room ? room.center[1] - 40 + (p[1] - room.center[1]) * ROOM_FOLLOW : p[1]
-    const k = 1 - Math.exp(-deltaMs / CAMERA_TAU_MS)
-    this.cam.x += (tx - this.cam.x) * k
-    this.cam.y += (ty - this.cam.y) * k
+    const t = this.cameraTarget()
+    const k = 1 - Math.exp(-deltaMs / (this.transit ? PAN_TAU_MS : CAMERA_TAU_MS))
+    this.cam.x += (t.x - this.cam.x) * k
+    this.cam.y += (t.y - this.cam.y) * k
     const cam = this.cameras.main
     cam.centerOn(this.cam.x, this.cam.y)
     const headY = this.player.y - (FOOT_Y - HEAD_Y) * this.player.scaleY
@@ -273,16 +326,12 @@ export class HQScene extends Phaser.Scene {
   }
 
   private reportPosition(time: number) {
-    if (time - this.saved.at < SAVE_EVERY_MS) return
+    if (this.transit || time - this.saved.at < SAVE_EVERY_MS) return
     const { x, y } = this.player
     this.saved.at = time
     if (Math.hypot(x - this.saved.x, y - this.saved.y) < 2) return
     this.saved = { at: time, x, y }
     this.cb().onPlayerMoved([x, y])
-  }
-
-  private roomById(id: string): PlacedRoom | undefined {
-    return this.map.rooms.find((r) => r.room.id === id)
   }
 
   private stationAt(p: Phaser.Input.Pointer) {
@@ -296,7 +345,7 @@ export class HQScene extends Phaser.Scene {
       console.log(`[world] world px: [${Math.round(w.x)}, ${Math.round(w.y)}]`)
       return
     }
-    if (this.paused) return
+    if (this.paused || this.transit) return
     const s = this.stationAt(p)
     if (s) this.cb().onInteract({ kind: 'station', key: s.key, label: s.label, opens: s.opens })
   }
@@ -347,12 +396,9 @@ export class HQScene extends Phaser.Scene {
       r.floors.forEach((f) => draw(f, tokenColor('success')))
       r.blocked.forEach((b) => draw(b, tokenColor('danger')))
       r.stations.forEach((s) => draw(s.area, tokenColor('accent')))
-    }
-    for (const c of this.map.corridors) {
-      c.polys.forEach((p) => draw(p, tokenColor('role-science')))
-      draw(c.doorArea, tokenColor(c.door.color))
+      r.doors.forEach((d) => draw(d.area, tokenColor(d.door.color)))
     }
     this.debug = g
-    console.log('[world] F2 overlay on: click to log WORLD pixel coordinates (hq-map.json uses these)')
+    console.log('[world] F2 overlay on: click to log WORLD pixel coordinates')
   }
 }

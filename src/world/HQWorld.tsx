@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useStore } from '@/store'
-import { getHqMap } from './hqMap'
+import { gatedRooms, getHqMap } from './hqMap'
 import type { SceneCallbacks, Target } from './HQScene'
 import { InteractPrompt, promptTransform } from './InteractPrompt'
 import { PauseMenu, type PauseState } from './PauseMenu'
@@ -24,13 +24,13 @@ function useRoomLocks(): Record<string, string | null> {
   return useMemo(() => {
     void [scenarioId, roleChoice, difficulty, recruitedIds, launched] // inputs of doorLockReason
     const locks: Record<string, string | null> = {}
-    for (const c of getHqMap().corridors) locks[c.roomId] = doorLockReason(c.door, planningDone)
+    for (const g of gatedRooms(getHqMap())) locks[g.roomId] = doorLockReason(g.door, planningDone)
     return locks
   }, [planningDone, scenarioId, roleChoice, difficulty, recruitedIds, launched])
 }
 
 /**
- * The walkable HQ (phase "hq", or a station popup open). Phaser draws the connected rooms; the
+ * The walkable HQ (phase "hq", or a station popup open). Phaser draws the building; the
  * backdrop, prompt, popup and pause menu are React.
  */
 export default function HQWorld({ popup }: { popup?: ReactNode }) {
