@@ -96,7 +96,7 @@ describe('turn arithmetic (no events)', () => {
       spareKits: 1,
     })
     expect(s.totalTurns).toBe(9)
-    expect(s.crew['jonas-reyes']).toEqual({ energy: 100, morale: 80, health: 100, busyTurns: 0 })
+    expect(s.crew['bilal']).toEqual({ energy: 100, morale: 80, health: 100, busyTurns: 0 })
   })
 
   it('Moon turn 1 (3-day coast): O2 −10.08, food −21.6, water −3.6 (90% recycled)', () => {
@@ -183,7 +183,7 @@ describe('options and resolution', () => {
       s,
       ev('solar-panel-damage'),
       'eva-repair',
-      'jonas-reyes',
+      'bilal',
       createRng(1),
       ctxOf(MOON_GOOD_DESIGN),
     )
@@ -203,7 +203,7 @@ describe('options and resolution', () => {
   it('success chance is clamped to 5%-95%', () => {
     const ctx = ctxOf(MOON_GOOD_DESIGN)
     const s = initMission(MOON_GOOD_DESIGN, content, 1)
-    const jonas = content.crew.find((c) => c.id === 'jonas-reyes')!
+    const jonas = content.crew.find((c) => c.id === 'bilal')!
     const e = ev('battery-fault')
     const option = e.options.find((o) => o.id === 'replace-cell')!
     // 0.7 + power 5 × 0.06 + practical 0.1 = 1.1 -> 0.95
@@ -218,15 +218,15 @@ describe('options and resolution', () => {
       s,
       ev('battery-fault'),
       'replace-cell',
-      'jonas-reyes',
+      'bilal',
       createRng(1),
       ctxOf(MOON_GOOD_DESIGN),
     )
     expect(r.result.applied).toBe(true)
     expect(r.state.resources.spareKits).toBe(0)
-    expect(r.state.crew['jonas-reyes']).toMatchObject({ energy: 80, busyTurns: 1 })
+    expect(r.state.crew['bilal']).toMatchObject({ energy: 80, busyTurns: 1 })
     expect(r.state.pendingEvents).toEqual([])
-    expect(r.state.eventLog.at(-1)?.text).toMatch(/^Jonas Reyes chose "Swap in a spare module"/)
+    expect(r.state.eventLog.at(-1)?.text).toMatch(/^Bilal Ahmed chose "Swap in a spare module"/)
   })
 })
 
@@ -234,7 +234,7 @@ describe('crew AI', () => {
   it('picks the Practical crew member with the higher skill for a repair', () => {
     const ctx = ctxOf(MOON_GOOD_DESIGN)
     const s = initMission(MOON_GOOD_DESIGN, content, 1)
-    const pool = content.crew.filter((c) => c.id === 'mina-okafor' || c.id === 'jonas-reyes')
+    const pool = content.crew.filter((c) => c.id === 'ayesha' || c.id === 'bilal')
     const d = chooseResponse(
       s,
       ev('battery-fault'),
@@ -243,10 +243,10 @@ describe('crew AI', () => {
       MOON_GOOD_DESIGN.standingOrders,
       ctx,
     )!
-    // Jonas: power 5 + practical; Mina: power 1, thinker.
-    expect(d).toMatchObject({ optionId: 'replace-cell', crewId: 'jonas-reyes' })
+    // Bilal: power 5 + practical; Ayesha: power 1, thinker.
+    expect(d).toMatchObject({ optionId: 'replace-cell', crewId: 'bilal' })
     expect(d.reason).toBe(
-      'Jonas Reyes took "Swap in a spare module": highest power skill (5/5), well rested, 95% chance.',
+      'Bilal Ahmed took "Swap in a spare module": highest power skill (5/5), well rested, 95% chance.',
     )
   })
 
@@ -302,7 +302,7 @@ describe('event routing and delayed comms', () => {
     const entry = after.eventLog.at(-1)!
     expect(entry.handledBy).toBe('ai')
     expect(entry.text).toMatch(
-      /^Dr\. Mina Okafor \(Science\) handled "Instrument Jam"\. Dr\. Mina Okafor took/,
+      /^Ayesha Khan \(Science\) handled "Instrument Jam"\. Ayesha Khan took/,
     )
   })
 })

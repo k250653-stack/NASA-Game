@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { PHASES, resetAll, useStore } from './index'
+import {
+  changeDestination,
+  chooseScenario,
+  DEMO_SEED,
+  PHASES,
+  resetAll,
+  SEED_RANGE,
+  useStore,
+} from './index'
 
 describe('store navigation (phase = screen)', () => {
   beforeEach(() => resetAll())
@@ -47,12 +55,12 @@ describe('store slices', () => {
 
   it('crew: recruit is idempotent and dismiss removes', () => {
     const s = useStore.getState()
-    s.recruit('mina-okafor')
-    s.recruit('mina-okafor')
-    s.recruit('jonas-reyes')
-    expect(useStore.getState().crew.recruitedIds).toEqual(['mina-okafor', 'jonas-reyes'])
-    s.dismiss('mina-okafor')
-    expect(useStore.getState().crew.recruitedIds).toEqual(['jonas-reyes'])
+    s.recruit('ayesha')
+    s.recruit('ayesha')
+    s.recruit('bilal')
+    expect(useStore.getState().crew.recruitedIds).toEqual(['ayesha', 'bilal'])
+    s.dismiss('ayesha')
+    expect(useStore.getState().crew.recruitedIds).toEqual(['bilal'])
   })
 
   it('mission: adjustResource accumulates and appendLog keeps order', () => {
@@ -77,5 +85,40 @@ describe('store slices', () => {
     expect(after.design.partIds).toEqual([])
     expect(after.crew.recruitedIds).toEqual([])
     expect(after.mission.day).toBe(0)
+  })
+})
+
+describe('run setup choices', () => {
+  beforeEach(() => resetAll())
+
+  it('changing destination clears the scenario, role, difficulty and crew but keeps seed and callsign', () => {
+    const s = useStore.getState()
+    changeDestination('moon')
+    chooseScenario('shackleton-ice-hunt')
+    s.setDifficulty('cadet')
+    s.setRoleChoice('science')
+    s.setCallsign('Eagle')
+    s.setSeed(48213)
+    s.setRecruited(['bilal', 'lin', 'kofi'])
+    changeDestination('mars')
+    const g = useStore.getState().game
+    expect(g).toMatchObject({
+      destinationId: 'mars',
+      scenarioId: null,
+      roleChoice: null,
+      difficulty: 'engineer',
+      callsign: 'Eagle',
+      seed: 48213,
+    })
+    expect(useStore.getState().crew.recruitedIds).toEqual([])
+  })
+
+  it('choosing a new scenario rolls a fresh seed below SEED_RANGE', () => {
+    useStore.getState().setSeed(DEMO_SEED)
+    chooseScenario('shackleton-ice-hunt')
+    const seed = useStore.getState().game.seed
+    expect(seed).not.toBe(DEMO_SEED)
+    expect(seed).toBeGreaterThanOrEqual(0)
+    expect(seed).toBeLessThan(SEED_RANGE)
   })
 })

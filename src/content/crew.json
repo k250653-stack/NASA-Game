@@ -1,81 +1,465 @@
 {
-  "_note": "Sample crew. Salaries (millions USD for the whole mission) and skill levels are approximate game-balance placeholders. Portrait ids follow the convention crew-<id> and resolve to public/assets/portraits/<portrait>.webp.",
+  "_note": "Approximate, verify. INVENTED placeholder roster (no ASSET_BRIEF.md was found): the team should review names, backstories, skills and salaries. Salaries are millions USD for the whole mission including training. Best specialists cost the most; Maya and Sana are the cheap-but-weak options. player-* entries are the player's own character per seat (not recruitable, no salary, no traits); player-director uses role launch_budget as a placeholder because the Mission Director covers every system.",
   "items": [
     {
-      "id": "mina-okafor",
-      "name": "Dr. Mina Okafor",
+      "id": "ayesha",
+      "name": "Ayesha Khan",
       "role": "science",
-      "salaryM": 2.1,
+      "salaryM": 45,
       "traits": ["thinker"],
-      "skills": { "power": 1, "comms": 2, "science": 5, "systems": 2, "navigation": 1 },
+      "skills": {
+        "power": 1,
+        "comms": 2,
+        "science": 5,
+        "systems": 2,
+        "navigation": 1
+      },
       "strength": {
         "text": "Spots patterns in instrument data that others miss.",
-        "effect": { "key": "scienceYield", "value": 0.1 }
+        "effect": {
+          "key": "scienceYield",
+          "value": 0.1
+        }
       },
       "weakness": {
         "text": "Over-plans and delays decisions under time pressure.",
-        "effect": { "key": "decisionDelayDays", "value": 1 }
+        "effect": {
+          "key": "decisionDelayDays",
+          "value": 1
+        }
       },
-      "priorities": { "science": 0.6, "safety": 0.25, "cost": 0.15 },
-      "backstory": "Planetary geologist who spent three winters at an Antarctic ice-core station. Wants to be the first person to hold lunar ice.",
-      "portrait": "crew-mina-okafor"
+      "priorities": {
+        "science": 0.6,
+        "safety": 0.25,
+        "cost": 0.15
+      },
+      "backstory": "Planetary geologist who spent three winters drilling ice cores in Antarctica. The best scientist available, and priced like it.",
+      "portrait": "crew-ayesha"
     },
     {
-      "id": "jonas-reyes",
-      "name": "Jonas Reyes",
-      "role": "power_life",
-      "salaryM": 1.8,
+      "id": "maya",
+      "name": "Maya Torres",
+      "role": "science",
+      "salaryM": 15,
       "traits": ["practical"],
-      "skills": { "power": 5, "comms": 1, "science": 1, "systems": 4, "navigation": 1 },
+      "skills": {
+        "power": 2,
+        "comms": 1,
+        "science": 3,
+        "systems": 3,
+        "navigation": 2
+      },
+      "strength": {
+        "text": "Happy to run any instrument and fix it when it jams.",
+        "effect": {
+          "key": "repairSpeed",
+          "value": 0.1
+        }
+      },
+      "weakness": {
+        "text": "Recent graduate: misses subtle signals in the data.",
+        "effect": {
+          "key": "scienceYield",
+          "value": -0.1
+        }
+      },
+      "priorities": {
+        "science": 0.45,
+        "safety": 0.35,
+        "cost": 0.2
+      },
+      "backstory": "Field technician turned junior researcher. Cheap, hands-on and keen, but still learning the science.",
+      "portrait": "crew-maya"
+    },
+    {
+      "id": "bilal",
+      "name": "Bilal Ahmed",
+      "role": "power_life",
+      "salaryM": 40,
+      "traits": ["practical"],
+      "skills": {
+        "power": 5,
+        "comms": 1,
+        "science": 1,
+        "systems": 4,
+        "navigation": 1
+      },
       "strength": {
         "text": "Fixes hardware fast with whatever is on hand.",
-        "effect": { "key": "repairSpeed", "value": 0.2 }
+        "effect": {
+          "key": "repairSpeed",
+          "value": 0.2
+        }
       },
       "weakness": {
         "text": "Cuts science time to protect power and life-support margins.",
-        "effect": { "key": "scienceYield", "value": -0.05 }
+        "effect": {
+          "key": "scienceYield",
+          "value": -0.05
+        }
       },
-      "priorities": { "science": 0.15, "safety": 0.6, "cost": 0.25 },
+      "priorities": {
+        "science": 0.15,
+        "safety": 0.6,
+        "cost": 0.25
+      },
       "backstory": "Former submarine electrician. Believes every system should survive two failures before anyone notices.",
-      "portrait": "crew-jonas-reyes"
+      "portrait": "crew-bilal"
     },
     {
-      "id": "priya-natarajan",
-      "name": "Priya Natarajan",
+      "id": "lin",
+      "name": "Lin Wei",
       "role": "comms_nav",
-      "salaryM": 2.4,
+      "salaryM": 50,
       "traits": ["leader", "thinker"],
-      "skills": { "power": 1, "comms": 5, "science": 2, "systems": 2, "navigation": 4 },
+      "skills": {
+        "power": 1,
+        "comms": 5,
+        "science": 2,
+        "systems": 2,
+        "navigation": 4
+      },
       "strength": {
         "text": "Keeps the team calm and talking during long signal delays.",
-        "effect": { "key": "teamMorale", "value": 0.1 }
+        "effect": {
+          "key": "teamMorale",
+          "value": 0.1
+        }
       },
       "weakness": {
         "text": "Prefers the best hardware, even when it costs more.",
-        "effect": { "key": "costOverrun", "value": 0.05 }
+        "effect": {
+          "key": "costOverrun",
+          "value": 0.05
+        }
       },
-      "priorities": { "science": 0.35, "safety": 0.4, "cost": 0.25 },
+      "priorities": {
+        "science": 0.35,
+        "safety": 0.4,
+        "cost": 0.25
+      },
       "backstory": "Deep-space network engineer who once talked a probe through a safe-mode recovery with a 20-minute round-trip delay.",
-      "portrait": "crew-priya-natarajan"
+      "portrait": "crew-lin"
     },
     {
-      "id": "theo-lindqvist",
-      "name": "Theo Lindqvist",
+      "id": "sana",
+      "name": "Sana Rahimi",
+      "role": "power_life",
+      "salaryM": 14,
+      "traits": ["thinker"],
+      "skills": {
+        "power": 3,
+        "comms": 1,
+        "science": 2,
+        "systems": 2,
+        "navigation": 1
+      },
+      "strength": {
+        "text": "Models the power budget days ahead and warns early.",
+        "effect": {
+          "key": "powerForecast",
+          "value": 0.1
+        }
+      },
+      "weakness": {
+        "text": "Slow with tools: repairs take longer.",
+        "effect": {
+          "key": "repairSpeed",
+          "value": -0.1
+        }
+      },
+      "priorities": {
+        "science": 0.2,
+        "safety": 0.6,
+        "cost": 0.2
+      },
+      "backstory": "Energy-systems PhD with more simulation hours than field hours. A bargain for planning, weaker at the workbench.",
+      "portrait": "crew-sana"
+    },
+    {
+      "id": "kofi",
+      "name": "Kofi Mensah",
       "role": "launch_budget",
-      "salaryM": 1.5,
+      "salaryM": 30,
       "traits": ["practical", "leader"],
-      "skills": { "power": 2, "comms": 1, "science": 0, "systems": 3, "navigation": 3 },
+      "skills": {
+        "power": 2,
+        "comms": 1,
+        "science": 0,
+        "systems": 3,
+        "navigation": 3
+      },
       "strength": {
         "text": "Finds cheaper launch and procurement options.",
-        "effect": { "key": "costSavings", "value": 0.1 }
+        "effect": {
+          "key": "costSavings",
+          "value": 0.1
+        }
       },
       "weakness": {
         "text": "Trims safety margins to stay under budget.",
-        "effect": { "key": "safetyMargin", "value": -0.05 }
+        "effect": {
+          "key": "safetyMargin",
+          "value": -0.05
+        }
       },
-      "priorities": { "science": 0.2, "safety": 0.3, "cost": 0.5 },
+      "priorities": {
+        "science": 0.2,
+        "safety": 0.3,
+        "cost": 0.5
+      },
       "backstory": "Launch-campaign manager who has never missed a window or a budget, and has the spreadsheets to prove it.",
-      "portrait": "crew-theo-lindqvist"
+      "portrait": "crew-kofi"
+    },
+    {
+      "id": "omar",
+      "name": "Omar Haddad",
+      "role": "comms_nav",
+      "salaryM": 22,
+      "traits": ["practical"],
+      "skills": {
+        "power": 2,
+        "comms": 3,
+        "science": 1,
+        "systems": 3,
+        "navigation": 3
+      },
+      "strength": {
+        "text": "Rigs a working antenna out of almost anything.",
+        "effect": {
+          "key": "repairSpeed",
+          "value": 0.1
+        }
+      },
+      "weakness": {
+        "text": "Quiet under pressure: does not rally the team.",
+        "effect": {
+          "key": "teamMorale",
+          "value": -0.05
+        }
+      },
+      "priorities": {
+        "science": 0.25,
+        "safety": 0.45,
+        "cost": 0.3
+      },
+      "backstory": "Ham-radio enthusiast and ex-airline navigator. Solid and affordable, not a star.",
+      "portrait": "crew-omar"
+    },
+    {
+      "id": "zara",
+      "name": "Zara Okonkwo",
+      "role": "launch_budget",
+      "salaryM": 35,
+      "traits": ["leader"],
+      "skills": {
+        "power": 2,
+        "comms": 2,
+        "science": 1,
+        "systems": 2,
+        "navigation": 3
+      },
+      "strength": {
+        "text": "Negotiates hard with suppliers and teammates alike.",
+        "effect": {
+          "key": "costSavings",
+          "value": 0.05
+        }
+      },
+      "weakness": {
+        "text": "Clashes with other strong personalities.",
+        "effect": {
+          "key": "teamMorale",
+          "value": -0.05
+        }
+      },
+      "priorities": {
+        "science": 0.3,
+        "safety": 0.4,
+        "cost": 0.3
+      },
+      "backstory": "Former flight director at a commercial launch provider. Used to running the room.",
+      "portrait": "crew-zara"
+    },
+    {
+      "id": "player-science",
+      "name": "You",
+      "role": "science",
+      "salaryM": 0,
+      "traits": [],
+      "skills": {
+        "power": 1,
+        "comms": 2,
+        "science": 3,
+        "systems": 2,
+        "navigation": 1
+      },
+      "strength": {
+        "text": "Trained for the Science Lead seat.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "weakness": {
+        "text": "First mission: everything is new.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "priorities": {
+        "science": 0.34,
+        "safety": 0.33,
+        "cost": 0.33
+      },
+      "backstory": "This is you. Your callsign appears on the mission screens.",
+      "portrait": "crew-player",
+      "isPlayer": true
+    },
+    {
+      "id": "player-power-life",
+      "name": "You",
+      "role": "power_life",
+      "salaryM": 0,
+      "traits": [],
+      "skills": {
+        "power": 3,
+        "comms": 1,
+        "science": 1,
+        "systems": 3,
+        "navigation": 1
+      },
+      "strength": {
+        "text": "Trained for the Power & Life Support seat.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "weakness": {
+        "text": "First mission: everything is new.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "priorities": {
+        "science": 0.34,
+        "safety": 0.33,
+        "cost": 0.33
+      },
+      "backstory": "This is you. Your callsign appears on the mission screens.",
+      "portrait": "crew-player",
+      "isPlayer": true
+    },
+    {
+      "id": "player-comms-nav",
+      "name": "You",
+      "role": "comms_nav",
+      "salaryM": 0,
+      "traits": [],
+      "skills": {
+        "power": 1,
+        "comms": 3,
+        "science": 1,
+        "systems": 2,
+        "navigation": 3
+      },
+      "strength": {
+        "text": "Trained for the Comms & Navigation seat.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "weakness": {
+        "text": "First mission: everything is new.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "priorities": {
+        "science": 0.34,
+        "safety": 0.33,
+        "cost": 0.33
+      },
+      "backstory": "This is you. Your callsign appears on the mission screens.",
+      "portrait": "crew-player",
+      "isPlayer": true
+    },
+    {
+      "id": "player-launch-budget",
+      "name": "You",
+      "role": "launch_budget",
+      "salaryM": 0,
+      "traits": [],
+      "skills": {
+        "power": 2,
+        "comms": 1,
+        "science": 1,
+        "systems": 2,
+        "navigation": 2
+      },
+      "strength": {
+        "text": "Trained for the Launch & Budget seat.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "weakness": {
+        "text": "First mission: everything is new.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "priorities": {
+        "science": 0.34,
+        "safety": 0.33,
+        "cost": 0.33
+      },
+      "backstory": "This is you. Your callsign appears on the mission screens.",
+      "portrait": "crew-player",
+      "isPlayer": true
+    },
+    {
+      "id": "player-director",
+      "name": "You",
+      "role": "launch_budget",
+      "salaryM": 0,
+      "traits": [],
+      "skills": {
+        "power": 2,
+        "comms": 2,
+        "science": 2,
+        "systems": 2,
+        "navigation": 2
+      },
+      "strength": {
+        "text": "Trained for the Mission Director seat.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "weakness": {
+        "text": "First mission: everything is new.",
+        "effect": {
+          "key": "none",
+          "value": 0
+        }
+      },
+      "priorities": {
+        "science": 0.34,
+        "safety": 0.33,
+        "cost": 0.33
+      },
+      "backstory": "This is you. Your callsign appears on the mission screens.",
+      "portrait": "crew-player",
+      "isPlayer": true
     }
   ]
 }

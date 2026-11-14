@@ -113,7 +113,27 @@ export const ScoringSchema = z
     { error: 'scoring.weights must sum to 1' },
   )
 
-export const ConstantsWithScoringSchema = ConstantsSchema.extend({ scoring: ScoringSchema })
+/** One difficulty level (Cadet / Engineer / Flight Director). */
+const DifficultyLevelSchema = z.strictObject({
+  label: NonEmptyString,
+  description: NonEmptyString,
+  /** Scenario budget × this. */
+  budgetMultiplier: z.number().positive(),
+  /** Event trigger chances × this (part failures are not scaled). */
+  eventChanceMultiplier: z.number().nonnegative(),
+  /** NOVA hints shown during the mission. */
+  hintsEnabled: z.boolean(),
+})
+export type DifficultyLevel = z.infer<typeof DifficultyLevelSchema>
+
+export const ConstantsWithScoringSchema = ConstantsSchema.extend({
+  scoring: ScoringSchema,
+  difficulty: z.strictObject({
+    cadet: DifficultyLevelSchema,
+    engineer: DifficultyLevelSchema,
+    flight_director: DifficultyLevelSchema,
+  }),
+})
 
 export type Constants = z.infer<typeof ConstantsWithScoringSchema>
 export type ScoringTuning = Constants['scoring']

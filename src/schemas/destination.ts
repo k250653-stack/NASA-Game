@@ -24,6 +24,13 @@ export type MissionPhase = z.infer<typeof MissionPhaseSchema>
 export const DestinationSchema = z.strictObject({
   id: IdSchema,
   name: NonEmptyString,
+  /** One-line pitch on the Destination select card. */
+  pitch: NonEmptyString,
+  /** Badge on the Destination select card, e.g. "Recommended first mission". */
+  recommendation: z.strictObject({
+    label: NonEmptyString,
+    tone: z.enum(['success', 'warning', 'info']),
+  }),
   /** Approximate one-way transit time in days. */
   transitDays: z.number().positive({ error: 'transitDays must be a positive number of days' }),
   /** Approximate one-way light-time delay in seconds (typical value). */

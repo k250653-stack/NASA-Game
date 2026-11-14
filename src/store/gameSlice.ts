@@ -1,4 +1,4 @@
-import type { Role } from '@/schemas'
+import type { Difficulty, RoleChoice } from '@/schemas'
 import type { SliceCreator } from './types'
 
 /** Navigation is the phase. There is no router: App.tsx renders the screen for the phase. */
@@ -20,11 +20,18 @@ export type Phase = (typeof PHASES)[number] | 'styleguide'
 /** Fixed seed used by the "demo run" button so the judged run is always the same. */
 export const DEMO_SEED = 20261114
 
+/** Clock-made seeds are 0 to 99,999 so they are short enough to type back in. */
+export const SEED_RANGE = 100000
+
 export interface GameState {
   phase: Phase
   destinationId: string | null
   scenarioId: string | null
-  playerRole: Role | null
+  /** Chosen seat (four roles or the sandbox Mission Director). */
+  roleChoice: RoleChoice | null
+  difficulty: Difficulty
+  /** Player callsign; empty means "You". */
+  callsign: string
   seed: number
 }
 
@@ -35,8 +42,12 @@ export interface GameSlice {
   prevPhase: () => void
   setDestination: (destinationId: string | null) => void
   setScenario: (scenarioId: string | null) => void
-  setPlayerRole: (role: Role | null) => void
+  setRoleChoice: (role: RoleChoice | null) => void
+  setDifficulty: (difficulty: Difficulty) => void
+  setCallsign: (callsign: string) => void
   setSeed: (seed: number) => void
+  /** New seed from the clock (seed creation only; all game randomness uses the seeded Rng). */
+  rollSeed: () => void
   resetGame: () => void
 }
 
@@ -44,7 +55,9 @@ export const initialGameState: GameState = {
   phase: 'title',
   destinationId: null,
   scenarioId: null,
-  playerRole: null,
+  roleChoice: null,
+  difficulty: 'engineer',
+  callsign: '',
   seed: DEMO_SEED,
 }
 
@@ -68,7 +81,10 @@ export const createGameSlice: SliceCreator<GameSlice> = (set, get) => ({
   },
   setDestination: (destinationId) => set((s) => ({ game: { ...s.game, destinationId } })),
   setScenario: (scenarioId) => set((s) => ({ game: { ...s.game, scenarioId } })),
-  setPlayerRole: (playerRole) => set((s) => ({ game: { ...s.game, playerRole } })),
+  setRoleChoice: (roleChoice) => set((s) => ({ game: { ...s.game, roleChoice } })),
+  setDifficulty: (difficulty) => set((s) => ({ game: { ...s.game, difficulty } })),
+  setCallsign: (callsign) => set((s) => ({ game: { ...s.game, callsign } })),
   setSeed: (seed) => set((s) => ({ game: { ...s.game, seed } })),
+  rollSeed: () => set((s) => ({ game: { ...s.game, seed: Date.now() % SEED_RANGE } })),
   resetGame: () => set({ game: initialGameState }),
 })

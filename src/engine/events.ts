@@ -87,7 +87,9 @@ export function eventChance(e: GameEvent, s: MissionState, ctx: MissionContext):
     e.weakness && s.weaknesses.includes(e.weakness)
       ? ctx.content.constants.mission.weaknessChanceMultiplier
       : 1
-  return clamp(e.trigger.chance * boost, 0, 1)
+  // Difficulty scales triggered events, not hardware failure rates.
+  const level = ctx.content.constants.difficulty[ctx.design.difficulty]
+  return clamp(e.trigger.chance * boost * level.eventChanceMultiplier, 0, 1)
 }
 
 /** Rolls every eligible event in content order; at most maxEventsPerTurn fire. */

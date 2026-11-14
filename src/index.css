@@ -42,6 +42,13 @@
   --color-trait-practical: #a3e635;
   --color-trait-leader: #fb7185;
 
+  /* Player roles (Role select, team slots) */
+  --color-role-science: #c084fc;
+  --color-role-power: #4ade80;
+  --color-role-comms: #38bdf8;
+  --color-role-budget: #f472b6;
+  --color-role-director: #fde047;
+
   /* Background decoration */
   --color-star: #cfe3ff;
   --color-grid: #ffffff08;

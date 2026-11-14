@@ -10,10 +10,12 @@ import type {
   EventOption,
   GameEvent,
   Priorities,
+  Role,
   StandingOrders,
 } from '@/schemas'
 import { availableOptions, eligibleCrew, isEvaOption, needsCrew, successChance } from './events'
-import type { MissionContext, MissionState } from './types'
+import { candidates, playerRoleOf, teamAnalysis, validateTeam, type TeamDraft } from './recruitment'
+import type { EngineContent, MissionContext, MissionState } from './types'
 
 export interface AiDecision {
   optionId: string
@@ -222,4 +224,43 @@ export function eventOwner(
     healthy[0] ??
     null
   )
+}
+
+/** The skill that matters most for each role (used to rank candidates). */
+const ROLE_SKILL: Record<Role, keyof CrewMember['skills']> = {
+  science: 'science',
+  power_life: 'power',
+  comms_nav: 'comms',
+  launch_budget: 'systems',
+}
+
+/** All k-element combinations of a list, in order (deterministic). */
+function combinations<T>(items: readonly T[], k: number): T[][] {
+  if (k === 0) return [[]]
+  return items.flatMap((item, i) =>
+    combinations(items.slice(i + 1), k - 1).map((rest) => [item, ...rest]),
+  )
+}
+
+/**
+ * Suggests a valid, balanced team within budget. Scores every valid team:
+ * −100 per team-balance warning, +5 per point of each member's key role skill, −salary ÷ 10
+ * (cheaper is better when everything else is equal). Ties keep the first team in content order.
+ * Returns null when no valid team exists.
+ */
+export function suggestTeam(t: TeamDraft, content: EngineContent): string[] | null {
+  const pool = candidates(content).filter((m) => m.role !== playerRoleOf(t.roleChoice))
+  const { slots } = validateTeam({ ...t, crewIds: [] }, content)
+  let best: { ids: string[]; score: number } | null = null
+  for (const team of combinations(pool, slots)) {
+    const ids = team.map((m) => m.id)
+    const draft = { ...t, crewIds: ids }
+    if (!validateTeam(draft, content).valid) continue
+    const warnings = teamAnalysis(draft, content).warnings.length
+    const skill = team.reduce((acc, m) => acc + m.skills[ROLE_SKILL[m.role]], 0)
+    const salary = team.reduce((acc, m) => acc + m.salaryM, 0)
+    const score = -100 * warnings + 5 * skill - salary / 10
+    if (!best || score > best.score + 1e-9) best = { ids, score }
+  }
+  return best?.ids ?? null
 }

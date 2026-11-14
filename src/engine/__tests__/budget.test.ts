@@ -23,10 +23,10 @@ describe('computeTotals (good design)', () => {
     expect(t.steadyGenW).toBe(0)
   })
 
-  it('cost: parts 500 + Medium launcher 150 + salaries 7.8 = $657.8M', () => {
+  it('cost: parts 500 + Medium launcher 150 + salaries 165 = $815M', () => {
     // parts: 60 + 120 + 15 + 18 + 38 + 95 + 120 + 28 + 6 = 500
-    // salaries: 2.1 + 1.8 + 2.4 + 1.5 = 7.8
-    expect(t.costM).toBeCloseTo(657.8, 10)
+    // salaries: Ayesha 45 + Bilal 40 + Lin 50 + Kofi 30 = 165
+    expect(t.costM).toBeCloseTo(815, 10)
   })
 
   it('data, science and capacities', () => {
@@ -66,12 +66,12 @@ describe('computeTotals edge cases', () => {
 })
 
 describe('margins', () => {
-  it('good design: mass 0.46625, power 0.7, budget 0.45183, data 0.98148', () => {
+  it('good design: mass 0.46625, power 0.7, budget 0.32083, data 0.98148', () => {
     const { rocket, scenario, destination } = resolveDesign(GOOD_DESIGN, content)
     const m = computeMargins(computeTotals(GOOD_DESIGN, content), rocket, scenario, destination)
     expect(m.mass).toBeCloseTo(0.46625, 5) // (8,000 − 4,270) ÷ 8,000
     expect(m.power).toBeCloseTo(0.7, 10) // (7,000 − 2,100) ÷ 7,000
-    expect(m.budget).toBeCloseTo(0.451833, 5) // (1,200 − 657.8) ÷ 1,200
+    expect(m.budget).toBeCloseTo(0.320833, 5) // (1,200 − 815) ÷ 1,200
     expect(m.data).toBeCloseTo(0.981481, 5) // (108 − 2) ÷ 108
   })
 

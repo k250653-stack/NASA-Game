@@ -7,7 +7,7 @@
  */
 import { create } from 'zustand'
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
-import { createGameSlice } from './gameSlice'
+import { createGameSlice, initialGameState } from './gameSlice'
 import { createDesignSlice } from './designSlice'
 import { createCrewSlice } from './crewSlice'
 import { createMissionSlice } from './missionSlice'
@@ -46,7 +46,19 @@ export const useStore = create<RootState>()(
     }),
     {
       name: SAVE_KEY,
-      version: 1,
+      version: 2,
+      // Saves from older versions keep their choices; fields added since get their defaults.
+      migrate: (persisted) => persisted as PersistedState,
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<PersistedState>
+        return {
+          ...current,
+          game: { ...current.game, ...p.game },
+          design: { ...current.design, ...p.design },
+          crew: { ...current.crew, ...p.crew },
+          mission: { ...current.mission, ...p.mission },
+        }
+      },
       storage: createJSONStorage(safeStorage),
       partialize: (s): PersistedState => ({
         game: s.game,
@@ -58,6 +70,35 @@ export const useStore = create<RootState>()(
   ),
 )
 
+/**
+ * Picks a destination. A different destination invalidates everything chosen after it, so the
+ * scenario, difficulty, role, crew, design and mission are cleared (the screen confirms first).
+ */
+export function changeDestination(destinationId: string): void {
+  const s = useStore.getState()
+  if (s.game.destinationId === destinationId) return
+  useStore.setState((st) => ({
+    game: {
+      ...st.game,
+      destinationId,
+      scenarioId: null,
+      roleChoice: null,
+      difficulty: initialGameState.difficulty,
+    },
+  }))
+  s.resetCrew()
+  s.resetDesign()
+  s.resetMission()
+}
+
+/** Picks a scenario and rolls a fresh seed for it. */
+export function chooseScenario(scenarioId: string): void {
+  const s = useStore.getState()
+  if (s.game.scenarioId === scenarioId) return
+  s.setScenario(scenarioId)
+  s.rollSeed()
+}
+
 /** Wipes every slice back to its initial state (used by "New game"). */
 export function resetAll(): void {
   const s = useStore.getState()
@@ -68,7 +109,7 @@ export function resetAll(): void {
 }
 
 export type { RootState } from './types'
-export { PHASES, DEMO_SEED, phaseIndex } from './gameSlice'
+export { PHASES, DEMO_SEED, SEED_RANGE, phaseIndex } from './gameSlice'
 export type { Phase, GameState } from './gameSlice'
 export type { DesignState } from './designSlice'
 export type { CrewState } from './crewSlice'

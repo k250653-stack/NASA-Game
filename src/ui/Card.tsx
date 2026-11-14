@@ -11,9 +11,12 @@ interface CardProps {
   className?: string
   /** Accessible name when the card is selectable. */
   label?: string
+  /** Inner padding (default true). Turn off for edge-to-edge art. */
+  padded?: boolean
 }
 
-const BASE = 'block w-full rounded-lg border bg-panel p-4 text-left transition-colors duration-150'
+const BASE =
+  'block w-full overflow-hidden rounded-lg border bg-panel text-left transition-colors duration-150'
 
 /** Surface for selectable items. Hover lifts it; selected gets the accent border and glow. */
 export function Card({
@@ -23,13 +26,15 @@ export function Card({
   disabled,
   className = '',
   label,
+  padded = true,
 }: CardProps) {
+  const pad = padded ? 'p-4' : ''
   const state = selected
     ? 'border-accent shadow-glow'
     : 'border-border shadow-panel hover:border-border-strong'
 
   if (!onSelect) {
-    return <div className={`${BASE} ${state} ${className}`}>{children}</div>
+    return <div className={`${BASE} ${pad} ${state} ${className}`}>{children}</div>
   }
 
   return (
@@ -47,7 +52,7 @@ export function Card({
       transition={{ type: 'spring', stiffness: 400, damping: 28 }}
       // flex-col + justify-start: buttons centre content vertically by default, which misaligns
       // cards of different heights in the same grid row.
-      className={`${BASE} ${state} flex flex-col justify-start cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 ${className}`}
+      className={`${BASE} ${pad} ${state} flex flex-col justify-start cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 ${className}`}
     >
       {children}
     </motion.button>

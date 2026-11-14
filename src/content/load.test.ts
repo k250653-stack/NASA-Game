@@ -11,6 +11,7 @@ function cloneRaw(): {
   rockets: unknown
   events: unknown
   lessons: unknown
+  roles: unknown
 } {
   return structuredClone(RAW_CONTENT)
 }
@@ -20,7 +21,21 @@ describe('content loading', () => {
     const content = loadContent()
     expect(content.destinations.map((d) => d.id)).toEqual(['moon', 'mars'])
     expect(content.scenarios.map((s) => s.id)).toEqual(['shackleton-ice-hunt', 'jezero-long-stay'])
-    expect(content.crew).toHaveLength(4)
+    expect(content.crew.filter((c) => !c.isPlayer)).toHaveLength(8)
+    expect(content.crew.filter((c) => c.isPlayer).map((c) => c.id)).toEqual([
+      'player-science',
+      'player-power-life',
+      'player-comms-nav',
+      'player-launch-budget',
+      'player-director',
+    ])
+    expect(content.roles.map((r) => r.id)).toEqual([
+      'science',
+      'power_life',
+      'comms_nav',
+      'launch_budget',
+      'director',
+    ])
     expect(content.parts.length).toBeGreaterThanOrEqual(16)
     expect(content.constants.perCrewPerDay.oxygenKg).toBe(0.84)
     expect(content.rockets).toHaveLength(4)

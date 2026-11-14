@@ -9,6 +9,8 @@ export interface CrewSlice {
   crew: CrewState
   recruit: (crewId: string) => void
   dismiss: (crewId: string) => void
+  /** Replace the whole team (e.g. "Suggested team" or a role swap computed by the engine). */
+  setRecruited: (crewIds: string[]) => void
   resetCrew: () => void
 }
 
@@ -28,5 +30,6 @@ export const createCrewSlice: SliceCreator<CrewSlice> = (set) => ({
     set((s) => ({
       crew: { ...s.crew, recruitedIds: s.crew.recruitedIds.filter((id) => id !== crewId) },
     })),
+  setRecruited: (recruitedIds) => set((s) => ({ crew: { ...s.crew, recruitedIds } })),
   resetCrew: () => set({ crew: initialCrewState }),
 })

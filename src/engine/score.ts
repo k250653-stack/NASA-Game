@@ -80,7 +80,13 @@ export function computeScore(
   const ctx = { design, content }
   const { scenario, destination, rocket } = resolveDesign(design, content)
   const totals = computeTotals(design, content)
-  const margins = computeMargins(totals, rocket, scenario, destination)
+  const margins = computeMargins(
+    totals,
+    rocket,
+    scenario,
+    destination,
+    content.constants.difficulty[design.difficulty].budgetMultiplier,
+  )
   const facts = missionFacts(finalState)
   const r = finalState.resources
 

@@ -135,7 +135,7 @@ describe('cause detectors (hand-built histories)', () => {
   })
 
   it('repair failures with no Practical crew trace back to recruitment', () => {
-    const d: Design = { ...MOON_GOOD_DESIGN, crewIds: ['mina-okafor', 'priya-natarajan'] }
+    const d: Design = { ...MOON_GOOD_DESIGN, crewIds: ['ayesha', 'lin'] }
     const s = initMission(d, content, 1)
     for (const day of [4, 12]) {
       s.decisions.push({
@@ -143,7 +143,7 @@ describe('cause detectors (hand-built histories)', () => {
         day,
         eventId: 'battery-fault',
         optionId: 'replace-cell',
-        crewId: 'mina-okafor',
+        crewId: 'ayesha',
         success: false,
         chance: 0.5,
         crewEnergy: 90,
@@ -158,7 +158,7 @@ describe('cause detectors (hand-built histories)', () => {
       rootDesignDecision: { field: 'crewIds', label: 'Crew recruited' },
     })
     expect(chains[0]!.suggestion).toBe(
-      'Recruit a Practical crew member such as Jonas Reyes to lift repair odds.',
+      'Recruit a Practical crew member such as Maya Torres to lift repair odds.',
     )
   })
 
@@ -172,7 +172,7 @@ describe('cause detectors (hand-built histories)', () => {
       day: 12,
       eventId: 'data-overflow',
       optionId: 'compress',
-      crewId: 'priya-natarajan',
+      crewId: 'lin',
       success: false,
       chance: 0.82,
       crewEnergy: 90,
@@ -195,9 +195,9 @@ describe('cause detectors (hand-built histories)', () => {
       headline: 'Morale collapsed by day 8',
       rootDesignDecision: { field: 'crewIds' },
     })
-    expect(chains[0]!.steps[1]).toMatch(/^Priya Natarajan and Theo Lindqvist are all Leaders/)
+    expect(chains[0]!.steps[1]).toMatch(/^Lin Wei and Kofi Mensah are all Leaders/)
     expect(chains[0]!.suggestion).toBe(
-      'Recruit only one Leader: swap Theo Lindqvist for a Thinker or Practical crew member.',
+      'Recruit only one Leader: swap Kofi Mensah for a Thinker or Practical crew member.',
     )
   })
 
@@ -294,7 +294,7 @@ describe('score', () => {
     s.changes.push({
       turn: 1,
       day: 4,
-      resource: 'health:jonas-reyes',
+      resource: 'health:bilal',
       delta: -10,
       sourceType: 'event',
       sourceId: 'minor-injury',
@@ -341,13 +341,13 @@ describe('mission history', () => {
     expect(o2.delta).toBeCloseTo(-10.08, 6) // 4 × 0.84 × 3
     expect(s.turnHistory).toHaveLength(1)
     // energy capped at 100; morale 80 − 2 (two Leaders); health 100
-    expect(s.turnHistory[0]!.crew['jonas-reyes']).toEqual([100, 78, 100])
+    expect(s.turnHistory[0]!.crew['bilal']).toEqual([100, 78, 100])
   })
 
   it('records option consumption and the decision when an event is resolved', () => {
     const s0 = initMission(MOON_GOOD_DESIGN, content, 1)
     const event = content.events.find((e) => e.id === 'battery-fault')!
-    const s = resolveEvent(s0, event, 'replace-cell', 'jonas-reyes', createRng(1), {
+    const s = resolveEvent(s0, event, 'replace-cell', 'bilal', createRng(1), {
       design: MOON_GOOD_DESIGN,
       content,
     }).state
@@ -363,7 +363,7 @@ describe('mission history', () => {
       expect.objectContaining({
         eventId: 'battery-fault',
         optionId: 'replace-cell',
-        crewId: 'jonas-reyes',
+        crewId: 'bilal',
         crewEnergy: 100,
       }),
     ])

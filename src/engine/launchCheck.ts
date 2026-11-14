@@ -3,6 +3,7 @@
  * with the actual numbers. Pure TypeScript. No React, no store (CLAUDE.md rule 1).
  */
 import { computeMargins, computeTotals, resolveDesign, rocketCapacityKg } from './budget'
+import { effectiveBudgetM } from './difficulty'
 import { fmt, fmtPct } from './format'
 import { batteryMarginRatio, batteryNeededWh, daysOfSupply } from './physics'
 import { supplyFeasibilityCheck } from './supplyFeasibility'
@@ -18,7 +19,8 @@ export function runLaunchCheck(design: Design, content: EngineContent): Check[] 
   const { destination, scenario, rocket, crew } = resolveDesign(design, content)
   const C = content.constants
   const t = computeTotals(design, content)
-  const margins = computeMargins(t, rocket, scenario, destination)
+  const budgetM = effectiveBudgetM(scenario, design.difficulty, content)
+  const margins = computeMargins(t, rocket, scenario, destination, budgetM / scenario.budgetM)
   const checks: Check[] = []
 
   // 1. Mass vs rocket capacity to this destination.
@@ -62,18 +64,18 @@ export function runLaunchCheck(design: Design, content: EngineContent): Check[] 
   }
 
   // 2. Budget.
-  const overBudget = t.costM - scenario.budgetM
+  const overBudget = t.costM - budgetM
   checks.push({
     id: 'budget',
     label: 'Budget',
     status: overBudget > 0 ? 'fail' : 'ok',
     value: t.costM,
-    limit: scenario.budgetM,
+    limit: budgetM,
     unit: '$M',
     explanation:
       overBudget > 0
-        ? `Total cost $${fmt(t.costM, 1)}M is $${fmt(overBudget, 1)}M over the $${fmt(scenario.budgetM)}M budget.`
-        : `Total cost $${fmt(t.costM, 1)}M leaves $${fmt(-overBudget, 1)}M of the $${fmt(scenario.budgetM)}M budget.`,
+        ? `Total cost $${fmt(t.costM, 1)}M is $${fmt(overBudget, 1)}M over the $${fmt(budgetM)}M budget.`
+        : `Total cost $${fmt(t.costM, 1)}M leaves $${fmt(-overBudget, 1)}M of the $${fmt(budgetM)}M budget.`,
   })
 
   // 3. Power margin.

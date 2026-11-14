@@ -120,11 +120,13 @@ export function computeMargins(
   rocket: Rocket | null,
   scenario: Scenario,
   destination: Destination,
+  /** From the chosen difficulty (default 1). */
+  budgetMultiplier = 1,
 ): Margins {
   return {
     mass: marginRatio(rocketCapacityKg(rocket, destination), totals.massKg),
     power: marginRatio(totals.powerGenW, totals.powerUseW),
-    budget: marginRatio(scenario.budgetM, totals.costM),
+    budget: marginRatio(scenario.budgetM * budgetMultiplier, totals.costM),
     data: marginRatio(totals.dataReturnGbPerDay, totals.dataGenGbPerDay),
   }
 }

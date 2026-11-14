@@ -5,7 +5,7 @@
 import type { StandingOrders } from '@/schemas'
 import type { Design } from './types'
 
-const CREW = ['mina-okafor', 'jonas-reyes', 'priya-natarajan', 'theo-lindqvist']
+const CREW = ['ayesha', 'bilal', 'lin', 'kofi']
 
 /** Same as the scenarios' defaults. */
 export const DEFAULT_ORDERS: StandingOrders = {
@@ -39,6 +39,7 @@ export const MOON_GOOD_DESIGN: Design = {
   crewIds: CREW,
   standingOrders: DEFAULT_ORDERS,
   playerRole: 'power_life',
+  difficulty: 'engineer',
 }
 
 /** Same parts on a Light launcher with too little food: fails mass, supplies, feasibility. */
@@ -71,6 +72,7 @@ export const MARS_GOOD_DESIGN: Design = {
   crewIds: CREW,
   standingOrders: { ...DEFAULT_ORDERS, eva: 'only_practical' },
   playerRole: 'power_life',
+  difficulty: 'engineer',
 }
 
 /** Same mission with open-loop life support: no recycling, so supplies and feasibility fail. */

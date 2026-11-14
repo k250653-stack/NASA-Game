@@ -1,6 +1,14 @@
 /** Shared engine types. Pure data, no behaviour. */
 import type { GameContent } from '@/content/load'
-import type { Location, ModifierKey, ResourceKey, Role, StandingOrders, Weakness } from '@/schemas'
+import type {
+  Difficulty,
+  Location,
+  ModifierKey,
+  ResourceKey,
+  Role,
+  StandingOrders,
+  Weakness,
+} from '@/schemas'
 
 /** Consumables packed for the mission, kg. */
 export interface Supplies {
@@ -21,8 +29,10 @@ export interface Design {
   crewIds: string[]
   /** What the crew does when Earth can't answer in time; also steers AI teammates. */
   standingOrders: StandingOrders
-  /** The seat the player flies. null = the player answers every event (debug). */
+  /** The seat the player flies. null = the player answers every event (Mission Director). */
   playerRole: Role | null
+  /** Chosen difficulty: scales the budget and event chances (constants.json "difficulty"). */
+  difficulty: Difficulty
 }
 
 export type CheckStatus = 'ok' | 'warn' | 'fail'
@@ -246,6 +256,8 @@ export interface MissionState {
   lastPower: { genW: number; useW: number }
   /** True after the crew cut the surface stay short (standing order abort_early). */
   abortedEarly: boolean
+  /** NOVA hints on (from the difficulty level). */
+  hintsEnabled: boolean
   outcome: MissionOutcome
   failReason?: string
   /** Structured version of failReason for cause analysis. */

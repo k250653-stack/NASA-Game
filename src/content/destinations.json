@@ -4,10 +4,15 @@
     {
       "id": "moon",
       "name": "Moon — South Pole",
+      "pitch": "Three days away and always in contact: hunt for water ice at the lunar south pole.",
+      "recommendation": {
+        "label": "Recommended first mission",
+        "tone": "success"
+      },
       "transitDays": 3,
       "signalDelaySec": 1.3,
       "signalDelayRangeSec": [1.19, 1.35],
-      "sunlightFactor": 1.0,
+      "sunlightFactor": 1,
       "lightFraction": 0.7,
       "darkPeriodHours": 100,
       "dustLossPerDay": 0.0005,
@@ -47,6 +52,11 @@
     {
       "id": "mars",
       "name": "Mars — Jezero Region",
+      "pitch": "Two years, no resupply and up to 22 minutes of signal delay: the crew must manage on its own.",
+      "recommendation": {
+        "label": "Advanced",
+        "tone": "warning"
+      },
       "transitDays": 210,
       "signalDelaySec": 600,
       "signalDelayRangeSec": [180, 1320],

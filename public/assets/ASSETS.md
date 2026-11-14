@@ -9,12 +9,17 @@ Record author, source and license for every file in the `License` column here **
 
 ## Portraits — `portraits/` — 512 × 512 WebP
 
-| File                             | For                              | License |
-| -------------------------------- | -------------------------------- | ------- |
-| `crew-mina-okafor.webp`          | Dr. Mina Okafor (science)        |         |
-| `crew-jonas-reyes.webp`          | Jonas Reyes (power_life)         |         |
-| `crew-priya-natarajan.webp`      | Priya Natarajan (comms_nav)      |         |
-| `crew-theo-lindqvist.webp`       | Theo Lindqvist (launch_budget)   |         |
+| File | For | License |
+| --- | --- | --- |
+| `crew-ayesha.webp` | Ayesha Khan (science) | |
+| `crew-maya.webp` | Maya Torres (science) | |
+| `crew-bilal.webp` | Bilal Ahmed (power_life) | |
+| `crew-lin.webp` | Lin Wei (comms_nav) | |
+| `crew-sana.webp` | Sana Rahimi (power_life) | |
+| `crew-kofi.webp` | Kofi Mensah (launch_budget) | |
+| `crew-omar.webp` | Omar Haddad (comms_nav) | |
+| `crew-zara.webp` | Zara Okonkwo (launch_budget) | |
+| `crew-player.webp` | The player (every seat) | |
 
 Convention: `crew-<crew id>.webp`, matching the `portrait` field in `src/content/crew.json`.
 
@@ -26,6 +31,10 @@ Convention: `crew-<crew id>.webp`, matching the `portrait` field in `src/content
 | `control-room.webp`  | Isometric control room (mission run)  |         |
 | `moon-surface.webp`  | Moon destination / surface scenes     |         |
 | `mars-surface.webp`  | Mars destination / surface scenes     |         |
+| `dest-moon.webp` | Destination select card: Moon | |
+| `dest-mars.webp` | Destination select card: Mars | |
+| `scenario-shackleton-ice-hunt.webp` | Scenario card: Shackleton Ice Hunt | |
+| `scenario-jezero-long-stay.webp` | Scenario card: Jezero Long Stay | |
 
 ## Sprites — `sprites/` — WebP, size per sprite
 

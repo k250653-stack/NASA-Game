@@ -90,5 +90,28 @@
     "tradeBonus": 5,
     "conflictEventIds": ["crew-argument"],
     "source": "TODO"
+  },
+  "difficulty": {
+    "cadet": {
+      "label": "Cadet",
+      "description": "Bigger budget, fewer events, NOVA hints on.",
+      "budgetMultiplier": 1.25,
+      "eventChanceMultiplier": 0.7,
+      "hintsEnabled": true
+    },
+    "engineer": {
+      "label": "Engineer",
+      "description": "The mission as designed: normal budget and events, hints on.",
+      "budgetMultiplier": 1,
+      "eventChanceMultiplier": 1,
+      "hintsEnabled": true
+    },
+    "flight_director": {
+      "label": "Flight Director",
+      "description": "Tight budget, more events, hints off.",
+      "budgetMultiplier": 0.8,
+      "eventChanceMultiplier": 1.3,
+      "hintsEnabled": false
+    }
   }
 }

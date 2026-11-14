@@ -4,6 +4,8 @@ import { Icon } from '@/ui/Icon'
 import { Panel } from '@/ui/Panel'
 import { StatChip } from '@/ui/StatChip'
 import { Tooltip } from '@/ui/Tooltip'
+import { SegmentedControl } from '@/ui/SegmentedControl'
+import { useState } from 'react'
 
 const VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'ghost', 'danger']
 const SIZES: ButtonSize[] = ['sm', 'md', 'lg']
@@ -19,6 +21,7 @@ const BADGES: BadgeVariant[] = [
 ]
 
 export function ControlsSection() {
+  const [mode, setMode] = useState<'a' | 'b' | 'c'>('b')
   return (
     <Panel title="Controls" subtitle="Button, Badge, StatChip, Tooltip">
       <div className="space-y-3">
@@ -72,6 +75,28 @@ export function ControlsSection() {
             Bottom tooltip
           </Button>
         </Tooltip>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-start gap-3">
+        <span className="w-24 pt-2 font-mono text-xs text-subtle">segmented</span>
+        <SegmentedControl
+          label="Demo segmented control"
+          value={mode}
+          onChange={setMode}
+          options={[
+            { id: 'a', label: 'Cadet', description: 'Arrow keys move the selection.' },
+            {
+              id: 'b',
+              label: 'Engineer',
+              description: 'The selected option shows its description.',
+            },
+            {
+              id: 'c',
+              label: 'Flight Director',
+              description: 'Rendered as a radiogroup for screen readers.',
+            },
+          ]}
+        />
       </div>
     </Panel>
   )

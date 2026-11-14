@@ -99,6 +99,7 @@ export function initMission(design: Design, content: EngineContent, seed: number
     weaknesses,
     lastPower: { genW: t.powerGenW, useW: t.powerUseW },
     abortedEarly: false,
+    hintsEnabled: C.difficulty[design.difficulty].hintsEnabled,
     outcome: null,
     turnHistory: [],
     changes: [],

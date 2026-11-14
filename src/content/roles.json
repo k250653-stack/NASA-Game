@@ -1,0 +1,77 @@
+{
+  "_note": "Role select content. Text is invented and should be reviewed by the team.",
+  "items": [
+    {
+      "id": "science",
+      "name": "Science Lead",
+      "icon": "IconMicroscope",
+      "color": "role-science",
+      "summary": "Decide what to study and how to get the data home.",
+      "controls": ["Instruments and sampling", "EVA science traverses", "Science priorities"],
+      "learn": [
+        "How instruments turn power and time into data",
+        "Why water ice matters",
+        "Data budgets and downlink"
+      ],
+      "difficultyHint": "Gentle start: most crises land on other seats."
+    },
+    {
+      "id": "power_life",
+      "name": "Power & Life Support",
+      "icon": "IconBolt",
+      "color": "role-power",
+      "summary": "Keep the lights on and the crew breathing.",
+      "controls": [
+        "Solar arrays, batteries and reactors",
+        "Water and oxygen recycling",
+        "Supplies and rationing"
+      ],
+      "learn": ["Solar power, dust and long nights", "Battery sizing", "Closed-loop life support"],
+      "difficultyHint": "Hardest seat: most urgent events are yours."
+    },
+    {
+      "id": "comms_nav",
+      "name": "Comms & Navigation",
+      "icon": "IconAntenna",
+      "color": "role-comms",
+      "summary": "Keep the link to Earth and get everyone where they need to go.",
+      "controls": ["Antennas and data links", "Rovers and traverses", "Space weather warnings"],
+      "learn": [
+        "Signal delay and the speed of light",
+        "Data rates and contact windows",
+        "Orbits and transfer trajectories"
+      ],
+      "difficultyHint": "Medium: comms outages and radiation warnings."
+    },
+    {
+      "id": "launch_budget",
+      "name": "Launch & Budget",
+      "icon": "IconRocket",
+      "color": "role-budget",
+      "summary": "Pick the launcher, balance the books and keep the team together.",
+      "controls": [
+        "Launcher choice and mass budget",
+        "Money and trade-offs",
+        "Crew morale and conflicts"
+      ],
+      "learn": [
+        "Mass budgets and launch capacity",
+        "Why every kilogram costs money",
+        "Team dynamics on long missions"
+      ],
+      "difficultyHint": "Medium: few emergencies, many trade-offs."
+    },
+    {
+      "id": "director",
+      "name": "Mission Director",
+      "icon": "IconUser",
+      "color": "role-director",
+      "summary": "Run the whole mission yourself.",
+      "controls": ["Every system", "Every event", "Every trade-off"],
+      "learn": ["How all the systems depend on each other"],
+      "difficultyHint": "Sandbox: you answer every event.",
+      "sandbox": true,
+      "note": "You control every system; no AI teammates."
+    }
+  ]
+}

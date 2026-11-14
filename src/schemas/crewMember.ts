@@ -38,20 +38,30 @@ export const PrioritiesSchema = z
   })
 export type Priorities = z.infer<typeof PrioritiesSchema>
 
-export const CrewMemberSchema = z.strictObject({
-  id: IdSchema,
-  name: NonEmptyString,
-  role: RoleSchema,
-  /** Salary for the whole mission, millions USD. */
-  salaryM: z.number().nonnegative({ error: 'salaryM must be >= 0 (millions USD)' }),
-  traits: z.array(TraitSchema).min(1, { error: 'every crew member needs at least one trait' }),
-  skills: SkillsSchema,
-  strength: TraitEffectSchema,
-  weakness: TraitEffectSchema,
-  priorities: PrioritiesSchema,
-  backstory: NonEmptyString,
-  /** Portrait asset id, resolved to public/assets/portraits/<portrait>.webp. */
-  portrait: IdSchema,
-})
+export const CrewMemberSchema = z
+  .strictObject({
+    id: IdSchema,
+    name: NonEmptyString,
+    role: RoleSchema,
+    /** Salary for the whole mission, millions USD. */
+    salaryM: z.number().nonnegative({ error: 'salaryM must be >= 0 (millions USD)' }),
+    traits: z.array(TraitSchema),
+    skills: SkillsSchema,
+    strength: TraitEffectSchema,
+    weakness: TraitEffectSchema,
+    priorities: PrioritiesSchema,
+    backstory: NonEmptyString,
+    /** Portrait asset id, resolved to public/assets/portraits/<portrait>.webp. */
+    portrait: IdSchema,
+    /**
+     * The player's own character for one seat (not recruitable, no salary, no traits).
+     * One per role plus the Mission Director; ids are player-<role>.
+     */
+    isPlayer: z.boolean().default(false),
+  })
+  .refine((m) => m.isPlayer || m.traits.length > 0, {
+    error: 'every recruitable crew member needs at least one trait',
+  })
+  .refine((m) => !m.isPlayer || m.salaryM === 0, { error: 'player characters have no salary' })
 
 export type CrewMember = z.infer<typeof CrewMemberSchema>

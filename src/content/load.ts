@@ -14,6 +14,8 @@ import {
   LessonSchema,
   PartSchema,
   RocketSchema,
+  RoleInfoSchema,
+  type RoleInfo,
   ScenarioSchema,
   type CrewMember,
   type Destination,
@@ -31,6 +33,7 @@ import rocketsJson from './rockets.json'
 import eventsJson from './events.json'
 import lessonsJson from './lessons.json'
 import constantsJson from './constants.json'
+import rolesJson from './roles.json'
 
 export interface GameContent {
   constants: Constants
@@ -41,6 +44,7 @@ export interface GameContent {
   rockets: Rocket[]
   events: GameEvent[]
   lessons: Lesson[]
+  roles: RoleInfo[]
 }
 
 export class ContentValidationError extends Error {
@@ -203,6 +207,7 @@ export function validateContent(raw: {
   rockets: unknown
   events: unknown
   lessons: unknown
+  roles: unknown
 }): GameContent {
   const content: GameContent = {
     constants: parseConstants(raw.constants),
@@ -213,6 +218,7 @@ export function validateContent(raw: {
     rockets: parseContentFile('rockets.json', RocketSchema, raw.rockets),
     events: parseContentFile('events.json', GameEventSchema, raw.events),
     lessons: parseContentFile('lessons.json', LessonSchema, raw.lessons),
+    roles: parseContentFile('roles.json', RoleInfoSchema, raw.roles),
   }
   ;(
     [
@@ -238,6 +244,7 @@ export const RAW_CONTENT = {
   rockets: rocketsJson,
   events: eventsJson,
   lessons: lessonsJson,
+  roles: rolesJson,
 } as const
 
 let cached: GameContent | null = null
