@@ -2,37 +2,68 @@ import { useMemo, useState } from 'react'
 import { getContent } from '@/content/load'
 import { computeTotals } from '@/engine/budget'
 import { canLaunch, runLaunchCheck } from '@/engine/launchCheck'
-import { BAD_DESIGN, GOOD_DESIGN } from '@/engine/sampleDesigns'
-import type { CheckStatus } from '@/engine/types'
-import { Badge, type BadgeVariant } from '@/ui/Badge'
+import {
+  MARS_BAD_DESIGN,
+  MARS_GOOD_DESIGN,
+  MOON_BAD_DESIGN,
+  MOON_GOOD_DESIGN,
+} from '@/engine/sampleDesigns'
+import { missionTimeline } from '@/engine/timeline'
+import { Badge } from '@/ui/Badge'
 import { Button } from '@/ui/Button'
 import { Panel } from '@/ui/Panel'
 import { StatChip } from '@/ui/StatChip'
+import { Tabs } from '@/ui/Tabs'
+import { CheckList } from './CheckList'
+import { TimelineList } from './TimelineList'
 
-const STATUS_BADGE: Record<CheckStatus, BadgeVariant> = {
-  ok: 'success',
-  warn: 'warning',
-  fail: 'danger',
-}
+const DESIGNS = {
+  moon: { good: MOON_GOOD_DESIGN, bad: MOON_BAD_DESIGN },
+  mars: { good: MARS_GOOD_DESIGN, bad: MARS_BAD_DESIGN },
+} as const
 
-/** Dev panel: runs the engine on a sample design and lists the Launch Check. */
+/** Dev panel: runs the engine on a sample design and lists the timeline and Launch Check. */
 export function EngineDebug() {
   const [open, setOpen] = useState(true)
+  const [dest, setDest] = useState<'moon' | 'mars'>('moon')
   const [which, setWhich] = useState<'good' | 'bad'>('good')
-  const design = which === 'good' ? GOOD_DESIGN : BAD_DESIGN
+  const design = DESIGNS[dest][which]
 
-  const { totals, checks } = useMemo(() => {
+  const result = useMemo(() => {
     const content = getContent()
-    return { totals: computeTotals(design, content), checks: runLaunchCheck(design, content) }
+    const destination = content.destinations.find((d) => d.id === design.destinationId)!
+    return {
+      destination,
+      totals: computeTotals(design, content),
+      checks: runLaunchCheck(design, content),
+      turns: missionTimeline(destination),
+    }
   }, [design])
-  const go = canLaunch(checks)
+  const go = canLaunch(result.checks)
+  const t = result.totals
 
   return (
     <Panel
       title="Engine debug"
-      subtitle={`Sample ${which} design · ${design.rocketId}`}
+      subtitle={`${result.destination.name} · sample ${which} design · ${design.rocketId}`}
       actions={
         <>
+          <Button
+            size="sm"
+            variant={dest === 'moon' ? 'primary' : 'secondary'}
+            aria-pressed={dest === 'moon'}
+            onClick={() => setDest('moon')}
+          >
+            Moon
+          </Button>
+          <Button
+            size="sm"
+            variant={dest === 'mars' ? 'primary' : 'secondary'}
+            aria-pressed={dest === 'mars'}
+            onClick={() => setDest('mars')}
+          >
+            Mars
+          </Button>
           <Button
             size="sm"
             variant="secondary"
@@ -53,38 +84,56 @@ export function EngineDebug() {
             <StatChip
               icon="IconWeight"
               label="Mass"
-              value={totals.massKg.toLocaleString('en-US')}
+              value={Math.round(t.massKg).toLocaleString('en-US')}
               unit="kg"
             />
-            <StatChip icon="IconBolt" label="Gen" value={Math.round(totals.powerGenW)} unit="W" />
-            <StatChip icon="IconBolt" label="Use" value={totals.powerUseW} unit="W" />
-            <StatChip icon="IconCoin" label="Cost" value={`$${totals.costM.toFixed(1)}`} unit="M" />
             <StatChip
-              icon="IconAntenna"
-              label="Data"
-              value={`${totals.dataGenGbPerDay} → ${totals.dataReturnGbPerDay}`}
-              unit="GB/d"
+              icon="IconBolt"
+              label="Gen / use"
+              value={`${Math.round(t.powerGenW)} / ${t.powerUseW}`}
+              unit="W"
             />
-            <StatChip icon="IconFlask" label="Science" value={totals.sciencePerDay} unit="/day" />
+            <StatChip icon="IconCoin" label="Cost" value={`$${t.costM.toFixed(1)}`} unit="M" />
+            <StatChip
+              icon="IconRecycle"
+              label="Recycling H2O / O2"
+              value={`${Math.round(t.waterRecoveryRate * 100)}% / ${Math.round(t.oxygenRecoveryRate * 100)}%`}
+            />
+            <StatChip
+              icon="IconFlask"
+              label="Science"
+              value={t.sciencePerDay}
+              unit="/surface day"
+            />
           </div>
-          <ul className="mt-4 divide-y divide-border rounded-md border border-border">
-            {checks.map((c) => (
-              <li key={c.id} className="flex items-start gap-3 px-3 py-2.5">
-                <Badge variant={STATUS_BADGE[c.status]} className="mt-0.5 w-12 justify-center">
-                  {c.status}
-                </Badge>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-primary">{c.label}</p>
-                  <p className="text-sm text-muted">{c.explanation}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-4">
+            <Tabs
+              key={dest}
+              tabs={[
+                {
+                  id: 'checks',
+                  label: 'Launch check',
+                  content: <CheckList checks={result.checks} />,
+                },
+                {
+                  id: 'timeline',
+                  label: `Timeline (${result.turns.length} turns)`,
+                  content: (
+                    <TimelineList
+                      destination={result.destination}
+                      turns={result.turns}
+                      design={design}
+                    />
+                  ),
+                },
+              ]}
+            />
+          </div>
         </>
       ) : (
         <p className="text-sm text-muted">
-          {checks.filter((c) => c.status === 'fail').length} failing,{' '}
-          {checks.filter((c) => c.status === 'warn').length} warning.
+          {result.checks.filter((c) => c.status === 'fail').length} failing,{' '}
+          {result.checks.filter((c) => c.status === 'warn').length} warning.
         </p>
       )}
     </Panel>

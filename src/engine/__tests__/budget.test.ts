@@ -8,13 +8,13 @@ const content = loadContent()
 describe('computeTotals (good design)', () => {
   const t = computeTotals(GOOD_DESIGN, content)
 
-  it('mass: parts 3,370 + supplies 380 + crew 4 × 100 = 4,150 kg', () => {
+  it('mass: parts 3,370 + supplies 450 + crew 4 × 100 = 4,220 kg', () => {
     // parts: 140 + 900 + 350 + 35 + 45 + 400 + 1,200 + 240 + 60 = 3,370
-    // supplies: 110 O2 + 230 food + 40 water = 380
+    // supplies: 130 O2 + 270 food + 50 water = 450
     expect(t.partsMassKg).toBe(3370)
-    expect(t.suppliesKg).toBe(380)
+    expect(t.suppliesKg).toBe(450)
     expect(t.crewMassKg).toBe(400)
-    expect(t.massKg).toBe(4150)
+    expect(t.massKg).toBe(4220)
   })
 
   it('power: 10 kW × 1.0 × 0.7 = 7,000 W generated; 1,500 + 80 + 120 + 400 = 2,100 W used', () => {
@@ -66,10 +66,10 @@ describe('computeTotals edge cases', () => {
 })
 
 describe('margins', () => {
-  it('good design: mass 0.48125, power 0.7, budget 0.45183, data 0.98148', () => {
+  it('good design: mass 0.4725, power 0.7, budget 0.45183, data 0.98148', () => {
     const { rocket, scenario, destination } = resolveDesign(GOOD_DESIGN, content)
     const m = computeMargins(computeTotals(GOOD_DESIGN, content), rocket, scenario, destination)
-    expect(m.mass).toBeCloseTo(0.48125, 5) // (8,000 − 4,150) ÷ 8,000
+    expect(m.mass).toBeCloseTo(0.4725, 5) // (8,000 − 4,220) ÷ 8,000
     expect(m.power).toBeCloseTo(0.7, 10) // (7,000 − 2,100) ÷ 7,000
     expect(m.budget).toBeCloseTo(0.451833, 5) // (1,200 − 657.8) ÷ 1,200
     expect(m.data).toBeCloseTo(0.981481, 5) // (108 − 2) ÷ 108

@@ -26,29 +26,31 @@ describe('full designs', () => {
       'data',
       'crew-count',
       'habitat',
+      'supply-feasibility',
     ])
     expect(checks.filter((c) => c.status !== 'ok')).toEqual([])
     expect(canLaunch(checks)).toBe(true)
   })
 
-  it('bad design fails exactly mass and supplies', () => {
-    // Mass: 3,370 parts + (110 + 100 + 40) supplies + 400 crew = 4,020 kg > 3,000 kg Light.
-    // Food: 100 ÷ 7.2 = 13.9 days < 28-day mission.
-    expect(failing(BAD_DESIGN)).toEqual(['mass', 'supplies'])
+  it('bad design fails exactly mass, supplies and supply feasibility', () => {
+    // Mass: 3,370 parts + (130 + 100 + 50) supplies + 400 crew = 4,050 kg > 3,000 kg Light.
+    // Food: 100 ÷ 7.2 = 13.9 days < 34-day mission (3 + 28 + 3).
+    // Feasibility: 3,770 dry + 34-day needs (114.24 O2 + 244.8 food + 40.8 water) = 4,170 kg > 3,000.
+    expect(failing(BAD_DESIGN)).toEqual(['mass', 'supplies', 'supply-feasibility'])
     expect(canLaunch(run(BAD_DESIGN))).toBe(false)
     expect(check(BAD_DESIGN, 'mass').explanation).toBe(
-      "Total mass 4,020 kg exceeds the Light Lunar Launcher's 3,000 kg to Moon — South Pole by 1,020 kg.",
+      "Total mass 4,050 kg exceeds the Light Lunar Launcher's 3,000 kg to Moon — South Pole by 1,050 kg.",
     )
     expect(check(BAD_DESIGN, 'supplies').explanation).toMatch(
-      /^Supplies last 13\.9 days \(food runs out first\); the mission needs 28 days plus a 3-day reserve = 31 days\.$/,
+      /^Supplies last 13\.9 days \(food runs out first\); the mission needs 34 days plus a 3-day reserve = 37 days\.$/,
     )
   })
 })
 
 describe('mass', () => {
   it('exactly at capacity is not a failure (warns: 0% < 5% margin target)', () => {
-    // 4,150 kg + 3,850 kg extra water = 8,000 kg = Medium launcher capacity.
-    const d = { ...GOOD_DESIGN, supplies: { ...GOOD_DESIGN.supplies, waterKg: 40 + 3850 } }
+    // 4,220 kg + 3,780 kg extra water = 8,000 kg = Medium launcher capacity.
+    const d = { ...GOOD_DESIGN, supplies: { ...GOOD_DESIGN.supplies, waterKg: 50 + 3780 } }
     const c = check(d, 'mass')
     expect(c.value).toBe(8000)
     expect(c.limit).toBe(8000)
@@ -100,8 +102,8 @@ describe('power and battery', () => {
 })
 
 describe('supplies, crew and habitat', () => {
-  it('covers the mission but not the reserve -> warn (220 ÷ 7.2 = 30.6 days, needs 31)', () => {
-    const d = { ...GOOD_DESIGN, supplies: { ...GOOD_DESIGN.supplies, foodKg: 220 } }
+  it('covers the mission but not the reserve -> warn (260 ÷ 7.2 = 36.1 days: >= 34, < 37)', () => {
+    const d = { ...GOOD_DESIGN, supplies: { ...GOOD_DESIGN.supplies, foodKg: 260 } }
     expect(check(d, 'supplies').status).toBe('warn')
   })
 

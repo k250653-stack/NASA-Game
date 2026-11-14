@@ -1,16 +1,44 @@
 {
-  "_note": "Approximate, verify. All numbers are placeholders to be checked against the NASA source URLs before the demo. transitDays and signalDelaySec are one-way; Mars values vary with the launch window. lightFraction, darkPeriodHours, dustLossPerDay and contactHoursPerDay are game-balance estimates (Moon south pole ridges see ~70% sunlight with dark spells up to ~100 h; Mars sols are ~24.6 h with ~12-13 h night).",
+  "_note": "Approximate, verify. All numbers are placeholders to be checked against the NASA source URLs before the demo. transitDays and signalDelaySec are one-way typical values; signalDelayRangeSec is [closest, farthest] (Moon ~1.19-1.35 s from its elliptical orbit; Mars ~3-22 min). lightFraction, darkPeriodHours, dustLossPerDay, contact hours and phase lengths are game-balance estimates. Phase days must add up to each scenario's durationDays (checked in load.ts).",
   "items": [
     {
       "id": "moon",
       "name": "Moon — South Pole",
       "transitDays": 3,
       "signalDelaySec": 1.3,
+      "signalDelayRangeSec": [1.19, 1.35],
       "sunlightFactor": 1.0,
       "lightFraction": 0.7,
       "darkPeriodHours": 100,
       "dustLossPerDay": 0.0005,
       "contactHoursPerDay": 24,
+      "transitContactHoursPerDay": 16,
+      "phases": [
+        {
+          "id": "outbound",
+          "name": "Trans-lunar coast",
+          "days": 3,
+          "turnDays": 3,
+          "location": "transit",
+          "eventsTag": "moon-transit"
+        },
+        {
+          "id": "surface",
+          "name": "Surface operations",
+          "days": 28,
+          "turnDays": 4,
+          "location": "surface",
+          "eventsTag": "moon-surface"
+        },
+        {
+          "id": "return",
+          "name": "Return to Earth",
+          "days": 3,
+          "turnDays": 3,
+          "location": "transit",
+          "eventsTag": "moon-transit"
+        }
+      ],
       "gravityG": 0.17,
       "resupplyPossible": true,
       "hazards": ["dust", "cold-night", "solar-flare"],
@@ -21,11 +49,39 @@
       "name": "Mars — Jezero Region",
       "transitDays": 210,
       "signalDelaySec": 600,
+      "signalDelayRangeSec": [180, 1320],
       "sunlightFactor": 0.43,
       "lightFraction": 0.5,
       "darkPeriodHours": 13,
       "dustLossPerDay": 0.002,
       "contactHoursPerDay": 8,
+      "transitContactHoursPerDay": 4,
+      "phases": [
+        {
+          "id": "outbound",
+          "name": "Earth-Mars cruise",
+          "days": 210,
+          "turnDays": 30,
+          "location": "transit",
+          "eventsTag": "mars-cruise"
+        },
+        {
+          "id": "surface",
+          "name": "Surface stay",
+          "days": 300,
+          "turnDays": 15,
+          "location": "surface",
+          "eventsTag": "mars-surface"
+        },
+        {
+          "id": "return",
+          "name": "Mars-Earth cruise",
+          "days": 220,
+          "turnDays": 30,
+          "location": "transit",
+          "eventsTag": "mars-cruise"
+        }
+      ],
       "gravityG": 0.38,
       "resupplyPossible": false,
       "hazards": ["dust-storm", "radiation", "solar-flare"],

@@ -58,21 +58,23 @@ export interface LifeSupportKg {
 
 /**
  * Consumables needed for a crew over a number of days.
- * Each = crew × days × per-crew-per-day rate. Recycling only reduces water:
- * water = crew × days × water rate × (1 − recovery rate).
+ * Each = crew × days × per-crew-per-day rate. Recycling reduces water and oxygen, never food:
+ * water  = crew × days × water rate  × (1 − water recovery rate)
+ * oxygen = crew × days × oxygen rate × (1 − oxygen recovery rate)
  */
 export function lifeSupportNeedKg(
   crewCount: number,
   days: number,
   perCrewPerDay: PerCrewPerDay,
   waterRecoveryRate: number,
+  oxygenRecoveryRate = 0,
 ): LifeSupportKg {
   const crewDays = Math.max(0, crewCount) * Math.max(0, days)
-  const recovery = Math.min(1, Math.max(0, waterRecoveryRate))
+  const share = (r: number) => Math.min(1, Math.max(0, r))
   return {
-    oxygen: crewDays * perCrewPerDay.oxygenKg,
+    oxygen: crewDays * perCrewPerDay.oxygenKg * (1 - share(oxygenRecoveryRate)),
     food: crewDays * perCrewPerDay.foodKg,
-    water: crewDays * perCrewPerDay.waterKg * (1 - recovery),
+    water: crewDays * perCrewPerDay.waterKg * (1 - share(waterRecoveryRate)),
   }
 }
 
@@ -90,7 +92,7 @@ export interface DaysOfSupply {
 
 /**
  * How long packed supplies last.
- * Days for each = supply kg ÷ (crew × daily rate); water's daily rate is × (1 − recovery).
+ * Days for each = supply kg ÷ (crew × daily rate); water and oxygen rates are × (1 − recovery).
  * No crew, or a fully recycled consumable, lasts forever (Infinity).
  */
 export function daysOfSupply(
@@ -98,8 +100,15 @@ export function daysOfSupply(
   crewCount: number,
   perCrewPerDay: PerCrewPerDay,
   waterRecoveryRate: number,
+  oxygenRecoveryRate = 0,
 ): DaysOfSupply {
-  const perDay = lifeSupportNeedKg(crewCount, 1, perCrewPerDay, waterRecoveryRate)
+  const perDay = lifeSupportNeedKg(
+    crewCount,
+    1,
+    perCrewPerDay,
+    waterRecoveryRate,
+    oxygenRecoveryRate,
+  )
   const last = (kg: number, use: number) =>
     use > 0 ? Math.max(0, kg) / use : Number.POSITIVE_INFINITY
   const oxygen = last(supplies.oxygenKg, perDay.oxygen)

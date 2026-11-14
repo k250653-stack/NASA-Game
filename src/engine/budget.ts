@@ -40,6 +40,11 @@ function sumStat(parts: readonly Part[], key: PartStatKey): number {
   return sum(parts, (p) => p.stats[key] ?? 0)
 }
 
+/** Highest value of a stat; recyclers do not stack, the best one sets the rate. */
+function bestStat(parts: readonly Part[], key: PartStatKey): number {
+  return parts.reduce((best, p) => Math.max(best, p.stats[key] ?? 0), 0)
+}
+
 /**
  * Totals over the whole design.
  * - mass = parts + supplies + crew × crewMassKg (body + gear)
@@ -81,7 +86,12 @@ export function computeTotals(design: Design, content: EngineContent): Totals {
     ),
     sciencePerDay: sumStat(parts, 'sciencePointsPerDay'),
     batteryWh: sumStat(parts, 'capacityWh'),
-    waterRecoveryRate: parts.reduce((best, p) => Math.max(best, p.stats.waterRecoveryRate ?? 0), 0),
+    dataReturnTransitGbPerDay: dataReturnedGbPerDay(
+      sumStat(parts, 'dataRateMbps'),
+      destination.transitContactHoursPerDay,
+    ),
+    waterRecoveryRate: bestStat(parts, 'waterRecoveryRate'),
+    oxygenRecoveryRate: bestStat(parts, 'oxygenRecoveryRate'),
     suitCount: sumStat(parts, 'suitCount'),
     spareKits: sumStat(parts, 'spareKits'),
     crewCapacity: sumStat(parts, 'crewCapacity'),

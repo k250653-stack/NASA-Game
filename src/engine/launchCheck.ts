@@ -5,6 +5,8 @@
 import { computeMargins, computeTotals, resolveDesign, rocketCapacityKg } from './budget'
 import { fmt, fmtPct } from './format'
 import { batteryMarginRatio, batteryNeededWh, daysOfSupply } from './physics'
+import { supplyFeasibilityCheck } from './supplyFeasibility'
+import { totalMissionDays } from './timeline'
 import type { Check, Design, EngineContent } from './types'
 
 /** True when nothing failed. Warnings do not block launch. */
@@ -108,21 +110,28 @@ export function runLaunchCheck(design: Design, content: EngineContent): Check[] 
           (batteryOk ? '.' : `, ${fmt(neededWh - t.batteryWh)} Wh short.`),
   })
 
-  // 5. Supplies for duration + reserve.
-  const supply = daysOfSupply(design.supplies, t.crewCount, C.perCrewPerDay, t.waterRecoveryRate)
+  // 5. Supplies for the whole mission (all phases) + reserve.
+  const missionDays = totalMissionDays(destination)
+  const supply = daysOfSupply(
+    design.supplies,
+    t.crewCount,
+    C.perCrewPerDay,
+    t.waterRecoveryRate,
+    t.oxygenRecoveryRate,
+  )
   const reserve = C.reserveDaysRequired.value
-  const required = scenario.durationDays + reserve
+  const required = missionDays + reserve
   checks.push({
     id: 'supplies',
     label: 'Supplies',
-    status: supply.days < scenario.durationDays ? 'fail' : supply.days < required ? 'warn' : 'ok',
+    status: supply.days < missionDays ? 'fail' : supply.days < required ? 'warn' : 'ok',
     value: supply.days,
     limit: required,
     unit: 'days',
     explanation:
       t.crewCount === 0
         ? 'No crew on board, so supplies are not consumed.'
-        : `Supplies last ${fmt(supply.days, 1)} days (${supply.limiting} runs out first); the mission needs ${fmt(scenario.durationDays)} days plus a ${fmt(reserve)}-day reserve = ${fmt(required)} days.`,
+        : `Supplies last ${fmt(supply.days, 1)} days (${supply.limiting} runs out first); the mission needs ${fmt(missionDays)} days plus a ${fmt(reserve)}-day reserve = ${fmt(required)} days.`,
   })
 
   // 6. EVA suits.
@@ -186,6 +195,12 @@ export function runLaunchCheck(design: Design, content: EngineContent): Check[] 
         ? `Habitats house ${fmt(t.crewCapacity)} crew; ${fmt(t.crewCount)} on board.`
         : `Habitats only house ${fmt(t.crewCapacity)} crew but ${fmt(t.crewCount)} are on board.`,
   })
+
+  // 10. Could the rocket even carry everything this mission needs?
+  // Uses mission days (no reserve): "can you even pack enough for the trip?"
+  checks.push(
+    supplyFeasibilityCheck(t, missionDays, C.perCrewPerDay, capacity, rocket?.name ?? null),
+  )
 
   return checks
 }

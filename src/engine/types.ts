@@ -23,7 +23,16 @@ export interface Design {
 export type CheckStatus = 'ok' | 'warn' | 'fail'
 
 export type CheckId =
-  'mass' | 'budget' | 'power' | 'battery' | 'supplies' | 'suits' | 'data' | 'crew-count' | 'habitat'
+  | 'mass'
+  | 'budget'
+  | 'power'
+  | 'battery'
+  | 'supplies'
+  | 'suits'
+  | 'data'
+  | 'crew-count'
+  | 'habitat'
+  | 'supply-feasibility'
 
 /** One line of the Launch Check. */
 export interface Check {
@@ -55,12 +64,17 @@ export interface Totals {
   /** Parts + rocket + crew salaries, millions USD. */
   costM: number
   dataGenGbPerDay: number
-  /** Downlink capacity per day. */
+  /** Downlink capacity per surface day. */
   dataReturnGbPerDay: number
+  /** Downlink capacity per transit day (fewer contact hours). */
+  dataReturnTransitGbPerDay: number
+  /** Science per surface day (all parts). */
   sciencePerDay: number
   batteryWh: number
-  /** Best recycler on board, 0-1. */
+  /** Best water recycler on board, 0-1. */
   waterRecoveryRate: number
+  /** Best oxygen system on board, 0-1. */
+  oxygenRecoveryRate: number
   suitCount: number
   spareKits: number
   crewCapacity: number

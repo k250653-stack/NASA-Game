@@ -19,13 +19,33 @@ describe('content loading', () => {
   it('validates every bundled content file', () => {
     const content = loadContent()
     expect(content.destinations.map((d) => d.id)).toEqual(['moon', 'mars'])
-    expect(content.scenarios).toHaveLength(1)
+    expect(content.scenarios.map((s) => s.id)).toEqual(['shackleton-ice-hunt', 'jezero-long-stay'])
     expect(content.crew).toHaveLength(4)
     expect(content.parts.length).toBeGreaterThanOrEqual(16)
     expect(content.constants.perCrewPerDay.oxygenKg).toBe(0.84)
-    expect(content.rockets).toHaveLength(3)
+    expect(content.rockets).toHaveLength(4)
     expect(content.events).toHaveLength(2)
     expect(content.lessons).toHaveLength(1)
+  })
+
+  it('every recycler draws power and can fail (so recycling is a trade-off)', () => {
+    const recyclers = loadContent().parts.filter(
+      (p) => (p.stats.waterRecoveryRate ?? 0) > 0 || (p.stats.oxygenRecoveryRate ?? 0) > 0,
+    )
+    expect(recyclers.length).toBeGreaterThanOrEqual(4)
+    for (const p of recyclers) {
+      expect(p.powerW, p.id).toBeLessThan(0)
+      expect(p.stats.failureChancePerTurn ?? 0, p.id).toBeGreaterThan(0)
+    }
+  })
+
+  it('rejects a scenario whose duration does not match the phase days', () => {
+    const raw = cloneRaw()
+    const scenarios = raw.scenarios as { items: Array<{ durationDays: number }> }
+    scenarios.items[1]!.durationDays = 700
+    expect(() => validateContent(raw)).toThrow(
+      /"jezero-long-stay" -> durationDays is 700 but the "mars" phases add up to 730 days \(outbound 210 \+ surface 300 \+ return 220\)/,
+    )
   })
 
   it('sample crew covers all four roles and all three traits', () => {

@@ -25,6 +25,9 @@ export const PART_STAT_KEYS = [
   'scienceDataGbPerDay', // data an instrument produces, GB/day
   'sciencePointsPerDay', // science score an instrument or rover adds per day
   'waterRecoveryRate', // share of water recycled, 0-1
+  'oxygenRecoveryRate', // share of oxygen regenerated, 0-1
+  'failureChancePerTurn', // chance the part breaks in a turn, 0-1
+  'radiationShielding', // share of radiation dose blocked, 0-1
   'suitCount', // EVA suits provided
   'spareKits', // repair kits provided
   'storageKg', // supply storage the part provides, kg
@@ -37,9 +40,24 @@ export type PartStatKey = z.infer<typeof PartStatKeySchema>
 
 export const PartStatsSchema = z
   .partialRecord(PartStatKeySchema, z.number().nonnegative({ error: 'stats must be >= 0' }))
-  .refine((s) => s.waterRecoveryRate === undefined || s.waterRecoveryRate <= 1, {
-    error: 'stats.waterRecoveryRate is a share and must be <= 1',
-  })
+  .refine(
+    (s) =>
+      (
+        [
+          'waterRecoveryRate',
+          'oxygenRecoveryRate',
+          'failureChancePerTurn',
+          'radiationShielding',
+        ] as const
+      ).every((k) => s[k] === undefined || s[k] <= 1),
+    {
+      error:
+        'recovery rates, failureChancePerTurn and radiationShielding are shares and must be <= 1',
+    },
+  )
+
+/** Where a part works: "surface" parts (instruments, rovers) do nothing in transit. */
+export const PART_LOCATIONS = ['surface', 'any'] as const
 
 export const PartSchema = z.strictObject({
   id: IdSchema,
@@ -54,6 +72,10 @@ export const PartSchema = z.strictObject({
   costM: z.number().nonnegative({ error: 'costM must be >= 0 (millions USD)' }),
   /** Which crew role owns decisions about this part. */
   ownerRole: RoleSchema,
+  /** "surface" = only works on the surface. Defaults to "any". */
+  location: z
+    .enum(PART_LOCATIONS, { error: () => `location must be one of: ${PART_LOCATIONS.join(', ')}` })
+    .default('any'),
   /** Numeric stats the engine reads, e.g. { capacityWh: 50000 }. Only known keys allowed. */
   stats: PartStatsSchema,
   description: NonEmptyString,

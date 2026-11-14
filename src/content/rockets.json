@@ -1,5 +1,5 @@
 {
-  "_note": "Generic launchers, deliberately not real brand names yet. Capacity, cost and reliability are approximate game-balance placeholders. A missing destination key means the rocket cannot reach it.",
+  "_note": "Approximate, verify. Generic launchers, deliberately not real brand names yet. Capacity, cost and reliability are game-balance placeholders; the Super Heavy is sized so a two-year Mars stay is only possible with recycling. A missing destination key means the rocket cannot reach it.",
   "items": [
     {
       "id": "light-lunar-launcher",
@@ -24,6 +24,14 @@
       "costM": 400,
       "reliability": 0.97,
       "source": "https://www.nasa.gov/reference/space-launch-system/"
+    },
+    {
+      "id": "super-heavy-launcher",
+      "name": "Super Heavy Launcher",
+      "capacityKgByDestination": { "moon": 50000, "mars": 25000 },
+      "costM": 900,
+      "reliability": 0.93,
+      "source": "https://www.nasa.gov/humans-in-space/humans-to-mars/"
     }
   ]
 }

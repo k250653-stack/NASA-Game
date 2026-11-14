@@ -1,5 +1,5 @@
 {
-  "_note": "Approximate, verify. Mass, power, cost and stats are game-balance placeholders, not vendor figures. Each category has 2-3 options so there are trade-offs (cheap/heavy/weak vs expensive/light/strong). powerW is constant draw (negative) or sun-independent production (positive); solar arrays use stats.ratedPowerW instead.",
+  "_note": "Approximate, verify. Mass, power, cost and stats are game-balance placeholders, not vendor figures. Each category has 2+ options so there are trade-offs. powerW is constant draw (negative) or sun-independent production (positive); solar arrays use stats.ratedPowerW. location \"surface\" parts do nothing in transit. Every recycler (waterRecoveryRate or oxygenRecoveryRate > 0) must draw power and have failureChancePerTurn.",
   "items": [
     {
       "id": "solar-array-5kw",
@@ -9,7 +9,9 @@
       "powerW": 0,
       "costM": 22,
       "ownerRole": "power_life",
-      "stats": { "ratedPowerW": 5000 },
+      "stats": {
+        "ratedPowerW": 5000
+      },
       "description": "Proven fold-out array. Cheap, but heavy for its output. Output scales with sunlight and drops as dust builds up.",
       "icon": "IconSolarPanel"
     },
@@ -21,7 +23,9 @@
       "powerW": 0,
       "costM": 60,
       "ownerRole": "power_life",
-      "stats": { "ratedPowerW": 10000 },
+      "stats": {
+        "ratedPowerW": 10000
+      },
       "description": "Lightweight flexible blanket array. Twice the output for little extra mass, at almost three times the price.",
       "icon": "IconSolarPanel2"
     },
@@ -45,7 +49,9 @@
       "powerW": 0,
       "costM": 15,
       "ownerRole": "power_life",
-      "stats": { "capacityWh": 50000 },
+      "stats": {
+        "capacityWh": 50000
+      },
       "description": "Standard battery modules. Cheap per kWh but heavy.",
       "icon": "IconBattery"
     },
@@ -57,7 +63,9 @@
       "powerW": 0,
       "costM": 40,
       "ownerRole": "power_life",
-      "stats": { "capacityWh": 150000 },
+      "stats": {
+        "capacityWh": 150000
+      },
       "description": "Three packs racked together. Enough for a short night, too heavy for a long one.",
       "icon": "IconBattery4"
     },
@@ -69,7 +77,9 @@
       "powerW": 0,
       "costM": 120,
       "ownerRole": "power_life",
-      "stats": { "capacityWh": 200000 },
+      "stats": {
+        "capacityWh": 200000
+      },
       "description": "Splits water by day and recombines it at night. Much lighter per kWh than batteries, but expensive.",
       "icon": "IconBatteryCharging"
     },
@@ -81,7 +91,9 @@
       "powerW": -20,
       "costM": 2,
       "ownerRole": "comms_nav",
-      "stats": { "dataRateMbps": 0.5 },
+      "stats": {
+        "dataRateMbps": 0.5
+      },
       "description": "Wide beam, no pointing needed. Very slow: fine for voice and telemetry, poor for science data.",
       "icon": "IconAntennaBars5"
     },
@@ -93,7 +105,9 @@
       "powerW": -80,
       "costM": 18,
       "ownerRole": "comms_nav",
-      "stats": { "dataRateMbps": 10 },
+      "stats": {
+        "dataRateMbps": 10
+      },
       "description": "Narrow-beam dish for high data rates. Must be pointed precisely at Earth.",
       "icon": "IconAntenna"
     },
@@ -105,7 +119,9 @@
       "powerW": -150,
       "costM": 60,
       "ownerRole": "comms_nav",
-      "stats": { "dataRateMbps": 200 },
+      "stats": {
+        "dataRateMbps": 200
+      },
       "description": "Laser link with enormous bandwidth. Expensive and blocked by clouds at the Earth station.",
       "icon": "IconSatellite"
     },
@@ -117,7 +133,11 @@
       "powerW": -120,
       "costM": 38,
       "ownerRole": "science",
-      "stats": { "scienceDataGbPerDay": 2, "sciencePointsPerDay": 4 },
+      "location": "surface",
+      "stats": {
+        "scienceDataGbPerDay": 2,
+        "sciencePointsPerDay": 4
+      },
       "description": "One-metre drill with an onboard spectrometer to confirm water ice in shadowed regolith.",
       "icon": "IconMicroscope"
     },
@@ -129,7 +149,11 @@
       "powerW": -60,
       "costM": 20,
       "ownerRole": "science",
-      "stats": { "scienceDataGbPerDay": 8, "sciencePointsPerDay": 3 },
+      "location": "surface",
+      "stats": {
+        "scienceDataGbPerDay": 8,
+        "sciencePointsPerDay": 3
+      },
       "description": "Maps buried ice layers. Light and cheap, but produces a lot of data to send home.",
       "icon": "IconRadar"
     },
@@ -141,7 +165,11 @@
       "powerW": -800,
       "costM": 90,
       "ownerRole": "science",
-      "stats": { "scienceDataGbPerDay": 1, "sciencePointsPerDay": 6 },
+      "location": "surface",
+      "stats": {
+        "scienceDataGbPerDay": 1,
+        "sciencePointsPerDay": 6
+      },
       "description": "Full lab for on-site analysis. Highest science return, but heavy and power-hungry.",
       "icon": "IconFlask"
     },
@@ -153,7 +181,9 @@
       "powerW": -500,
       "costM": 30,
       "ownerRole": "power_life",
-      "stats": { "waterRecoveryRate": 0 },
+      "stats": {
+        "waterRecoveryRate": 0
+      },
       "description": "Simple air scrubbing with no water recycling. Light and cheap, but every litre of water must be launched.",
       "icon": "IconWind"
     },
@@ -165,7 +195,10 @@
       "powerW": -1500,
       "costM": 95,
       "ownerRole": "power_life",
-      "stats": { "waterRecoveryRate": 0.9 },
+      "stats": {
+        "waterRecoveryRate": 0.9,
+        "failureChancePerTurn": 0.02
+      },
       "description": "Air revitalisation and 90% water recovery for a crew of four.",
       "icon": "IconLungs"
     },
@@ -177,9 +210,42 @@
       "powerW": -2000,
       "costM": 160,
       "ownerRole": "power_life",
-      "stats": { "waterRecoveryRate": 0.98 },
-      "description": "Station-class recycler recovering 98% of water. Heavy, power-hungry and expensive.",
+      "stats": {
+        "waterRecoveryRate": 0.98,
+        "failureChancePerTurn": 0.03
+      },
+      "description": "Station-class recycler recovering 98% of water: the only way to make a two-year Mars stay fit on a rocket. Heavy, power-hungry, expensive, and it can break.",
       "icon": "IconRecycle"
+    },
+    {
+      "id": "water-recycler-85",
+      "name": "Water Recovery System (85%)",
+      "category": "life_support",
+      "massKg": 450,
+      "powerW": -1200,
+      "costM": 70,
+      "ownerRole": "power_life",
+      "stats": {
+        "waterRecoveryRate": 0.85,
+        "failureChancePerTurn": 0.025
+      },
+      "description": "Mid-range distiller that recovers 85% of water from urine and humidity. Cheaper than the advanced recycler but packs more water.",
+      "icon": "IconDroplet"
+    },
+    {
+      "id": "oxygen-generator",
+      "name": "Oxygen Generation Assembly",
+      "category": "life_support",
+      "massKg": 700,
+      "powerW": -3000,
+      "costM": 140,
+      "ownerRole": "power_life",
+      "stats": {
+        "oxygenRecoveryRate": 0.75,
+        "failureChancePerTurn": 0.03
+      },
+      "description": "Splits water into oxygen and recovers oxygen from exhaled CO2, covering 75% of the crew's oxygen. Draws a lot of power.",
+      "icon": "IconBubble"
     },
     {
       "id": "eva-suit",
@@ -189,7 +255,9 @@
       "powerW": 0,
       "costM": 15,
       "ownerRole": "science",
-      "stats": { "suitCount": 1 },
+      "stats": {
+        "suitCount": 1
+      },
       "description": "Pressurised suit for surface work. One suit supports one crew member outside at a time.",
       "icon": "IconShirt"
     },
@@ -201,7 +269,9 @@
       "powerW": 0,
       "costM": 28,
       "ownerRole": "science",
-      "stats": { "suitCount": 2 },
+      "stats": {
+        "suitCount": 2
+      },
       "description": "Two suits so crew can always walk outside in pairs, the safe way.",
       "icon": "IconUsers"
     },
@@ -213,7 +283,9 @@
       "powerW": 0,
       "costM": 6,
       "ownerRole": "launch_budget",
-      "stats": { "spareKits": 1 },
+      "stats": {
+        "spareKits": 1
+      },
       "description": "Fuses, pumps, seals and connectors for the most likely failures.",
       "icon": "IconTool"
     },
@@ -225,7 +297,9 @@
       "powerW": 0,
       "costM": 15,
       "ownerRole": "launch_budget",
-      "stats": { "spareKits": 3 },
+      "stats": {
+        "spareKits": 3
+      },
       "description": "Three full repair kits. Heavy, but you can fix almost anything twice.",
       "icon": "IconPackage"
     },
@@ -237,7 +311,11 @@
       "powerW": -400,
       "costM": 70,
       "ownerRole": "comms_nav",
-      "stats": { "sciencePointsPerDay": 2, "scienceDataGbPerDay": 1 },
+      "location": "surface",
+      "stats": {
+        "sciencePointsPerDay": 2,
+        "scienceDataGbPerDay": 1
+      },
       "description": "Two-seat rover that reaches science sites beyond walking distance.",
       "icon": "IconCar"
     },
@@ -249,7 +327,11 @@
       "powerW": -1000,
       "costM": 250,
       "ownerRole": "comms_nav",
-      "stats": { "sciencePointsPerDay": 5, "scienceDataGbPerDay": 3 },
+      "location": "surface",
+      "stats": {
+        "sciencePointsPerDay": 5,
+        "scienceDataGbPerDay": 3
+      },
       "description": "Shirt-sleeve rover for multi-day traverses. Huge science reach, huge mass.",
       "icon": "IconTruck"
     },
@@ -261,7 +343,10 @@
       "powerW": -200,
       "costM": 50,
       "ownerRole": "power_life",
-      "stats": { "crewCapacity": 2, "storageKg": 300 },
+      "stats": {
+        "crewCapacity": 2,
+        "storageKg": 300
+      },
       "description": "Cramped lander cabin. Light and cheap, but only fits two.",
       "icon": "IconBox"
     },
@@ -273,7 +358,10 @@
       "powerW": -400,
       "costM": 120,
       "ownerRole": "power_life",
-      "stats": { "crewCapacity": 4, "storageKg": 1500 },
+      "stats": {
+        "crewCapacity": 4,
+        "storageKg": 1500
+      },
       "description": "Packs small for launch and expands on the surface. Good volume for its mass.",
       "icon": "IconTent"
     },
@@ -285,9 +373,42 @@
       "powerW": -600,
       "costM": 200,
       "ownerRole": "power_life",
-      "stats": { "crewCapacity": 6, "storageKg": 3000 },
+      "stats": {
+        "crewCapacity": 6,
+        "storageKg": 3000
+      },
       "description": "Station-style module with radiation shielding and room to spare. Very heavy.",
       "icon": "IconBuilding"
+    },
+    {
+      "id": "radiation-shelter",
+      "name": "Radiation Storm Shelter",
+      "category": "habitat",
+      "massKg": 2500,
+      "powerW": -100,
+      "costM": 90,
+      "ownerRole": "power_life",
+      "stats": {
+        "radiationShielding": 0.6
+      },
+      "description": "Water-walled refuge where the crew hides during solar particle events. Blocks most of the dose; houses no one long-term.",
+      "icon": "IconShield"
+    },
+    {
+      "id": "habitat-large-8",
+      "name": "Long-Stay Habitat (8 crew)",
+      "category": "habitat",
+      "massKg": 9000,
+      "powerW": -1500,
+      "costM": 350,
+      "ownerRole": "power_life",
+      "stats": {
+        "crewCapacity": 8,
+        "storageKg": 8000,
+        "radiationShielding": 0.2
+      },
+      "description": "Two-deck surface base with storage for years of supplies. Enormous mass and power draw.",
+      "icon": "IconBuildingCommunity"
     }
   ]
 }

@@ -1,16 +1,27 @@
 {
-  "_note": "Budget, duration and science target are approximate game-balance placeholders, not real mission figures.",
+  "_note": "Approximate, verify. Budget and science targets are game-balance placeholders, not real mission figures. durationDays is the WHOLE mission (outbound + surface + return) and must equal the sum of the destination's phase days.",
   "items": [
     {
       "id": "shackleton-ice-hunt",
       "destinationId": "moon",
       "name": "Shackleton Ice Hunt",
-      "objective": "Land near Shackleton crater, survive one full lunar day-night cycle and confirm water ice in a permanently shadowed region.",
-      "durationDays": 28,
+      "objective": "Land near Shackleton crater, spend 28 days on the surface through a lunar night and confirm water ice in a permanently shadowed region.",
+      "durationDays": 34,
       "crewSize": 4,
       "budgetM": 1200,
       "scienceTarget": 100,
       "difficulty": "cadet"
+    },
+    {
+      "id": "jezero-long-stay",
+      "destinationId": "mars",
+      "name": "Jezero Long Stay",
+      "objective": "Fly four crew to Jezero crater, stay 300 days studying the ancient river delta for signs of past life, and bring everyone home: about two years with no resupply.",
+      "durationDays": 730,
+      "crewSize": 4,
+      "budgetM": 4000,
+      "scienceTarget": 2000,
+      "difficulty": "flight_director"
     }
   ]
 }

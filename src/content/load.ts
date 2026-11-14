@@ -124,10 +124,19 @@ function checkReferences(content: GameContent): void {
   const problems: Array<[string, string]> = []
 
   content.scenarios.forEach((s) => {
-    if (!destinationIds.has(s.destinationId)) {
+    const destination = content.destinations.find((d) => d.id === s.destinationId)
+    if (!destination) {
       problems.push([
         'scenarios.json',
         `scenario "${s.id}" -> destinationId "${s.destinationId}" does not exist in destinations.json`,
+      ])
+      return
+    }
+    const phaseDays = destination.phases.reduce((sum, p) => sum + p.days, 0)
+    if (phaseDays !== s.durationDays) {
+      problems.push([
+        'scenarios.json',
+        `scenario "${s.id}" -> durationDays is ${s.durationDays} but the "${destination.id}" phases add up to ${phaseDays} days (${destination.phases.map((p) => `${p.id} ${p.days}`).join(' + ')})`,
       ])
     }
   })
