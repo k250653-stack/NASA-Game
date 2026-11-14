@@ -10,6 +10,7 @@ interface StatChipProps {
   unit?: string
   tone?: Tone
   className?: string
+  testId?: string
 }
 
 /** Icon + label + monospace value. Values use tabular numbers so they never jump. */
@@ -20,9 +21,11 @@ export function StatChip({
   unit,
   tone = 'neutral',
   className = '',
+  testId,
 }: StatChipProps) {
   return (
     <div
+      data-testid={testId}
       className={`inline-flex items-center gap-2 rounded-md border border-border bg-surface px-2.5 py-1.5 ${className}`}
     >
       {icon && <Icon name={icon} size={16} className="text-muted" />}

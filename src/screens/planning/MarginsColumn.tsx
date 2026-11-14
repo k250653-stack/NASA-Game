@@ -31,7 +31,7 @@ export function MarginsColumn({
 
   return (
     <>
-      <Panel title="Margins" subtitle="Hover or focus a bar for the details">
+      <Panel id="panel-margins" title="Margins" subtitle="Hover or focus a bar for the details">
         <div className="flex flex-col gap-4" data-testid="margins">
           {gauges.map((g) => (
             <Tooltip key={g.id} content={g.explanation} side="bottom">

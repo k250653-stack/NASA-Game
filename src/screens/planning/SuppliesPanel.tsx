@@ -46,6 +46,8 @@ export function SuppliesPanel({ design, seat, content, ownerName, onEdit }: Supp
 
   return (
     <Panel
+      id="panel-supplies"
+      testId="supplies-panel"
       title="Supplies"
       subtitle={
         editable
@@ -91,7 +93,7 @@ export function SuppliesPanel({ design, seat, content, ownerName, onEdit }: Supp
             </label>
           )
         })}
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted" data-testid="supply-days">
           Lasts{' '}
           <span className="font-mono text-primary">
             {Number.isFinite(read.days) ? Math.round(read.days) : '∞'}

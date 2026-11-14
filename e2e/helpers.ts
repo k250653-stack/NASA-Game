@@ -88,3 +88,46 @@ export async function next(page: Page): Promise<void> {
   await expect(button).toBeEnabled()
   await button.click()
 }
+
+export type Seat = 'science' | 'power_life' | 'comms_nav' | 'launch_budget' | 'director'
+
+/** Fresh save, then the real UI up to the requested screen (demo seed, suggested team). */
+export async function playTo(
+  page: Page,
+  target: 'destination' | 'scenario' | 'role' | 'recruit' | 'planning' | 'launch',
+  opts: { destination?: 'moon' | 'mars'; seat?: Seat } = {},
+): Promise<void> {
+  const { destination = 'moon', seat = 'science' } = opts
+  await page.goto('/')
+  await page.evaluate(() => localStorage.clear())
+  await page.reload()
+  await page.getByTestId('start-mission-button').click()
+  if (target === 'destination') return
+  await page.getByTestId(`destination-card-${destination}`).click()
+  await next(page)
+  if (target === 'scenario') return
+  await page.locator('[data-testid^="scenario-card-"]').click()
+  await page.getByTestId('seed-change').click()
+  await page.getByTestId('seed-demo').click()
+  await page.getByTestId('seed-set').click()
+  await expect(page.getByTestId('seed-value')).toHaveText(`Seed: ${DEMO_SEED}`)
+  await next(page)
+  if (target === 'role') return
+  await page.getByTestId(`role-card-${seat}`).click()
+  await next(page)
+  if (target === 'recruit') return
+  await page.getByTestId('suggest-team-button').click()
+  await next(page)
+  await expect(page.getByTestId('planning-board')).toBeVisible()
+  if (target === 'planning') return
+  await next(page)
+}
+
+/** Text of the current phase marker, e.g. "planning". */
+export async function phase(page: Page): Promise<string> {
+  const label = await page
+    .getByText(/Phase \d+ \/ 10 · /)
+    .first()
+    .innerText()
+  return label.split('·').pop()!.trim().toLowerCase()
+}

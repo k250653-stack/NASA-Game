@@ -85,6 +85,8 @@ interface StandingOrdersPanelProps {
 export function StandingOrdersPanel({ orders, onChange }: StandingOrdersPanelProps) {
   return (
     <Panel
+      id="panel-orders"
+      testId="standing-orders"
       title="Standing orders"
       subtitle="Mars is up to 22 light-minutes away: urgent events are handled by the crew using these orders."
     >

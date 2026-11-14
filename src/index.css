@@ -97,7 +97,6 @@ body {
     linear-gradient(var(--color-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
   background-size: 48px 48px;
-  min-width: 1280px;
 }
 
 /* One focus ring for every interactive element (keyboard only). */

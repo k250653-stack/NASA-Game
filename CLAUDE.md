@@ -74,10 +74,13 @@ The Zod schemas in `src/schemas/` are the contract between lanes. Change them to
 ## Definition of done (every task)
 
 - Run `pnpm check`. All must pass.
-- Then use the Playwright MCP browser to open the dev server, play through the screens you changed like a real player, look at the screenshots, and read the browser console.
+- Then use the Playwright MCP browser in visible (headed) mode, never headless, to open the dev server, play through the screens you changed like a real player, look at the screenshots, and read the browser console.
 - If anything is broken, overlapping, unreadable, or logs errors: fix it and repeat. Max 3 fix rounds; if still failing, stop and report exactly what's wrong.
 - Extend e2e/smoke.spec.ts whenever you add a new screen or interaction.
 - End every task with a short "Verified in browser:" list of what you checked.
+
+`pnpm e2e:watch` runs the suite headed and slowed down (one test at a time) so a person can watch;
+`pnpm exec playwright show-report` opens the HTML report from the last run.
 
 `pnpm check` = lint + unit tests + build + `pnpm e2e` (Playwright, headless, both 1280x720 and
 1920x1080). The smoke test reuses a running `pnpm dev` on port 5173 or starts one, and writes

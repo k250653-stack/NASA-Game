@@ -90,6 +90,7 @@ export function TeamSidebar(p: TeamSidebarProps) {
       <Panel title="Budget">
         <div className="flex flex-col gap-3">
           <StatChip
+            testId="salaries"
             icon="IconCoin"
             label="Salaries"
             value={`$${v.salaryM}`}
@@ -119,7 +120,11 @@ export function TeamSidebar(p: TeamSidebarProps) {
           </Badge>
         </div>
         {p.team.length > 0 && p.analysis.warnings.length > 0 ? (
-          <ul className="mt-3 flex flex-col gap-2" aria-live="polite">
+          <ul
+            className="mt-3 flex flex-col gap-2"
+            aria-live="polite"
+            data-testid="balance-warnings"
+          >
             {p.analysis.warnings.map((w) => (
               <li key={w} className="flex gap-2 text-sm text-alert">
                 <Icon name="IconAlertTriangle" size={16} className="mt-0.5 shrink-0" />

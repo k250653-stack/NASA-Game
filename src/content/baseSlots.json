@@ -116,8 +116,8 @@
         {
           "slotId": "suit-2",
           "category": "suit",
-          "x": 60,
-          "y": 76
+          "x": 64,
+          "y": 72
         },
         {
           "slotId": "spares-1",
@@ -248,8 +248,8 @@
         {
           "slotId": "suit-2",
           "category": "suit",
-          "x": 60,
-          "y": 76
+          "x": 64,
+          "y": 72
         },
         {
           "slotId": "spares-1",

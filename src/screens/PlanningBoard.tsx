@@ -150,6 +150,8 @@ export default function PlanningBoard() {
         <div className="flex min-w-0 flex-col gap-5">
           <BaseView design={design} seat={seat} content={content} />
           <Panel
+            id="panel-catalog"
+            testId="catalog-panel"
             title="Parts catalog"
             subtitle="Add, swap or remove parts in your seat; ask teammates for theirs."
           >

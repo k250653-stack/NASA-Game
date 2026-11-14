@@ -23,6 +23,8 @@ export function RocketSelector({ design, seat, content, ownerName, onEdit }: Roc
     : false
   return (
     <Panel
+      id="panel-launcher"
+      testId="launcher-panel"
       title="Launcher"
       subtitle={editable ? 'Your call: capacity vs cost' : `View only: chosen by ${ownerName}`}
     >

@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { getContent } from '@/content/load'
+import { candidates } from '@/engine/recruitment'
 import { Card } from '@/ui/Card'
 import { CrewCard } from '@/ui/CrewCard'
 import { Panel } from '@/ui/Panel'
 import { PartCard } from '@/ui/PartCard'
 
 export function CardsSection() {
-  const { crew, parts } = getContent()
+  const content = getContent()
+  // Recruitable crew only: player characters ("You") are not cards.
+  const crew = candidates(content)
+  const parts = content.parts
   const [picked, setPicked] = useState<string[]>([crew[0]?.id ?? '', parts[1]?.id ?? ''])
   const toggle = (id: string) =>
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
