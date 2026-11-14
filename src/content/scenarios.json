@@ -10,7 +10,13 @@
       "crewSize": 4,
       "budgetM": 1200,
       "scienceTarget": 100,
-      "difficulty": "cadet"
+      "difficulty": "cadet",
+      "defaultStandingOrders": {
+        "powerEmergency": "shed_science",
+        "crewInjury": "rest",
+        "lowSupplies": "ration",
+        "eva": "best_available"
+      }
     },
     {
       "id": "jezero-long-stay",
@@ -21,7 +27,13 @@
       "crewSize": 4,
       "budgetM": 4000,
       "scienceTarget": 2000,
-      "difficulty": "flight_director"
+      "difficulty": "flight_director",
+      "defaultStandingOrders": {
+        "powerEmergency": "shed_science",
+        "crewInjury": "rest",
+        "lowSupplies": "ration",
+        "eva": "only_practical"
+      }
     }
   ]
 }

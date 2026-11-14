@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { IdSchema, NonEmptyString } from './shared'
+import { StandingOrdersSchema } from './standingOrders'
 
 export const DIFFICULTIES = ['cadet', 'engineer', 'flight_director'] as const
 export const DifficultySchema = z.enum(DIFFICULTIES, {
@@ -13,7 +14,7 @@ export const ScenarioSchema = z.strictObject({
   destinationId: IdSchema,
   name: NonEmptyString,
   objective: NonEmptyString,
-  /** Surface mission length in days. */
+  /** Whole mission length in days (equals the sum of the destination's phase days). */
   durationDays: z.number().int().positive({ error: 'durationDays must be a positive integer' }),
   crewSize: z
     .number()
@@ -25,6 +26,8 @@ export const ScenarioSchema = z.strictObject({
   /** Science points needed for full mission success. */
   scienceTarget: z.number().positive({ error: 'scienceTarget must be > 0' }),
   difficulty: DifficultySchema,
+  /** Standing orders a new design starts with; the player can change them. */
+  defaultStandingOrders: StandingOrdersSchema,
 })
 
 export type Scenario = z.infer<typeof ScenarioSchema>

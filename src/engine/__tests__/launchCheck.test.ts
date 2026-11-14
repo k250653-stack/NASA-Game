@@ -49,7 +49,7 @@ describe('full designs', () => {
 
 describe('mass', () => {
   it('exactly at capacity is not a failure (warns: 0% < 5% margin target)', () => {
-    // 4,220 kg + 3,780 kg extra water = 8,000 kg = Medium launcher capacity.
+    // 3,370 parts + 130 O2 + 270 food + 3,830 water + 400 crew = 8,000 kg = Medium capacity.
     const d = { ...GOOD_DESIGN, supplies: { ...GOOD_DESIGN.supplies, waterKg: 50 + 3780 } }
     const c = check(d, 'mass')
     expect(c.value).toBe(8000)

@@ -1,5 +1,6 @@
 /** Shared engine types. Pure data, no behaviour. */
 import type { GameContent } from '@/content/load'
+import type { Location, ModifierKey, ResourceKey, Role, StandingOrders, Weakness } from '@/schemas'
 
 /** Consumables packed for the mission, kg. */
 export interface Supplies {
@@ -18,6 +19,10 @@ export interface Design {
   partIds: string[]
   supplies: Supplies
   crewIds: string[]
+  /** What the crew does when Earth can't answer in time; also steers AI teammates. */
+  standingOrders: StandingOrders
+  /** The seat the player flies. null = the player answers every event (debug). */
+  playerRole: Role | null
 }
 
 export type CheckStatus = 'ok' | 'warn' | 'fail'
@@ -96,5 +101,92 @@ export interface Margins {
 /** Content the engine reads. Same shape as the validated game content. */
 export type EngineContent = Pick<
   GameContent,
-  'constants' | 'destinations' | 'scenarios' | 'crew' | 'parts' | 'rockets'
+  'constants' | 'destinations' | 'scenarios' | 'crew' | 'parts' | 'rockets' | 'events'
 >
+
+/** Design + content: everything the mission functions need besides the state. */
+export interface MissionContext {
+  design: Design
+  content: EngineContent
+}
+
+// ---------------------------------------------------------------------------------------------
+// Mission run state
+// ---------------------------------------------------------------------------------------------
+
+export interface CrewStatus {
+  /** 0-100. Spent on actions, recovered when not busy. */
+  energy: number
+  /** 0-100. Low morale cuts science. */
+  morale: number
+  /** 0-100. 0 ends the mission. */
+  health: number
+  /** Turns left on a task; busy crew do not recover energy. */
+  busyTurns: number
+}
+
+export interface MissionResources extends Record<ResourceKey, number> {
+  /** Net power last turn (generation − use), W. Information only. */
+  power: number
+}
+
+/** A temporary multiplier from an event (e.g. solarOutput × 0.3 for 2 turns). */
+export interface ActiveEffect {
+  target: ModifierKey
+  value: number
+  turnsLeft: number
+  sourceEventId: string
+}
+
+export type LogKind = 'info' | 'warning' | 'alarm' | 'science' | 'event' | 'decision'
+
+export interface LogEntry {
+  turnIndex?: number
+  day: number
+  kind: LogKind
+  text: string
+  eventId?: string
+  /** Who answered an event: the player, an AI teammate, or standing orders under signal delay. */
+  handledBy?: 'player' | 'ai' | 'standing-orders'
+}
+
+export interface PendingEvent {
+  /** Unique per firing: eventId@turnIndex. */
+  uid: string
+  eventId: string
+  turnIndex: number
+  day: number
+}
+
+export type MissionOutcome = null | 'success' | 'partial' | 'failed'
+
+export interface MissionState {
+  seed: number
+  destinationId: string
+  /** Next turn to simulate (0-based). Equals totalTurns when the mission is over. */
+  turnIndex: number
+  totalTurns: number
+  /** Days elapsed since launch. */
+  day: number
+  phaseId: string
+  location: Location
+  resources: MissionResources
+  crew: Record<string, CrewStatus>
+  /** partId -> turns until it comes back online. */
+  disabledParts: Record<string, number>
+  activeEffects: ActiveEffect[]
+  eventLog: LogEntry[]
+  pendingEvents: PendingEvent[]
+  /** eventId -> how often it fired and when it last fired. */
+  eventHistory: Record<string, { count: number; lastTurn: number }>
+  /** Share of solar output lost to dust, 0-1. */
+  dustLevel: number
+  /** Design weaknesses that make matching events more likely. */
+  weaknesses: Weakness[]
+  /** Last turn's average generation and use, W (for powerMarginBelow). */
+  lastPower: { genW: number; useW: number }
+  /** True after the crew cut the surface stay short (standing order abort_early). */
+  abortedEarly: boolean
+  outcome: MissionOutcome
+  failReason?: string
+}

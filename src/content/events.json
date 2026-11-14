@@ -1,59 +1,1433 @@
 {
-  "_note": "Sample events. Chances, resource costs and effect magnitudes are approximate game-balance placeholders. Effects are keyed by engine stat or resource name and applied as deltas.",
+  "_note": "Approximate, verify. Chances, durations, success rates and effect sizes are game-balance placeholders. trigger.chance is per turn (before weakness scaling). Effects: resources/crew stats use add/multiply/set; modifiers (solarOutput, powerUse, dataRate, scienceRate, lifeSupportUse) multiply for durationTurns; part:<category> disable takes those parts offline for durationTurns. partFailureCategory events fire from the parts' failureChancePerTurn instead of trigger.chance.",
   "items": [
     {
-      "id": "dust-on-solar-array",
-      "title": "Dust on the Solar Array",
-      "description": "After yesterday's EVA, fine regolith is clinging to the panels. Array output is down and the lunar night is coming.",
-      "type": "environmental",
+      "id": "solar-panel-damage",
+      "title": "Solar Panel Damage",
+      "description": "A string of cells on the array has failed after a thermal cycle. Output is dropping.",
+      "type": "technical",
       "role": "power_life",
-      "destinations": ["moon"],
-      "trigger": { "minDay": 3, "maxDay": 25, "chance": 0.3, "condition": "afterEva" },
+      "destinations": ["moon", "mars"],
+      "location": "surface",
+      "urgency": "urgent",
+      "weakness": "power",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.08
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 2,
       "options": [
         {
-          "label": "Send two crew out to brush the panels",
-          "crewSkill": "systems",
-          "uses": { "evaHours": 2, "powerWh": 500 },
-          "successChance": 0.85,
-          "onSuccess": { "powerFactor": 0.1 },
-          "onFail": { "powerFactor": -0.05, "morale": -0.05 },
-          "explanation": "Lunar dust is electrostatically charged and sticks to surfaces; it is abrasive and hard to remove, so brushing works but costs EVA time and suit wear."
+          "id": "eva-repair",
+          "label": "EVA to bypass the failed string",
+          "requiresPart": "suit",
+          "consumes": {
+            "spareKits": 1,
+            "crewEnergy": 30
+          },
+          "baseSuccess": 0.55,
+          "skill": "systems",
+          "tags": ["eva", "repair"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "solarOutput",
+              "op": "multiply",
+              "value": 0.7,
+              "durationTurns": 4
+            },
+            {
+              "target": "actingCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -10
+            }
+          ],
+          "explanation": "Solar arrays are wired in strings; one bad cell can drag down a whole string until it is bypassed."
         },
         {
-          "label": "Leave it and ration power through the night",
-          "uses": {},
-          "successChance": 1,
-          "onSuccess": { "powerFactor": -0.1, "morale": -0.05 },
-          "onFail": {},
-          "explanation": "No EVA risk, but the array stays dirty, so battery charge going into the 14-day night is lower than planned."
+          "id": "accept-loss",
+          "label": "Accept reduced output",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "solarOutput",
+              "op": "multiply",
+              "value": 0.7,
+              "durationTurns": 6
+            }
+          ],
+          "onFail": [],
+          "explanation": "No EVA risk, but the array delivers 30% less power until the end of the stay."
         }
       ]
     },
     {
-      "id": "antenna-pointing-drift",
-      "title": "Antenna Pointing Drift",
-      "description": "Thermal flexing has pushed the high-gain antenna off its Earth lock. Data rate is dropping and the next science downlink is due.",
+      "id": "dust-storm",
+      "title": "Regional Dust Storm",
+      "description": "A dust storm is rolling over the site. Sunlight at the surface will drop sharply for weeks.",
+      "type": "environmental",
+      "role": "power_life",
+      "destinations": ["mars"],
+      "location": "surface",
+      "urgency": "urgent",
+      "weakness": "power",
+      "trigger": {
+        "minDay": 210,
+        "maxDay": 510,
+        "chance": 0.07
+      },
+      "cooldownTurns": 6,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "hunker-down",
+          "label": "Hunker down and power off science",
+          "baseSuccess": 1,
+          "tags": ["shed_science", "wait"],
+          "onSuccess": [
+            {
+              "target": "solarOutput",
+              "op": "multiply",
+              "value": 0.3,
+              "durationTurns": 2
+            },
+            {
+              "target": "scienceRate",
+              "op": "multiply",
+              "value": 0,
+              "durationTurns": 2
+            },
+            {
+              "target": "dustLevel",
+              "op": "add",
+              "value": 0.1
+            }
+          ],
+          "onFail": [],
+          "explanation": "Mars dust storms can cut surface sunlight by over 90%; Opportunity was lost to one in 2018."
+        },
+        {
+          "id": "keep-working",
+          "label": "Keep working through it",
+          "baseSuccess": 0.5,
+          "skill": "systems",
+          "tags": ["continue"],
+          "onSuccess": [
+            {
+              "target": "solarOutput",
+              "op": "multiply",
+              "value": 0.3,
+              "durationTurns": 2
+            },
+            {
+              "target": "dustLevel",
+              "op": "add",
+              "value": 0.1
+            }
+          ],
+          "onFail": [
+            {
+              "target": "solarOutput",
+              "op": "multiply",
+              "value": 0.3,
+              "durationTurns": 2
+            },
+            {
+              "target": "dustLevel",
+              "op": "add",
+              "value": 0.2
+            },
+            {
+              "target": "randomCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -15
+            }
+          ],
+          "explanation": "Science continues, but fine dust gets into seals and lungs and settles thickly on the panels."
+        }
+      ]
+    },
+    {
+      "id": "battery-fault",
+      "title": "Battery Cell Fault",
+      "description": "One battery module is overheating. It must be isolated or replaced before it spreads.",
+      "type": "technical",
+      "role": "power_life",
+      "destinations": ["moon", "mars"],
+      "location": "any",
+      "urgency": "urgent",
+      "weakness": "power",
+      "requiresPartCategory": "battery",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.06
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "replace-cell",
+          "label": "Swap in a spare module",
+          "consumes": {
+            "spareKits": 1,
+            "crewEnergy": 20
+          },
+          "baseSuccess": 0.7,
+          "skill": "power",
+          "tags": ["repair"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "batteryWh",
+              "op": "multiply",
+              "value": 0.7
+            }
+          ],
+          "explanation": "Lithium cells can go into thermal runaway; a faulty module must come out before it heats its neighbours."
+        },
+        {
+          "id": "isolate-bank",
+          "label": "Isolate the module and lose its capacity",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "batteryWh",
+              "op": "multiply",
+              "value": 0.6
+            }
+          ],
+          "onFail": [],
+          "explanation": "Safe and immediate, but the stored energy in that module is gone."
+        }
+      ]
+    },
+    {
+      "id": "comms-outage",
+      "title": "Comms Outage",
+      "description": "The main link to Earth has dropped. Telemetry is coming through only in bursts.",
       "type": "technical",
       "role": "comms_nav",
       "destinations": ["moon", "mars"],
-      "trigger": { "minDay": 1, "maxDay": 28, "chance": 0.2 },
+      "location": "any",
+      "urgency": "routine",
+      "weakness": "comms",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.07
+      },
+      "cooldownTurns": 2,
+      "maxOccurrences": 3,
       "options": [
         {
-          "label": "Recalibrate pointing using a star tracker fix",
-          "crewSkill": "comms",
-          "uses": { "crewHours": 4 },
-          "successChance": 0.9,
-          "onSuccess": { "dataRateFactor": 0.0 },
-          "onFail": { "dataRateFactor": -0.3, "sciencePoints": -2 },
-          "explanation": "A narrow high-gain beam must point within a fraction of a degree of Earth; a star tracker gives an absolute attitude reference to re-aim it."
+          "id": "reboot-repoint",
+          "label": "Reboot the radio and re-point the antenna",
+          "consumes": {
+            "crewEnergy": 15
+          },
+          "baseSuccess": 0.6,
+          "skill": "comms",
+          "tags": ["repair"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "dataRate",
+              "op": "multiply",
+              "value": 0.3,
+              "durationTurns": 2
+            }
+          ],
+          "explanation": "High-gain antennas need sub-degree pointing; a reboot and re-point usually restores the link."
         },
         {
-          "label": "Fall back to the low-gain antenna",
-          "uses": {},
-          "successChance": 1,
-          "onSuccess": { "dataRateFactor": -0.5 },
-          "onFail": {},
-          "explanation": "A wide low-gain beam does not need precise pointing but carries far less data, so science downlink slows down."
+          "id": "backup-link",
+          "label": "Fall back to the backup link",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "dataRate",
+              "op": "multiply",
+              "value": 0.5,
+              "durationTurns": 3
+            }
+          ],
+          "onFail": [],
+          "explanation": "The backup works without fixing anything, but at half the data rate."
+        }
+      ]
+    },
+    {
+      "id": "recycler-failure",
+      "title": "Water Recycler Failure",
+      "description": "A recycler has tripped offline (its own failure chance came up). Until it is fixed every litre and breath comes out of the stores.",
+      "type": "technical",
+      "role": "power_life",
+      "destinations": ["moon", "mars"],
+      "location": "any",
+      "urgency": "urgent",
+      "weakness": "life_support",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0,
+        "conditions": [
+          {
+            "key": "recyclerInstalled"
+          }
+        ]
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "repair-recycler",
+          "label": "Repair the processor",
+          "consumes": {
+            "spareKits": 1,
+            "crewEnergy": 20
+          },
+          "baseSuccess": 0.65,
+          "skill": "systems",
+          "tags": ["repair"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "part:life_support",
+              "op": "disable",
+              "value": 1,
+              "durationTurns": 1
+            },
+            {
+              "target": "waterKg",
+              "op": "add",
+              "value": -20
+            }
+          ],
+          "explanation": "The ISS water processor has failed several times; spare pumps and filters are why it keeps running."
+        },
+        {
+          "id": "run-open-loop",
+          "label": "Run open loop from stores until it cools",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "part:life_support",
+              "op": "disable",
+              "value": 1,
+              "durationTurns": 1
+            }
+          ],
+          "onFail": [],
+          "explanation": "No repair risk, but for one turn all water and oxygen comes from the stored supply."
+        }
+      ],
+      "partFailureCategory": "life_support"
+    },
+    {
+      "id": "co2-scrubber",
+      "title": "CO2 Scrubber Saturated",
+      "description": "Cabin CO2 is climbing. The scrubber cartridges are spent faster than planned.",
+      "type": "technical",
+      "role": "power_life",
+      "destinations": ["moon", "mars"],
+      "location": "any",
+      "urgency": "urgent",
+      "weakness": "life_support",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.05
+      },
+      "cooldownTurns": 4,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "swap-cartridges",
+          "label": "Swap in spare cartridges",
+          "consumes": {
+            "spareKits": 1
+          },
+          "baseSuccess": 0.85,
+          "tags": ["repair"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -10
+            }
+          ],
+          "explanation": "CO2 builds up fast in a sealed cabin; fresh lithium hydroxide or amine beds bring it back down."
+        },
+        {
+          "id": "improvise",
+          "label": "Improvise an adapter (Apollo 13 style)",
+          "requiresTrait": "thinker",
+          "consumes": {
+            "crewEnergy": 25
+          },
+          "baseSuccess": 0.6,
+          "skill": "systems",
+          "tags": ["repair"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -15
+            },
+            {
+              "target": "oxygenKg",
+              "op": "add",
+              "value": -10
+            }
+          ],
+          "explanation": "Apollo 13's crew built a square-to-round adapter from spare parts to use the command module's scrubbers."
+        }
+      ]
+    },
+    {
+      "id": "solar-flare",
+      "title": "Solar Particle Event",
+      "description": "Space weather forecasters warn of a large solar flare. Protons arrive within hours.",
+      "type": "environmental",
+      "role": "comms_nav",
+      "destinations": ["moon", "mars"],
+      "location": "any",
+      "urgency": "urgent",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.04
+      },
+      "cooldownTurns": 4,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "use-shelter",
+          "label": "Everyone into the storm shelter",
+          "requiresPart": "radiation-shelter",
+          "baseSuccess": 0.95,
+          "tags": ["rest"],
+          "onSuccess": [
+            {
+              "target": "scienceRate",
+              "op": "multiply",
+              "value": 0.5,
+              "durationTurns": 1
+            }
+          ],
+          "onFail": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -5
+            }
+          ],
+          "explanation": "Water and polyethylene walls stop most solar protons; sheltering for a day or two avoids most of the dose."
+        },
+        {
+          "id": "hide-in-habitat",
+          "label": "Hide in the most shielded corner of the habitat",
+          "baseSuccess": 0.6,
+          "tags": ["rest"],
+          "onSuccess": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -5
+            }
+          ],
+          "onFail": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -20
+            }
+          ],
+          "explanation": "Stacking supplies and water around the crew helps, but a habitat wall alone lets through much more dose."
+        },
+        {
+          "id": "ignore-flare",
+          "label": "Carry on working",
+          "baseSuccess": 0.3,
+          "tags": ["continue"],
+          "onSuccess": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -10
+            }
+          ],
+          "onFail": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -35
+            }
+          ],
+          "explanation": "Without shielding, a large particle event can deliver a dangerous dose in hours."
+        }
+      ]
+    },
+    {
+      "id": "micrometeoroid-hit",
+      "title": "Micrometeoroid Hit",
+      "description": "A sand-grain-sized particle has punched through a module wall. Cabin pressure is falling slowly.",
+      "type": "technical",
+      "role": "power_life",
+      "destinations": ["moon", "mars"],
+      "location": "any",
+      "urgency": "urgent",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.04
+      },
+      "cooldownTurns": 4,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "patch-leak",
+          "label": "Find and patch the leak",
+          "consumes": {
+            "spareKits": 1,
+            "crewEnergy": 15
+          },
+          "baseSuccess": 0.75,
+          "skill": "systems",
+          "tags": ["repair"],
+          "onSuccess": [
+            {
+              "target": "oxygenKg",
+              "op": "add",
+              "value": -5
+            }
+          ],
+          "onFail": [
+            {
+              "target": "oxygenKg",
+              "op": "add",
+              "value": -25
+            }
+          ],
+          "explanation": "At 7 km/s even a tiny grain can hole a wall; finding a slow leak often takes ultrasound and patience."
+        },
+        {
+          "id": "seal-module",
+          "label": "Seal off the module",
+          "baseSuccess": 0.9,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "oxygenKg",
+              "op": "add",
+              "value": -12
+            },
+            {
+              "target": "allCrew",
+              "stat": "morale",
+              "op": "add",
+              "value": -5
+            }
+          ],
+          "onFail": [
+            {
+              "target": "oxygenKg",
+              "op": "add",
+              "value": -35
+            }
+          ],
+          "explanation": "Closing the hatch stops the loss but the air in that module is gone and living space shrinks."
+        }
+      ]
+    },
+    {
+      "id": "crew-fatigue",
+      "title": "Crew Fatigue",
+      "description": "The schedule has been relentless. Mistakes are creeping in.",
+      "type": "human",
+      "role": "launch_budget",
+      "destinations": ["moon", "mars"],
+      "location": "any",
+      "urgency": "routine",
+      "trigger": {
+        "minDay": 5,
+        "maxDay": 730,
+        "chance": 0.08,
+        "conditions": [
+          {
+            "key": "lowMorale",
+            "value": 70
+          }
+        ]
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 3,
+      "options": [
+        {
+          "id": "rest-day",
+          "label": "Call a rest day",
+          "baseSuccess": 1,
+          "tags": ["rest"],
+          "onSuccess": [
+            {
+              "target": "allCrew",
+              "stat": "energy",
+              "op": "add",
+              "value": 30
+            },
+            {
+              "target": "allCrew",
+              "stat": "morale",
+              "op": "add",
+              "value": 10
+            },
+            {
+              "target": "scienceRate",
+              "op": "multiply",
+              "value": 0.5,
+              "durationTurns": 1
+            }
+          ],
+          "onFail": [],
+          "explanation": "Sleep loss is one of the biggest risks on long missions; planned rest days keep error rates down."
+        },
+        {
+          "id": "push-on",
+          "label": "Push on with the plan",
+          "baseSuccess": 0.5,
+          "requiresTrait": "leader",
+          "tags": ["continue"],
+          "onSuccess": [
+            {
+              "target": "sciencePoints",
+              "op": "add",
+              "value": 10
+            }
+          ],
+          "onFail": [
+            {
+              "target": "randomCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -15
+            },
+            {
+              "target": "allCrew",
+              "stat": "morale",
+              "op": "add",
+              "value": -10
+            }
+          ],
+          "explanation": "A strong leader can carry a tired team for a while, but exhaustion causes accidents."
+        }
+      ]
+    },
+    {
+      "id": "crew-argument",
+      "title": "Crew Argument",
+      "description": "Two strong personalities disagree about who runs the next traverse. The rest of the crew is taking sides.",
+      "type": "human",
+      "role": "launch_budget",
+      "destinations": ["moon", "mars"],
+      "location": "any",
+      "urgency": "routine",
+      "trigger": {
+        "minDay": 3,
+        "maxDay": 730,
+        "chance": 0.15,
+        "conditions": [
+          {
+            "key": "leadersAtLeast",
+            "value": 2
+          }
+        ]
+      },
+      "cooldownTurns": 4,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "mediate",
+          "label": "Mediate and set clear roles",
+          "requiresTrait": "leader",
+          "consumes": {
+            "crewEnergy": 10
+          },
+          "baseSuccess": 0.65,
+          "tags": ["rest"],
+          "onSuccess": [
+            {
+              "target": "allCrew",
+              "stat": "morale",
+              "op": "add",
+              "value": 5
+            }
+          ],
+          "onFail": [
+            {
+              "target": "allCrew",
+              "stat": "morale",
+              "op": "add",
+              "value": -15
+            }
+          ],
+          "explanation": "Isolated crews need one clear decision-maker per task; two leaders with overlapping authority cause friction."
+        },
+        {
+          "id": "split-shifts",
+          "label": "Put them on different shifts",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "scienceRate",
+              "op": "multiply",
+              "value": 0.8,
+              "durationTurns": 2
+            },
+            {
+              "target": "allCrew",
+              "stat": "morale",
+              "op": "add",
+              "value": -3
+            }
+          ],
+          "onFail": [],
+          "explanation": "Separating them avoids conflict but makes coordination slower."
+        }
+      ]
+    },
+    {
+      "id": "minor-injury",
+      "title": "Minor Injury",
+      "description": "A crew member strained a shoulder lifting equipment in reduced gravity.",
+      "type": "human",
+      "role": "power_life",
+      "destinations": ["moon", "mars"],
+      "location": "surface",
+      "urgency": "routine",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.07
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 3,
+      "options": [
+        {
+          "id": "treat-and-rest",
+          "label": "Treat it and rest them",
+          "baseSuccess": 0.9,
+          "tags": ["rest"],
+          "onSuccess": [
+            {
+              "target": "randomCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -5
+            },
+            {
+              "target": "scienceRate",
+              "op": "multiply",
+              "value": 0.85,
+              "durationTurns": 1
+            }
+          ],
+          "onFail": [
+            {
+              "target": "randomCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -15
+            }
+          ],
+          "explanation": "Strains heal well with rest; working through them in a suit turns minor injuries into long ones."
+        },
+        {
+          "id": "keep-working",
+          "label": "Strap it and keep working",
+          "baseSuccess": 0.6,
+          "tags": ["continue"],
+          "onSuccess": [
+            {
+              "target": "randomCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -10
+            }
+          ],
+          "onFail": [
+            {
+              "target": "randomCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -25
+            }
+          ],
+          "explanation": "No science lost today, but the injury may get worse."
+        }
+      ]
+    },
+    {
+      "id": "instrument-jam",
+      "title": "Instrument Jam",
+      "description": "The sample handling mechanism has jammed with fine regolith.",
+      "type": "technical",
+      "role": "science",
+      "destinations": ["moon", "mars"],
+      "location": "surface",
+      "urgency": "routine",
+      "requiresPartCategory": "instrument",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.08
+      },
+      "cooldownTurns": 2,
+      "maxOccurrences": 3,
+      "options": [
+        {
+          "id": "clear-jam",
+          "label": "Strip it down and clear the jam",
+          "consumes": {
+            "crewEnergy": 15
+          },
+          "baseSuccess": 0.7,
+          "skill": "science",
+          "tags": ["repair"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "part:instrument",
+              "op": "disable",
+              "value": 1,
+              "durationTurns": 2
+            }
+          ],
+          "explanation": "Abrasive, clingy regolith jammed sample mechanisms on Apollo and on Mars landers alike."
+        },
+        {
+          "id": "degraded-mode",
+          "label": "Run in degraded mode",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "scienceRate",
+              "op": "multiply",
+              "value": 0.7,
+              "durationTurns": 2
+            }
+          ],
+          "onFail": [],
+          "explanation": "Keeps some data flowing without opening the instrument."
+        }
+      ]
+    },
+    {
+      "id": "drill-stuck",
+      "title": "Drill Stuck",
+      "description": "The drill string is stuck half a metre down in icy regolith.",
+      "type": "technical",
+      "role": "science",
+      "destinations": ["moon", "mars"],
+      "location": "surface",
+      "urgency": "routine",
+      "requiresPartCategory": "instrument",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.06
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "eva-free-drill",
+          "label": "EVA to free the drill string",
+          "requiresPart": "suit",
+          "consumes": {
+            "crewEnergy": 25
+          },
+          "baseSuccess": 0.6,
+          "skill": "systems",
+          "tags": ["eva", "repair"],
+          "onSuccess": [
+            {
+              "target": "sciencePoints",
+              "op": "add",
+              "value": 5
+            }
+          ],
+          "onFail": [
+            {
+              "target": "part:instrument",
+              "op": "disable",
+              "value": 1,
+              "durationTurns": 3
+            },
+            {
+              "target": "actingCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -5
+            }
+          ],
+          "explanation": "Ice can refreeze around a warm drill bit and lock it; InSight's heat probe never got past 40 cm."
+        },
+        {
+          "id": "abandon-hole",
+          "label": "Abandon this hole",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "sciencePoints",
+              "op": "add",
+              "value": -5
+            }
+          ],
+          "onFail": [],
+          "explanation": "Lose the samples from this site but keep the crew inside."
+        }
+      ]
+    },
+    {
+      "id": "ice-discovery",
+      "title": "Ice Discovery",
+      "description": "The spectrometer shows a strong water-ice signal in a shadowed pocket nearby.",
+      "type": "science",
+      "role": "science",
+      "destinations": ["moon"],
+      "location": "surface",
+      "urgency": "routine",
+      "positive": true,
+      "requiresPartCategory": "instrument",
+      "trigger": {
+        "minDay": 5,
+        "maxDay": 34,
+        "chance": 0.15
+      },
+      "cooldownTurns": 2,
+      "maxOccurrences": 1,
+      "options": [
+        {
+          "id": "core-sample",
+          "label": "Send a team to take a core",
+          "requiresPart": "suit",
+          "consumes": {
+            "crewEnergy": 20
+          },
+          "baseSuccess": 0.8,
+          "skill": "science",
+          "tags": ["eva"],
+          "onSuccess": [
+            {
+              "target": "sciencePoints",
+              "op": "add",
+              "value": 40
+            }
+          ],
+          "onFail": [
+            {
+              "target": "sciencePoints",
+              "op": "add",
+              "value": 10
+            }
+          ],
+          "explanation": "Permanently shadowed craters at the lunar poles stay below −170 °C, cold enough to trap water ice for billions of years."
+        },
+        {
+          "id": "log-it",
+          "label": "Log the location for the next mission",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "sciencePoints",
+              "op": "add",
+              "value": 10
+            }
+          ],
+          "onFail": [],
+          "explanation": "Remote data still counts, but a sample is worth far more."
+        }
+      ]
+    },
+    {
+      "id": "rover-stuck",
+      "title": "Rover Stuck",
+      "description": "The rover has dug its wheels into soft sand on a slope.",
+      "type": "technical",
+      "role": "comms_nav",
+      "destinations": ["moon", "mars"],
+      "location": "surface",
+      "urgency": "routine",
+      "requiresPartCategory": "rover",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.1
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "dig-out",
+          "label": "EVA to dig it out",
+          "requiresPart": "suit",
+          "consumes": {
+            "crewEnergy": 25
+          },
+          "baseSuccess": 0.65,
+          "skill": "navigation",
+          "tags": ["eva", "repair"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "part:rover",
+              "op": "disable",
+              "value": 1,
+              "durationTurns": 3
+            }
+          ],
+          "explanation": "Spirit was permanently trapped in soft Martian sand in 2009; careful route planning matters."
+        },
+        {
+          "id": "cancel-traverse",
+          "label": "Cancel the traverse",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "part:rover",
+              "op": "disable",
+              "value": 1,
+              "durationTurns": 2
+            }
+          ],
+          "onFail": [],
+          "explanation": "Leave the rover until conditions improve; the sites it was heading to are lost for now."
+        }
+      ]
+    },
+    {
+      "id": "ground-station-request",
+      "title": "Ground Station Request",
+      "description": "Mission scientists ask for a priority observation of a newly spotted target.",
+      "type": "science",
+      "role": "comms_nav",
+      "destinations": ["moon", "mars"],
+      "location": "surface",
+      "urgency": "routine",
+      "positive": true,
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.08
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 3,
+      "options": [
+        {
+          "id": "priority-pass",
+          "label": "Schedule a priority observation",
+          "consumes": {
+            "crewEnergy": 10
+          },
+          "baseSuccess": 0.9,
+          "skill": "comms",
+          "tags": ["continue"],
+          "onSuccess": [
+            {
+              "target": "sciencePoints",
+              "op": "add",
+              "value": 25
+            }
+          ],
+          "onFail": [
+            {
+              "target": "sciencePoints",
+              "op": "add",
+              "value": 5
+            }
+          ],
+          "explanation": "Earth-based teams can spot targets in orbital images that the crew cannot see from the ground."
+        },
+        {
+          "id": "decline",
+          "label": "Stick to the plan",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [],
+          "onFail": [],
+          "explanation": "No extra science, no extra workload."
+        }
+      ]
+    },
+    {
+      "id": "data-overflow",
+      "title": "Data Storage Filling Up",
+      "description": "Instruments are producing data faster than the link can send it home.",
+      "type": "technical",
+      "role": "comms_nav",
+      "destinations": ["moon", "mars"],
+      "location": "surface",
+      "urgency": "routine",
+      "weakness": "comms",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.05
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 3,
+      "options": [
+        {
+          "id": "compress",
+          "label": "Compress and prioritise the queue",
+          "consumes": {
+            "crewEnergy": 10
+          },
+          "baseSuccess": 0.7,
+          "skill": "comms",
+          "tags": ["repair"],
+          "onSuccess": [
+            {
+              "target": "dataBacklogGb",
+              "op": "multiply",
+              "value": 0.5
+            }
+          ],
+          "onFail": [
+            {
+              "target": "dataBacklogGb",
+              "op": "multiply",
+              "value": 0.8
+            }
+          ],
+          "explanation": "Mars missions routinely compress images onboard because the downlink, not the camera, is the bottleneck."
+        },
+        {
+          "id": "delete-low-priority",
+          "label": "Delete low-priority data",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [
+            {
+              "target": "dataBacklogGb",
+              "op": "multiply",
+              "value": 0.3
+            },
+            {
+              "target": "sciencePoints",
+              "op": "add",
+              "value": -5
+            }
+          ],
+          "onFail": [],
+          "explanation": "Frees space instantly but some observations are gone for good."
+        }
+      ]
+    },
+    {
+      "id": "morale-boost",
+      "title": "Birthday and a Call Home",
+      "description": "It's a crew member's birthday, and Mission Control has arranged a family call.",
+      "type": "human",
+      "role": "launch_budget",
+      "destinations": ["moon", "mars"],
+      "location": "any",
+      "urgency": "routine",
+      "positive": true,
+      "trigger": {
+        "minDay": 2,
+        "maxDay": 730,
+        "chance": 0.08
+      },
+      "cooldownTurns": 4,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "celebrate",
+          "label": "Take an evening off to celebrate",
+          "baseSuccess": 1,
+          "tags": ["rest"],
+          "onSuccess": [
+            {
+              "target": "allCrew",
+              "stat": "morale",
+              "op": "add",
+              "value": 15
+            },
+            {
+              "target": "scienceRate",
+              "op": "multiply",
+              "value": 0.9,
+              "durationTurns": 1
+            }
+          ],
+          "onFail": [],
+          "explanation": "Contact with family is one of the strongest supports for crew mental health on long missions."
+        },
+        {
+          "id": "quick-call",
+          "label": "Keep it to a quick call",
+          "baseSuccess": 1,
+          "tags": ["continue"],
+          "onSuccess": [
+            {
+              "target": "allCrew",
+              "stat": "morale",
+              "op": "add",
+              "value": 6
+            }
+          ],
+          "onFail": [],
+          "explanation": "A smaller lift, no lost work time."
+        }
+      ]
+    },
+    {
+      "id": "radiation-spike",
+      "title": "Cosmic Ray Spike",
+      "description": "Dosimeters show galactic cosmic ray levels well above normal during the cruise.",
+      "type": "environmental",
+      "role": "comms_nav",
+      "destinations": ["mars"],
+      "location": "transit",
+      "urgency": "urgent",
+      "trigger": {
+        "minDay": 0,
+        "maxDay": 730,
+        "chance": 0.08
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 3,
+      "options": [
+        {
+          "id": "sleep-in-shelter",
+          "label": "Sleep in the shielded shelter",
+          "requiresPart": "radiation-shelter",
+          "baseSuccess": 0.95,
+          "tags": ["rest"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -5
+            }
+          ],
+          "explanation": "Cosmic rays are hard to stop, but sleeping behind water walls cuts the long-term dose noticeably."
+        },
+        {
+          "id": "water-wall",
+          "label": "Rearrange water bags around the bunks",
+          "consumes": {
+            "crewEnergy": 15
+          },
+          "baseSuccess": 0.6,
+          "skill": "systems",
+          "tags": ["repair"],
+          "onSuccess": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -3
+            }
+          ],
+          "onFail": [
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -10
+            }
+          ],
+          "explanation": "Hydrogen-rich water is one of the best shields per kilogram."
+        }
+      ]
+    },
+    {
+      "id": "long-dark-period",
+      "title": "Long Dark Period",
+      "description": "The ridge is entering a long shadow. The batteries must carry the base for days.",
+      "type": "environmental",
+      "role": "power_life",
+      "destinations": ["moon"],
+      "location": "surface",
+      "urgency": "urgent",
+      "weakness": "power",
+      "trigger": {
+        "minDay": 10,
+        "maxDay": 34,
+        "chance": 0.25,
+        "conditions": [
+          {
+            "key": "dayAfter",
+            "value": 10
+          }
+        ]
+      },
+      "cooldownTurns": 3,
+      "maxOccurrences": 1,
+      "options": [
+        {
+          "id": "power-down-science",
+          "label": "Power down science until sunrise",
+          "baseSuccess": 1,
+          "tags": ["shed_science"],
+          "onSuccess": [
+            {
+              "target": "scienceRate",
+              "op": "multiply",
+              "value": 0,
+              "durationTurns": 1
+            },
+            {
+              "target": "powerUse",
+              "op": "multiply",
+              "value": 0.8,
+              "durationTurns": 1
+            }
+          ],
+          "onFail": [],
+          "explanation": "Even at the south pole's best ridges, the Sun can hide for days; batteries must be sized for the longest dark spell."
+        },
+        {
+          "id": "keep-running",
+          "label": "Keep everything running",
+          "consumes": {
+            "powerWh": 20000
+          },
+          "baseSuccess": 0.5,
+          "tags": ["continue"],
+          "onSuccess": [],
+          "onFail": [
+            {
+              "target": "batteryWh",
+              "op": "set",
+              "value": 0
+            },
+            {
+              "target": "allCrew",
+              "stat": "health",
+              "op": "add",
+              "value": -10
+            }
+          ],
+          "explanation": "Science continues, but if the dark lasts longer than forecast the batteries run flat."
+        }
+      ]
+    },
+    {
+      "id": "dust-devil-cleaning",
+      "title": "Dust Devil Cleaning",
+      "description": "A dust devil swept across the site overnight. The panels are suddenly clean.",
+      "type": "environmental",
+      "role": "power_life",
+      "destinations": ["mars"],
+      "location": "surface",
+      "urgency": "routine",
+      "positive": true,
+      "trigger": {
+        "minDay": 210,
+        "maxDay": 510,
+        "chance": 0.1,
+        "conditions": [
+          {
+            "key": "dustLevelAbove",
+            "value": 0.05
+          }
+        ]
+      },
+      "cooldownTurns": 4,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "enjoy-it",
+          "label": "Log it and enjoy the extra power",
+          "baseSuccess": 1,
+          "onSuccess": [
+            {
+              "target": "dustLevel",
+              "op": "set",
+              "value": 0
+            }
+          ],
+          "onFail": [],
+          "explanation": "Spirit and Opportunity both had their panels cleaned by passing dust devils, extending their missions by years."
+        }
+      ]
+    },
+    {
+      "id": "efficient-routine",
+      "title": "Better Routine",
+      "description": "The crew has found a smarter way to schedule maintenance and meals.",
+      "type": "human",
+      "role": "launch_budget",
+      "destinations": ["moon", "mars"],
+      "location": "any",
+      "urgency": "routine",
+      "positive": true,
+      "trigger": {
+        "minDay": 5,
+        "maxDay": 730,
+        "chance": 0.06
+      },
+      "cooldownTurns": 5,
+      "maxOccurrences": 2,
+      "options": [
+        {
+          "id": "adopt",
+          "label": "Adopt the new routine",
+          "baseSuccess": 1,
+          "tags": ["rest"],
+          "onSuccess": [
+            {
+              "target": "allCrew",
+              "stat": "energy",
+              "op": "add",
+              "value": 20
+            },
+            {
+              "target": "allCrew",
+              "stat": "morale",
+              "op": "add",
+              "value": 5
+            }
+          ],
+          "onFail": [],
+          "explanation": "Crews that shape their own schedules tend to stay rested and motivated."
+        },
+        {
+          "id": "keep-plan",
+          "label": "Stick with Mission Control's plan",
+          "baseSuccess": 1,
+          "tags": ["wait"],
+          "onSuccess": [],
+          "onFail": [],
+          "explanation": "No change."
         }
       ]
     }

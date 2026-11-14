@@ -24,7 +24,12 @@ describe('content loading', () => {
     expect(content.parts.length).toBeGreaterThanOrEqual(16)
     expect(content.constants.perCrewPerDay.oxygenKg).toBe(0.84)
     expect(content.rockets).toHaveLength(4)
-    expect(content.events).toHaveLength(2)
+    expect(content.events.length).toBeGreaterThanOrEqual(20)
+    expect(content.events.filter((e) => e.positive).length).toBeGreaterThanOrEqual(5)
+    for (const d of ['moon', 'mars']) {
+      expect(content.events.filter((e) => e.destinations.includes(d)).length).toBeGreaterThan(10)
+    }
+    expect(new Set(content.events.map((e) => e.role)).size).toBe(4)
     expect(content.lessons).toHaveLength(1)
   })
 

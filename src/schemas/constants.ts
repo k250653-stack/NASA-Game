@@ -38,8 +38,45 @@ export const ConstantsSchema = z.strictObject({
     multiLeaderMoraleDrift: z.number(),
     source: NonEmptyString,
   }),
+  /** Who can answer events live. */
+  settings: z.strictObject({
+    /** Destinations close enough for the player to answer urgent events live. */
+    liveResponseDestinations: z.array(z.string()),
+    /** One-way delay above which urgent events are handled by standing orders, seconds. */
+    delayThresholdSec: z.number().nonnegative(),
+    source: NonEmptyString,
+  }),
+  /** Turn-loop tuning (see engine/mission.ts and engine/events.ts). */
+  mission: z.strictObject({
+    startMorale: z.number().min(0).max(100),
+    energyRecoveryPerDay: z.number().nonnegative(),
+    healthRecoveryPerDay: z.number().nonnegative(),
+    /** Health lost per day when life support has no power. */
+    healthLossPerDayNoLifeSupport: z.number().nonnegative(),
+    /** Crew below this health count as injured (crewInjury "rest" keeps them inside). */
+    injuredHealthBelow: z.number().min(0).max(100),
+    maxEventsPerTurn: z.number().int().nonnegative(),
+    weaknessChanceMultiplier: z.number().positive(),
+    skillBonusPerLevel: z.number().nonnegative(),
+    traitBonus: z.number().nonnegative(),
+    /** Success penalty at 0 energy; scales linearly with tiredness. */
+    fatiguePenaltyMax: z.number().nonnegative(),
+    minSuccess: z.number().min(0).max(1),
+    maxSuccess: z.number().min(0).max(1),
+    /** Onboard storage for science data waiting to be sent, GB. */
+    dataStorageGb: z.number().nonnegative(),
+    rationFoodFactor: z.number().min(0).max(1),
+    rationMoralePerTurn: z.number(),
+    /** Average morale below this cuts science output. */
+    lowMoraleThreshold: z.number().min(0).max(100),
+    lowMoraleScienceFactor: z.number().min(0).max(1),
+    /** Share of time in sunlight while in transit (deep space: no night). */
+    transitLightFraction: z.number().min(0).max(1),
+    source: NonEmptyString,
+  }),
 })
 
 export type Constants = z.infer<typeof ConstantsSchema>
+export type MissionTuning = Constants['mission']
 export type PerCrewPerDay = Constants['perCrewPerDay']
 export type TeamRules = Constants['teamRules']

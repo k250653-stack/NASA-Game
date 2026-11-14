@@ -4,6 +4,8 @@
  */
 import { z } from 'zod'
 import {
+  isCrewTarget,
+  PART_CATEGORIES,
   ConstantsSchema,
   type Constants,
   CrewMemberSchema,
@@ -140,7 +142,28 @@ function checkReferences(content: GameContent): void {
       ])
     }
   })
+  const partIds = new Set(content.parts.map((p) => p.id))
+  const crewIds = new Set(content.crew.map((c) => c.id))
+  const categories: readonly string[] = PART_CATEGORIES
   content.events.forEach((e) => {
+    e.options.forEach((o) => {
+      if (o.requiresPart && !categories.includes(o.requiresPart) && !partIds.has(o.requiresPart)) {
+        problems.push([
+          'events.json',
+          `event "${e.id}" option "${o.id}" -> requiresPart "${o.requiresPart}" is neither a part category nor a part id`,
+        ])
+      }
+      ;[...o.onSuccess, ...o.onFail].forEach((fx) => {
+        const named =
+          isCrewTarget(fx.target) && !['randomCrew', 'allCrew', 'actingCrew'].includes(fx.target)
+        if (named && !crewIds.has(fx.target)) {
+          problems.push([
+            'events.json',
+            `event "${e.id}" option "${o.id}" -> effect target "${fx.target}" is not a crew id`,
+          ])
+        }
+      })
+    })
     e.destinations.forEach((d) => {
       if (!destinationIds.has(d)) {
         problems.push([
