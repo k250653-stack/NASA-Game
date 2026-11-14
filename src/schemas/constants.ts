@@ -128,6 +128,14 @@ export type DifficultyLevel = z.infer<typeof DifficultyLevelSchema>
 
 export const ConstantsWithScoringSchema = ConstantsSchema.extend({
   scoring: ScoringSchema,
+  /** Go / No-Go poll thresholds (engine/launchPoll.ts). */
+  launch: z.strictObject({
+    /** Rocket reliability below this makes Launch & Budget raise a concern. */
+    reliabilityConcernBelow: z.number().min(0).max(1),
+    /** Expected science below this share of the target makes Science raise a concern. */
+    scienceConcernBelow: z.number().min(0),
+    source: NonEmptyString,
+  }),
   difficulty: z.strictObject({
     cadet: DifficultyLevelSchema,
     engineer: DifficultyLevelSchema,

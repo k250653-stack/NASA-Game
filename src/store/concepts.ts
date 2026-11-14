@@ -11,6 +11,7 @@ export const CONCEPTS = [
   'life_support',
   'data_downlink',
   'launch_capacity',
+  'go_no_go_poll',
 ] as const
 export type ConceptKey = (typeof CONCEPTS)[number]
 

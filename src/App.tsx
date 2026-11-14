@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import { useLayoutEffect, type ComponentType } from 'react'
 import { MotionConfig } from 'motion/react'
 import { useStore, type Phase } from '@/store'
 import { Starfield } from '@/ui/Starfield'
@@ -33,6 +33,10 @@ const SCREENS: Record<Phase, ComponentType> = {
 export default function App() {
   const phase = useStore((s) => s.game.phase)
   const Screen = SCREENS[phase] ?? Title
+  // Each screen opens at the top (runs before a screen's own effects, e.g. Fix in Planning).
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [phase])
   return (
     // reducedMotion="user": Motion skips transform animations when the OS asks for less motion.
     <MotionConfig reducedMotion="user">

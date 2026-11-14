@@ -18,6 +18,8 @@ interface PhaseShellProps {
   backLabel?: string
   /** Disables Continue; nextHint explains why. */
   nextDisabled?: boolean
+  /** Replaces the default "go to the next phase" (e.g. Launch). */
+  onNext?: () => void
   nextHint?: string
 }
 
@@ -33,6 +35,7 @@ export function PhaseShell({
   backLabel = 'Back',
   nextDisabled = false,
   nextHint,
+  onNext,
 }: PhaseShellProps) {
   const phase = useStore((s) => s.game.phase)
   const nextPhase = useStore((s) => s.nextPhase)
@@ -54,7 +57,7 @@ export function PhaseShell({
           </Button>
         ) : (
           <Button
-            onClick={nextPhase}
+            onClick={onNext ?? nextPhase}
             data-testid="next-button"
             disabled={nextDisabled}
             aria-describedby={nextHint ? 'next-hint' : undefined}

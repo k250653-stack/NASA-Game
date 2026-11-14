@@ -6,16 +6,16 @@
 
 ### Tests added in this audit
 
-| Area | File | Tests added | Total now |
-| --- | --- | --- | --- |
-| Engine helpers with only indirect coverage (format, mission helpers, history, effects, events, crew AI, autopilot, planning, read-outs, recruitment, score, detectors) | `src/engine/__tests__/engineAudit.test.ts` | 32 | 32 |
-| Full-run determinism (Moon + Mars: state, score, causes) | `engineAudit.test.ts` | 1 | 1 |
-| Content integrity (validation, portraits, dialogue, icons, event ids, base slots incl. no overlap, phase sums, ownership) | `src/content/contentIntegrity.test.ts` | 9 | 9 |
-| Guards (no `Math.random` in `src`, engine imports no React/screens/ui/store) | `contentIntegrity.test.ts` | 3 | 3 |
-| e2e design system (every component, Modal Esc + focus trap, focus ring) | `e2e/design-system.spec.ts` | 1 | 1 |
-| e2e selection (destination gating + reset confirm, difficulty + seed persist, 5 seats, callsign) | `e2e/selection.spec.ts` | 3 | 3 |
-| e2e recruit (budget, no-Practical warning, suggested team, invalid reason, reload) | `e2e/recruit.spec.ts` | 3 | 3 |
-| e2e planning (ownership locks, Mission Director, supplies slider, rocket → mass bar, accepted trade → margins, standing orders Mars only) | `e2e/planning.spec.ts` | 5 | 12 |
+| Area                                                                                                                                                                   | File                                       | Tests added | Total now |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ----------- | --------- |
+| Engine helpers with only indirect coverage (format, mission helpers, history, effects, events, crew AI, autopilot, planning, read-outs, recruitment, score, detectors) | `src/engine/__tests__/engineAudit.test.ts` | 32          | 32        |
+| Full-run determinism (Moon + Mars: state, score, causes)                                                                                                               | `engineAudit.test.ts`                      | 1           | 1         |
+| Content integrity (validation, portraits, dialogue, icons, event ids, base slots incl. no overlap, phase sums, ownership)                                              | `src/content/contentIntegrity.test.ts`     | 9           | 9         |
+| Guards (no `Math.random` in `src`, engine imports no React/screens/ui/store)                                                                                           | `contentIntegrity.test.ts`                 | 3           | 3         |
+| e2e design system (every component, Modal Esc + focus trap, focus ring)                                                                                                | `e2e/design-system.spec.ts`                | 1           | 1         |
+| e2e selection (destination gating + reset confirm, difficulty + seed persist, 5 seats, callsign)                                                                       | `e2e/selection.spec.ts`                    | 3           | 3         |
+| e2e recruit (budget, no-Practical warning, suggested team, invalid reason, reload)                                                                                     | `e2e/recruit.spec.ts`                      | 3           | 3         |
+| e2e planning (ownership locks, Mission Director, supplies slider, rocket → mass bar, accepted trade → margins, standing orders Mars only)                              | `e2e/planning.spec.ts`                     | 5           | 12        |
 
 Unit tests by file: physics 21, launch check 13, budget 9, team balance 5, long duration 16, mission 22, debrief 19, planning 18, recruitment 11, purity 3, rng 11, content 23, store 9, icons 1, audit 33.
 
@@ -45,3 +45,28 @@ this session, so the play-throughs ran as headed Playwright scripts instead.
 - e2e screenshots: `e2e/screenshots/<viewport>/` (gitignored)
 - HTML report: `pnpm exec playwright show-report e2e/playwright-report`
 - Watch the suite: `pnpm e2e:watch`
+
+## Launch Check, go/no-go poll and launch sequence
+
+### Tests added
+
+| Area                                                                                                       | File                                      | Tests          |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------------- |
+| Go/no-go poll and overall call                                                                             | `src/engine/__tests__/launchPoll.test.ts` | 8              |
+| Launch e2e (valid launch, over-mass NO-GO, warn-only confirm, Fix in Planning focus, Skip, reduced motion) | `e2e/launch.spec.ts`                      | 6 per viewport |
+| Smoke now launches as the Mission Director and skips the sequence                                          | `e2e/smoke.spec.ts`                       | 2 per viewport |
+
+Totals: 282 unit tests; 27 e2e tests × 2 viewports = 54 runs, all passing.
+
+### Bugs found and fixed
+
+1. **Lint: running total reassigned during render** in the transit map; phase ranges are now computed without mutation.
+2. **Launch Check opened scrolled to the bottom**, carried over from the Planning Board. Found in the visible Mars play-through. The app now scrolls to the top on every phase change, before a screen's own effects run, so "Fix in Planning" still scrolls to its panel.
+3. **"Earth" label clipped under the transit map**: the SVG viewBox was too short. Found in the visible Mars play-through.
+
+### Visible play-throughs
+
+Headed Edge, narrated, 2 s pause per screen, Mission Director seat, demo seed.
+
+- Moon: final call GO; all four seats go with numbers in each reason; launched directly; countdown, lift-off, transit chips (3 / 28 / 3 days); arrived at Mission; 0 console errors.
+- Mars: final call GO WITH RISKS (science 1,200 of 2,000 points); the confirm modal listed that risk; Launch anyway played the sequence; transit chips (210 / 300 / 220 days); arrived at Mission; 0 console errors. Bugs 2 and 3 found, fixed and replayed.

@@ -46,7 +46,7 @@ for (const destination of ['moon', 'mars'] as const) {
 
     // Role
     await page.getByLabel('Callsign').fill('Eagle-1')
-    await page.getByTestId('role-card-science').click()
+    await page.getByTestId('role-card-director').click()
     await shot('04-role')
     await next(page)
 
@@ -57,10 +57,24 @@ for (const destination of ['moon', 'mars'] as const) {
     await shot('05-recruit')
     await next(page)
 
-    // Stub and debug screens: they only need to render and navigate.
-    for (const [i, phase] of (['planning', 'launch', 'mission', 'review'] as const).entries()) {
+    // Planning: the Director's proposed design passes the launch gate.
+    await expect(page.getByTestId('planning-board')).toBeVisible()
+    await shot('06-planning')
+    await next(page)
+
+    // Launch Check: poll, then launch (confirming risks if asked), then skip the sequence.
+    await expect(page.getByTestId('final-call')).not.toHaveAttribute('data-call', 'NO-GO')
+    await shot('07-launch')
+    await next(page)
+    const confirm = page.getByTestId('confirm-launch')
+    const skip = page.getByTestId('skip-launch')
+    await expect(confirm.or(skip)).toBeVisible()
+    if (await confirm.isVisible()) await confirm.click()
+    await skip.click()
+
+    for (const [i, phase] of (['mission', 'review'] as const).entries()) {
       await expect(page.getByText(new RegExp(`Phase \\d+ / 10 · ${phase}`, 'i'))).toBeVisible()
-      await shot(`${String(i + 6).padStart(2, '0')}-${phase}`)
+      await shot(`${String(i + 8).padStart(2, '0')}-${phase}`)
       if (phase !== 'review') await next(page)
     }
 

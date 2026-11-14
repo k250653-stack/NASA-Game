@@ -113,5 +113,10 @@
       "eventChanceMultiplier": 1.3,
       "hintsEnabled": false
     }
+  },
+  "launch": {
+    "reliabilityConcernBelow": 0.92,
+    "scienceConcernBelow": 1,
+    "source": "TODO"
   }
 }

@@ -19,6 +19,9 @@ export interface ToastItem {
 interface UiState {
   toasts: ToastItem[]
   soundOn: boolean
+  /** Planning Board panel to scroll to and focus on arrival ("Fix in Planning"). */
+  focusPanel: string | null
+  setFocusPanel: (id: string | null) => void
   pushToast: (toast: Omit<ToastItem, 'id'>) => number
   dismissToast: (id: number) => void
   setSoundOn: (on: boolean) => void
@@ -31,6 +34,8 @@ let nextToastId = 1
 export const useUi = create<UiState>()((set) => ({
   toasts: [],
   soundOn: true,
+  focusPanel: null,
+  setFocusPanel: (focusPanel) => set({ focusPanel }),
   pushToast: (toast) => {
     const id = nextToastId++
     set((s) => ({ toasts: [...s.toasts, { ...toast, id }].slice(-MAX_TOASTS) }))

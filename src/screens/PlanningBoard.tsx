@@ -22,6 +22,8 @@ import { usePlanning } from './planning/usePlanning'
 
 /** Teammates speak up at most this often when the team is over a limit, in ms. */
 const REQUEST_INTERVAL_MS = 60_000
+/** How long a panel reached from the Launch Check stays highlighted, in ms. */
+const FLASH_MS = 2500
 
 export default function PlanningBoard() {
   const p = usePlanning()
@@ -33,6 +35,21 @@ export default function PlanningBoard() {
   useEffect(() => {
     latest.current = p
   })
+
+  // "Fix in Planning": scroll to and focus the panel the Launch Check pointed at.
+  const focusPanel = useUi((s) => s.focusPanel)
+  const ready = p.design !== null
+  useEffect(() => {
+    if (!focusPanel || !ready) return
+    const el = document.getElementById(focusPanel)
+    if (el) {
+      el.scrollIntoView({ block: 'start' })
+      el.focus({ preventScroll: true })
+      el.setAttribute('data-flash', '')
+      setTimeout(() => el.removeAttribute('data-flash'), FLASH_MS)
+    }
+    useUi.getState().setFocusPanel(null)
+  }, [focusPanel, ready])
 
   const massStatus = p.design
     ? planningGauges(p.design, p.content).find((g) => g.id === 'mass')?.status
