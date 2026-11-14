@@ -3,8 +3,8 @@ import { motion } from 'motion/react'
 import { resetAll, useStore } from '@/store'
 import { Button } from '@/ui/Button'
 import { Modal } from '@/ui/Modal'
-import { resumePhase, useSettings } from '@/ui/settingsStore'
 import { useUi } from '@/ui/uiStore'
+import { useWorld } from '@/world/worldStore'
 import { AboutModal } from './menu/AboutModal'
 import { MenuBackground } from './menu/MenuBackground'
 import { MenuList, type MenuItem } from './menu/MenuList'
@@ -17,15 +17,16 @@ const DEV = new URLSearchParams(window.location.search).get('dev') === '1'
 export default function Title() {
   const setPhase = useStore((s) => s.setPhase)
   const hasSave = useStore((s) => s.game.destinationId !== null)
-  const lastPhase = useSettings((s) => s.lastPhase)
   const setSandboxStart = useUi((s) => s.setSandboxStart)
+  const resetWorld = useWorld((s) => s.resetWorld)
   const [modal, setModal] = useState<'settings' | 'about' | 'new-game' | null>(null)
-  const canContinue = hasSave && lastPhase !== null
 
+  // Play starts in the HQ lobby; Sandbox keeps the direct screen flow for now.
   const newGame = (sandbox: boolean) => {
     resetAll()
+    resetWorld()
     setSandboxStart(sandbox)
-    setPhase('destination')
+    setPhase(sandbox ? 'destination' : 'hq')
   }
 
   const items: MenuItem[] = [
@@ -38,12 +39,9 @@ export default function Title() {
     {
       id: 'menu-continue',
       label: 'Continue game',
-      disabled: !canContinue,
-      hint: canContinue ? undefined : 'No saved mission yet',
-      onSelect: () => {
-        const phase = resumePhase()
-        if (phase) setPhase(phase)
-      },
+      disabled: !hasSave,
+      hint: hasSave ? undefined : 'No saved mission yet',
+      onSelect: () => setPhase('hq'),
     },
     { id: 'menu-sandbox', label: 'Sandbox mode', onSelect: () => newGame(true) },
     { id: 'menu-settings', label: 'Settings', onSelect: () => setModal('settings') },

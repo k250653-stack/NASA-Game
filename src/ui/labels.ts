@@ -46,6 +46,7 @@ export const PHASE_LABEL: Record<Phase, string> = {
   mission: 'Mission',
   review: 'Review',
   codex: 'Codex',
+  hq: 'HQ',
   styleguide: 'UI Kit',
 }
 

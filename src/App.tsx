@@ -1,4 +1,4 @@
-import { useLayoutEffect, type ComponentType } from 'react'
+import { lazy, Suspense, useLayoutEffect, type ComponentType } from 'react'
 import { MotionConfig } from 'motion/react'
 import { useStore, type Phase } from '@/store'
 import { Starfield } from '@/ui/Starfield'
@@ -15,6 +15,12 @@ import MissionControl from '@/screens/MissionControl'
 import FailureReview from '@/screens/FailureReview'
 import Codex from '@/screens/Codex'
 import Styleguide from '@/screens/styleguide/Styleguide'
+import { FadeOverlay } from '@/world/FadeOverlay'
+// Also installs the "leaving a door's screens returns to the HQ lobby" rule.
+import '@/world/worldStore'
+
+/** Phaser is large, so the walkable world loads only when the lobby is first opened. */
+const HQLobby = lazy(() => import('@/world/HQLobby'))
 
 /** No router: the current phase in the store decides which screen is shown. */
 const SCREENS: Record<Phase, ComponentType> = {
@@ -28,6 +34,7 @@ const SCREENS: Record<Phase, ComponentType> = {
   mission: MissionControl,
   review: FailureReview,
   codex: Codex,
+  hq: HQLobby,
   styleguide: Styleguide,
 }
 
@@ -43,8 +50,11 @@ export default function App() {
     // Motion skips transform animations when the OS asks for less motion, or Settings does.
     <MotionConfig reducedMotion={reducedMotion ? 'always' : 'user'}>
       <Starfield />
-      <Screen />
+      <Suspense fallback={null}>
+        <Screen />
+      </Suspense>
       <Toaster />
+      <FadeOverlay />
     </MotionConfig>
   )
 }

@@ -14,8 +14,11 @@ export const PHASES = [
   'review',
   'codex',
 ] as const
-/** 'styleguide' is a dev-only screen outside the game flow; Next/Back from it go to the title. */
-export type Phase = (typeof PHASES)[number] | 'styleguide'
+/**
+ * Screens outside the linear flow: 'hq' is the walkable HQ lobby (src/world) whose doors open
+ * flow screens; 'styleguide' is dev-only. Next/Back from either go to the title.
+ */
+export type Phase = (typeof PHASES)[number] | 'hq' | 'styleguide'
 
 /** Fixed seed used by the "demo run" button so the judged run is always the same. */
 export const DEMO_SEED = 20261114
