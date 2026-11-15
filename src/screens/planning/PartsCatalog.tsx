@@ -3,7 +3,6 @@ import type { Design, EngineContent } from '@/engine/types'
 import type { Part, Role, RoleChoice } from '@/schemas'
 import { Icon } from '@/ui/Icon'
 import { Tabs } from '@/ui/Tabs'
-import { Tooltip } from '@/ui/Tooltip'
 
 interface PartsCatalogProps {
   design: Design
@@ -13,10 +12,21 @@ interface PartsCatalogProps {
   onEdit: (change: DesignChange) => void
 }
 
-const ACT =
-  'flex size-7 items-center justify-center border-2 border-border-strong font-mono text-sm text-primary hover:border-accent hover:text-accent'
+/** Short tab names so four tabs fit the narrow left column. */
+const TAB_NAME: Record<Role, string> = {
+  science: 'Science',
+  power_life: 'Power',
+  comms_nav: 'Comms',
+  launch_budget: 'Launch',
+}
 
-/** Parts grouped by the seat that owns them, as a compact list: icon, name, mass/power/cost. */
+const ACT =
+  'flex size-7 shrink-0 items-center justify-center border-2 border-border-strong font-mono text-sm text-primary hover:border-accent hover:text-accent'
+
+/**
+ * Parts grouped by the seat that owns them. One compact row per part: icon, name, and the
+ * mass/power/cost line under it; the +/−/⇄ buttons sit inside the row on the right.
+ */
 export function PartsCatalog({ design, seat, content, ownerName, onEdit }: PartsCatalogProps) {
   const roles = content.roles.filter((r) => r.id !== 'director' && r.owns.categories.length > 0)
   const ordered = [...roles].sort((a, b) => Number(b.id === seat) - Number(a.id === seat))
@@ -28,26 +38,25 @@ export function PartsCatalog({ design, seat, content, ownerName, onEdit }: Parts
     )
     const add: DesignChange = { kind: 'addPart', partId: part.id }
     const editable = canEdit(seat, add, content)
-    const owner = ownerName(ownerOfCategory(part.category, content))
     const power = part.powerW > 0 ? `+${part.powerW}` : `${part.powerW}`
     return (
       <li
         key={part.id}
-        className={`flex items-center gap-2 border-l-2 py-1.5 pr-1 pl-2 ${count > 0 ? 'border-accent bg-accent/5' : 'border-transparent'}`}
+        className={`grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 border-l-2 py-1 pr-1 pl-2 ${count > 0 ? 'border-accent bg-accent/5' : 'border-transparent'}`}
       >
         <Icon name={part.icon} size={18} className={count > 0 ? 'text-accent' : 'text-muted'} />
-        <Tooltip content={part.description}>
-          <span tabIndex={0} className="min-w-0 flex-1 truncate text-sm text-primary">
+        <div className="min-w-0" title={part.description}>
+          <p className="truncate text-sm leading-tight text-primary">
             {part.name}
             {count > 0 && <span className="ml-1 font-mono text-accent">×{count}</span>}
-          </span>
-        </Tooltip>
-        <span className="w-24 shrink-0 text-right font-mono text-xs leading-tight text-muted tabular-nums">
-          {part.massKg}kg · {power}W · ${part.costM}M
-        </span>
-        {editable ? (
+          </p>
+          <p className="truncate font-mono text-xs leading-tight whitespace-nowrap text-muted tabular-nums">
+            {part.massKg}kg · {power}W · ${part.costM}M
+          </p>
+        </div>
+        {editable && (
           <span className="flex shrink-0 gap-1">
-            {count === 0 && sameCategory ? (
+            {count === 0 && sameCategory && (
               <button
                 type="button"
                 className={ACT}
@@ -57,7 +66,7 @@ export function PartsCatalog({ design, seat, content, ownerName, onEdit }: Parts
               >
                 ⇄
               </button>
-            ) : null}
+            )}
             {count > 0 && (
               <button
                 type="button"
@@ -78,12 +87,6 @@ export function PartsCatalog({ design, seat, content, ownerName, onEdit }: Parts
               +
             </button>
           </span>
-        ) : (
-          <Tooltip content={`Owned by ${owner}: ask them in a trade.`}>
-            <span tabIndex={0} className="shrink-0 text-subtle" aria-label={`Owned by ${owner}`}>
-              <Icon name="IconAlertOctagon" size={16} />
-            </span>
-          </Tooltip>
         )}
       </li>
     )
@@ -91,15 +94,26 @@ export function PartsCatalog({ design, seat, content, ownerName, onEdit }: Parts
 
   return (
     <Tabs
-      tabs={ordered.map((r) => ({
-        id: r.id,
-        label: r.id === seat ? `${r.name} (you)` : r.name,
-        content: (
-          <ul className="flex flex-col">
-            {content.parts.filter((p) => r.owns.categories.includes(p.category)).map(row)}
-          </ul>
-        ),
-      }))}
+      compact
+      tabs={ordered.map((r) => {
+        const mine = r.id === seat
+        const list = content.parts.filter((p) => r.owns.categories.includes(p.category))
+        const owner = ownerName(ownerOfCategory(list[0]?.category ?? r.owns.categories[0]!, content))
+        return {
+          id: r.id,
+          label: mine ? `${TAB_NAME[r.id as Role]} ★` : TAB_NAME[r.id as Role],
+          content: (
+            <div className="min-w-0">
+              {!canEdit(seat, { kind: 'addPart', partId: list[0]?.id ?? '' }, content) && (
+                <p className="mb-1 truncate text-xs text-subtle">
+                  Owned by {owner} · view only. Ask in a trade.
+                </p>
+              )}
+              <ul className="flex min-w-0 flex-col">{list.map(row)}</ul>
+            </div>
+          ),
+        }
+      })}
     />
   )
 }

@@ -15,7 +15,14 @@ import type { HabitatCallbacks, HabitatScene, HabitatTarget, NpcSpec } from './H
 import { InteractPrompt, promptTransform } from './InteractPrompt'
 import { EventPopup } from './mission/EventPopup'
 import { MissionEndCard } from './mission/MissionEndCard'
-import { DayBadge, GaugeStrip, MissionLog, ResultToast, TurnControls } from './mission/MissionHud'
+import {
+  DayBadge,
+  GaugeStrip,
+  HudFrame,
+  MissionLog,
+  ResultToast,
+  TurnControls,
+} from './mission/MissionHud'
 import { dayInfo, gauges, ROLE_POST, ROLE_TOKEN } from './mission/missionRun'
 import { StationPopup } from './mission/StationPopup'
 import { attention } from './mission/stationStatus'
@@ -208,25 +215,33 @@ export default function HabitatWorld() {
           y={anchor.current.y}
         />
       )}
-      <DayBadge info={dayInfo(run, p.destination, p.content)} />
-      <GaugeStrip gauges={bars} />
-      <MissionLog log={run.eventLog} />
+      <HudFrame
+        topLeft={<DayBadge info={dayInfo(run, p.destination, p.content)} />}
+        topCenter={<ResultToast toast={m.toast} />}
+        topRight={<GaugeStrip gauges={bars} />}
+        bottomLeft={
+          <>
+            <MissionLog log={run.eventLog} />
+            <p className="mt-1 font-mono text-xs text-subtle">
+              WASD move · Shift run · E use · Esc pause · F2 debug
+            </p>
+          </>
+        }
+        bottomRight={
+          <TurnControls
+            canAdvance={!m.over && !pending && !m.acting}
+            fastForward={m.fastForward}
+            onNext={m.nextTurn}
+            onFastForward={m.setFastForward}
+          />
+        }
+      />
       <NovaCompanion
-        className="bottom-36 left-4"
+        className="bottom-40 left-4"
         lines={tutorial.lines}
         onDone={tutorial.onDone}
         onSkip={tutorial.active ? skipTutorial : undefined}
       />
-      <p className="pointer-events-none absolute bottom-4 left-4 font-mono text-xs text-subtle">
-        WASD move · Shift run · E use · Esc pause · F2 debug
-      </p>
-      <TurnControls
-        canAdvance={!m.over && !pending && !m.acting}
-        fastForward={m.fastForward}
-        onNext={m.nextTurn}
-        onFastForward={m.setFastForward}
-      />
-      <ResultToast toast={m.toast} />
       {pending && !m.acting && (
         <EventPopup
           key={pending.id + run.turnIndex}

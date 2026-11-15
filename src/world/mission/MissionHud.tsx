@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import type { LogEntry } from '@/engine/types'
 import { GaugeItem } from './GaugeItem'
@@ -10,10 +11,39 @@ const LOG_LINES = 4
 const LOG_TONES = ['text-subtle', 'text-subtle', 'text-muted', 'text-primary']
 const LOG_MAX_CHARS = 84
 
+interface HudFrameProps {
+  topLeft: ReactNode
+  topCenter: ReactNode
+  topRight: ReactNode
+  bottomLeft: ReactNode
+  bottomRight: ReactNode
+}
+
+/**
+ * Lays the HUD out as two flex rows (top and bottom) so no piece can overlap another: the
+ * middle of the top row shrinks and wraps, the ends keep their size. Clicks pass through the
+ * frame; only the pieces themselves are interactive.
+ */
+export function HudFrame({ topLeft, topCenter, topRight, bottomLeft, bottomRight }: HudFrameProps) {
+  return (
+    <div className="pointer-events-none absolute inset-0 flex flex-col justify-between gap-3 p-4">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="shrink-0">{topLeft}</div>
+        <div className="flex min-w-0 flex-1 justify-center">{topCenter}</div>
+        <div className="pointer-events-auto shrink-0">{topRight}</div>
+      </div>
+      <div className="flex min-w-0 items-end justify-between gap-3">
+        <div className="min-w-0 max-w-[50%]">{bottomLeft}</div>
+        <div className="pointer-events-auto shrink-0">{bottomRight}</div>
+      </div>
+    </div>
+  )
+}
+
 /** Top-left: day counter and phase; on Mars also the signal delay. */
 export function DayBadge({ info }: { info: DayInfo }) {
   return (
-    <div className={`${PIXEL_BOX} absolute top-4 left-4 px-3 py-2`} data-testid="mission-day">
+    <div className={`${PIXEL_BOX} px-3 py-2`} data-testid="mission-day">
       <p className="font-title text-xl tracking-wider text-primary uppercase">
         Day <span className="font-mono tabular-nums">{info.day}</span> /{' '}
         <span className="font-mono tabular-nums">{info.totalDays}</span>
@@ -32,7 +62,7 @@ export function DayBadge({ info }: { info: DayInfo }) {
 export function GaugeStrip({ gauges }: { gauges: Gauge[] }) {
   return (
     <ul
-      className={`${PIXEL_BOX} absolute top-4 right-4 grid grid-cols-2 gap-x-4 gap-y-1.5 px-3 py-2`}
+      className={`${PIXEL_BOX} grid grid-cols-2 gap-x-4 gap-y-1.5 px-3 py-2`}
       data-testid="mission-gauges"
     >
       {gauges.map((g) => (
@@ -47,10 +77,7 @@ export function MissionLog({ log }: { log: readonly LogEntry[] }) {
   const lines = log.slice(-LOG_LINES)
   const offset = LOG_LINES - lines.length
   return (
-    <ol
-      className="pointer-events-none absolute bottom-10 left-4 max-w-[46vw] space-y-0.5"
-      data-testid="mission-log"
-    >
+    <ol className="pointer-events-none min-w-0 space-y-0.5" data-testid="mission-log">
       {lines.map((l, i) => (
         <li
           key={`${log.length - lines.length + i}`}
@@ -77,7 +104,7 @@ const BTN =
 /** Bottom-right: Next Turn, and Fast-Forward that becomes Stop while running. */
 export function TurnControls({ canAdvance, fastForward, onNext, onFastForward }: ControlsProps) {
   return (
-    <div className="absolute right-4 bottom-4 flex gap-2">
+    <div className="flex gap-2">
       <button
         type="button"
         className={`${BTN} border-accent bg-bg/90 text-accent hover:bg-accent/10`}
@@ -121,7 +148,7 @@ export function ResultToast({ toast }: { toast: Toast | null }) {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          className={`absolute top-24 left-1/2 -translate-x-1/2 border bg-bg/95 px-4 py-2 font-title text-lg tracking-wide ${toast.ok ? 'border-success text-success' : 'border-danger text-danger'}`}
+          className={`max-w-full border bg-bg/95 px-4 py-2 text-center font-title text-lg tracking-wide ${toast.ok ? 'border-success text-success' : 'border-danger text-danger'}`}
           data-testid="result-toast"
           data-ok={toast.ok}
         >

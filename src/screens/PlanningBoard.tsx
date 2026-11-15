@@ -6,6 +6,7 @@ import type { CrewMember, Role } from '@/schemas'
 import { useStore } from '@/store'
 import { emitConcept } from '@/store/concepts'
 import { Button } from '@/ui/Button'
+import { Collapsible } from '@/ui/Collapsible'
 import { Panel } from '@/ui/Panel'
 import { PhaseShell } from '@/ui/PhaseShell'
 import { useUi } from '@/ui/uiStore'
@@ -28,6 +29,8 @@ const FLASH_MS = 2500
 export default function PlanningBoard() {
   const p = usePlanning()
   const setPhase = useStore((s) => s.setPhase)
+  const prevPhase = useStore((s) => s.prevPhase)
+  const nextPhase = useStore((s) => s.nextPhase)
   const recordTrade = useStore((s) => s.recordTrade)
   const setStandingOrders = useStore((s) => s.setStandingOrders)
   const [talkTo, setTalkTo] = useState<CrewMember | null>(null)
@@ -137,42 +140,60 @@ export default function PlanningBoard() {
       title="Planning Board"
       description={`Design your part of ${p.scenario.name}. Your teammates design theirs; mass, power and budget are shared.`}
       topBarExtra={<ReadinessChip readiness={readiness} />}
-      nextLabel="Continue to Launch Check"
-      nextHint={
-        readiness.fails + readiness.warns > 0
-          ? `${readiness.fails} failing and ${readiness.warns} warning checks: you can still continue.`
-          : undefined
-      }
-      sidebar={
-        <MarginsColumn
-          design={design}
-          content={content}
-          hintsEnabled={content.constants.difficulty[p.difficulty].hintsEnabled}
-          ownerName={ownerName}
-          canApply={(s) => canEdit(seat, s.change, content)}
-          onApply={(s) => p.edit(s.change)}
-        />
-      }
+      fill
     >
-      <div className="grid grid-cols-[18rem_minmax(0,1fr)] gap-5" data-testid="planning-board">
-        <Panel
-          id="panel-catalog"
-          testId="catalog-panel"
-          title="Parts"
-          subtitle="Add (+), remove (−) or swap (⇄) parts in your seat. Parts owned by a teammate need a trade: click their portrait."
-          padded={false}
-        >
-          <div className="px-3 pb-3">
-            <PartsCatalog
+      <div
+        className="grid min-h-0 flex-1 grid-cols-[32fr_40fr_28fr] gap-3"
+        data-testid="planning-board"
+      >
+        {/* LEFT: parts, supplies, launcher. Scrolls by itself only if needed. */}
+        <div className="flex min-h-0 min-w-0 flex-col gap-3 overflow-y-auto pr-1">
+          <Panel
+            id="panel-catalog"
+            testId="catalog-panel"
+            title="Parts"
+            subtitle="Add (+), remove (−) or swap (⇄) parts in your seat. Parts owned by a teammate need a trade: talk to them."
+            padded={false}
+          >
+            <div className="min-w-0 px-3 pb-3">
+              <PartsCatalog
+                design={design}
+                seat={seat}
+                content={content}
+                ownerName={ownerName}
+                onEdit={p.edit}
+              />
+            </div>
+          </Panel>
+          <Collapsible id="panel-supplies" testId="supplies-panel" title="Supplies">
+            <SuppliesPanel
               design={design}
               seat={seat}
               content={content}
-              ownerName={ownerName}
+              ownerName={ownerName(
+                ownerOfChange({ kind: 'supply', resource: 'waterKg', deltaKg: 0 }, content),
+              )}
               onEdit={p.edit}
             />
-          </div>
-        </Panel>
-        <div className="flex min-w-0 flex-col gap-5">
+          </Collapsible>
+          <Collapsible id="panel-launcher" testId="launcher-panel" title="Launcher">
+            <RocketSelector
+              design={design}
+              seat={seat}
+              content={content}
+              ownerName={ownerName(ownerOfChange({ kind: 'rocket', rocketId: '' }, content))}
+              onEdit={p.edit}
+            />
+          </Collapsible>
+          {isMars && (
+            <Collapsible id="panel-orders" testId="standing-orders-panel" title="Standing orders">
+              <StandingOrdersPanel orders={design.standingOrders} onChange={setStandingOrders} />
+            </Collapsible>
+          )}
+        </div>
+
+        {/* CENTRE: the team in one row, then the base picture filling the rest. */}
+        <div className="flex min-h-0 min-w-0 flex-col gap-3">
           <TeamColumn
             seat={seat}
             seatName={seatName}
@@ -183,27 +204,40 @@ export default function PlanningBoard() {
             onOpen={playerRole ? setTalkTo : null}
           />
           <BaseView design={design} seat={seat} content={content} />
-          <div className="grid grid-cols-2 items-start gap-5">
-            <SuppliesPanel
+        </div>
+
+        {/* RIGHT: resources and fixes, with the main button always at the bottom. */}
+        <div className="flex min-h-0 min-w-0 flex-col gap-3">
+          <div className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
+            <MarginsColumn
               design={design}
-              seat={seat}
               content={content}
-              ownerName={ownerName(
-                ownerOfChange({ kind: 'supply', resource: 'waterKg', deltaKg: 0 }, content),
-              )}
-              onEdit={p.edit}
-            />
-            <RocketSelector
-              design={design}
-              seat={seat}
-              content={content}
-              ownerName={ownerName(ownerOfChange({ kind: 'rocket', rocketId: '' }, content))}
-              onEdit={p.edit}
+              hintsEnabled={content.constants.difficulty[p.difficulty].hintsEnabled}
+              ownerName={ownerName}
+              canApply={(s) => canEdit(seat, s.change, content)}
+              onApply={(s) => p.edit(s.change)}
             />
           </div>
-          {isMars && (
-            <StandingOrdersPanel orders={design.standingOrders} onChange={setStandingOrders} />
-          )}
+          <div className="flex shrink-0 flex-col gap-2 border-t-2 border-border pt-3">
+            {readiness.fails + readiness.warns > 0 && (
+              <p className="text-xs text-alert" id="next-hint">
+                {readiness.fails} failing, {readiness.warns} warning checks: you can still confirm.
+              </p>
+            )}
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" onClick={prevPhase} data-testid="back-button">
+                ← Back
+              </Button>
+              <Button
+                className="min-w-0 flex-1"
+                onClick={nextPhase}
+                data-testid="next-button"
+                aria-describedby={readiness.fails + readiness.warns > 0 ? 'next-hint' : undefined}
+              >
+                Confirm plan
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
       {playerRole && (

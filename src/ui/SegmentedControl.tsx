@@ -49,7 +49,7 @@ export function SegmentedControl<T extends string>({
       <div
         role="radiogroup"
         aria-label={label}
-        className="inline-flex rounded-md border border-border-strong bg-surface p-1"
+        className="inline-flex max-w-full flex-wrap rounded-md border border-border-strong bg-surface p-1"
       >
         {options.map((o, i) => {
           const checked = o.id === value
@@ -68,7 +68,7 @@ export function SegmentedControl<T extends string>({
                 onChange(o.id)
               }}
               onKeyDown={(e) => move(e, i)}
-              className={`rounded-sm px-4 py-1.5 font-display text-sm font-semibold transition-colors ${
+              className={`rounded-sm px-3 py-1.5 font-display text-sm font-semibold transition-colors ${
                 checked ? 'bg-accent text-on-accent' : 'text-muted hover:text-primary'
               }`}
             >

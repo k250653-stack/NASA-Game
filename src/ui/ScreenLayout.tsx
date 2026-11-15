@@ -15,6 +15,8 @@ interface ScreenLayoutProps {
   showSteps?: boolean
   /** Extra content at the right of the top bar. */
   topBarExtra?: ReactNode
+  /** Take exactly the available height; children manage their own scrolling. */
+  fill?: boolean
 }
 
 /** Every screen sits inside this: top bar (title, stepper, sound), content, optional sidebar. */
@@ -24,6 +26,7 @@ export function ScreenLayout({
   footer,
   showSteps = true,
   topBarExtra,
+  fill = false,
 }: ScreenLayoutProps) {
   const phase = useStore((s) => s.game.phase)
   const setPhase = useStore((s) => s.setPhase)
@@ -31,7 +34,7 @@ export function ScreenLayout({
   const inPopup = usePopup() !== null
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className={`flex flex-col ${fill ? 'h-full' : 'min-h-full'}`}>
       {!inPopup && (
         <header className="sticky top-0 z-30 h-topbar shrink-0 border-b-2 border-border bg-surface">
           <div className="mx-auto flex h-full max-w-content items-center gap-6 px-6">
@@ -53,11 +56,11 @@ export function ScreenLayout({
       )}
 
       <div
-        className={`mx-auto grid w-full max-w-content flex-1 gap-6 px-6 ${inPopup ? 'py-4' : 'py-6'} ${
+        className={`mx-auto grid w-full max-w-content flex-1 gap-6 px-6 ${fill ? 'min-h-0 grid-rows-[minmax(0,1fr)] py-3' : inPopup ? 'py-4' : 'py-6'} ${
           sidebar ? 'grid-cols-[minmax(0,1fr)_var(--spacing-sidebar)]' : 'grid-cols-1'
         }`}
       >
-        <main className="flex min-w-0 flex-col gap-6">
+        <main className={`flex min-w-0 flex-col ${fill ? 'min-h-0 gap-3' : 'gap-6'}`}>
           {children}
           {footer && <div className="mt-auto">{footer}</div>}
         </main>

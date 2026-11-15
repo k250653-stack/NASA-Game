@@ -1,5 +1,4 @@
 import type { StandingOrders } from '@/schemas'
-import { Panel } from '@/ui/Panel'
 import { SegmentedControl } from '@/ui/SegmentedControl'
 
 /** What the crew does under each order when you cannot answer in time (Mars signal delay). */
@@ -84,27 +83,24 @@ interface StandingOrdersPanelProps {
 
 export function StandingOrdersPanel({ orders, onChange }: StandingOrdersPanelProps) {
   return (
-    <Panel
-      id="panel-orders"
-      testId="standing-orders"
-      title="Standing orders"
-      subtitle="Mars is up to 22 light-minutes away: urgent events are handled by the crew using these orders."
-    >
-      <div className="grid grid-cols-2 gap-5">
-        {(Object.keys(ORDERS) as Array<keyof StandingOrders>).map((key) => (
-          <div key={key}>
-            <p className="mb-1.5 text-xs font-semibold tracking-wide text-subtle uppercase">
-              {ORDERS[key].title}
-            </p>
-            <SegmentedControl
-              label={ORDERS[key].title}
-              options={ORDERS[key].options}
-              value={orders[key]}
-              onChange={(v) => onChange({ ...orders, [key]: v })}
-            />
-          </div>
-        ))}
-      </div>
-    </Panel>
+    <div className="flex min-w-0 flex-col gap-3" data-testid="standing-orders">
+      <p className="text-xs text-subtle">
+        Mars is up to 22 light-minutes away: urgent events are handled by the crew using these
+        orders.
+      </p>
+      {(Object.keys(ORDERS) as Array<keyof StandingOrders>).map((key) => (
+        <div key={key} className="min-w-0">
+          <p className="mb-1 text-xs font-semibold tracking-wide text-subtle uppercase">
+            {ORDERS[key].title}
+          </p>
+          <SegmentedControl
+            label={ORDERS[key].title}
+            options={ORDERS[key].options}
+            value={orders[key]}
+            onChange={(v) => onChange({ ...orders, [key]: v })}
+          />
+        </div>
+      ))}
+    </div>
   )
 }

@@ -1,7 +1,9 @@
 import type { RoleUsage } from '@/engine/planningHints'
 import type { CrewMember, RoleChoice } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
-import { ROLE_LABEL } from '@/ui/labels'
+import { compactNumber } from '@/ui/compactNumber'
+import { HelmetPortrait } from '@/ui/HelmetPortrait'
+import { Icon } from '@/ui/Icon'
 import { roleClasses } from '@/ui/roleColors'
 
 interface TeamColumnProps {
@@ -16,13 +18,19 @@ interface TeamColumnProps {
   onOpen: ((member: CrewMember) => void) | null
 }
 
-function usageText(u: RoleUsage): string {
-  const kg = Math.round(u.massKg).toLocaleString('en-US')
-  const w = Math.round(u.powerW).toLocaleString('en-US')
-  return `${kg} kg · ${w} W · $${Math.round(u.costM)}M`
+/** Short role names so they fit a narrow card. */
+const SHORT_ROLE: Record<CrewMember['role'], string> = {
+  science: 'Science',
+  power_life: 'Power & Life',
+  comms_nav: 'Comms & Nav',
+  launch_budget: 'Launch & Budget',
 }
 
-/** The mission team as a row of portraits; click a teammate to negotiate. Usage on hover. */
+function usageText(u: RoleUsage): string {
+  return `${compactNumber(u.massKg)} kg · ${compactNumber(u.powerW)} W · $${Math.round(u.costM)}M`
+}
+
+/** The whole team in ONE row of four compact cards; the talk icon on a teammate opens a trade. */
 export function TeamColumn({
   seat,
   seatName,
@@ -32,59 +40,51 @@ export function TeamColumn({
   playerUsage,
   onOpen,
 }: TeamColumnProps) {
+  const card = 'relative flex min-w-0 flex-col items-center gap-1 border-2 bg-panel p-1.5 text-center'
   return (
-    <ul className="flex flex-wrap items-end gap-4" aria-label="Mission team">
+    <ul className="grid min-w-0 shrink-0 grid-cols-4 gap-2" aria-label="Mission team">
       <li
         title={`${seatName}: ${usageText(playerUsage)}`}
-        className="flex flex-col items-center gap-1"
+        className={`${card} ${roleClasses(seat).border}`}
       >
-        <AssetImage
-          kind="portraits"
-          id="crew-player"
-          label={callsign || 'You'}
-          className={`size-16 border-2 ${roleClasses(seat).border}`}
-        />
-        <span className="label-caps text-xs text-primary">{callsign || 'You'}</span>
-        <span className={`label-caps text-xs ${roleClasses(seat).text}`}>{seatName}</span>
+        <HelmetPortrait size={56} />
+        <p className="label-caps w-full truncate text-xs text-primary">{callsign || 'You'}</p>
+        <p className={`label-caps w-full truncate text-xs ${roleClasses(seat).text}`}>
+          {seat === 'director' ? 'Director' : seatName}
+        </p>
       </li>
       {team.map((m) => {
         const c = roleClasses(m.role)
-        const tip = `${m.name}, ${ROLE_LABEL[m.role]}: ${usageText(usage(m.role))}${onOpen ? '. Click to negotiate.' : ''}`
-        const body = (
-          <>
+        return (
+          <li
+            key={m.id}
+            title={`${m.name}, ${SHORT_ROLE[m.role]}: ${usageText(usage(m.role))}`}
+            data-testid={`teammate-card-${m.id}`}
+            className={`${card} ${c.border}`}
+          >
             <AssetImage
               kind="portraits"
               id={m.portrait}
               label={m.name}
-              className={`size-16 border-2 ${c.border}`}
+              className={`size-14 shrink-0 border-2 ${c.border}`}
             />
-            <span className="label-caps text-xs text-primary">{m.name.split(' ')[0]}</span>
-            <span className={`label-caps text-xs ${c.text}`}>{ROLE_LABEL[m.role]}</span>
-          </>
-        )
-        return (
-          <li key={m.id}>
-            {onOpen ? (
+            <p className="label-caps w-full truncate text-xs text-primary">{m.name.split(' ')[0]}</p>
+            <p className={`label-caps w-full truncate text-xs ${c.text}`}>{SHORT_ROLE[m.role]}</p>
+            {onOpen && (
               <button
                 type="button"
-                title={tip}
-                data-testid={`teammate-card-${m.id}`}
+                title={`Talk to ${m.name.split(' ')[0]} to trade parts and budget`}
+                aria-label={`Talk to ${m.name}`}
+                data-testid={`talk-${m.id}`}
                 onClick={() => onOpen(m)}
-                className="flex flex-col items-center gap-1 transition-transform hover:-translate-y-px"
+                className="absolute top-1 right-1 flex size-6 items-center justify-center border-2 border-border-strong bg-bg/80 text-muted hover:border-accent hover:text-accent"
               >
-                {body}
+                <Icon name="IconBubble" size={14} />
               </button>
-            ) : (
-              <div title={tip} className="flex flex-col items-center gap-1">
-                {body}
-              </div>
             )}
           </li>
         )
       })}
-      {onOpen && (
-        <li className="label-caps self-center text-xs text-subtle">Click a teammate to trade</li>
-      )}
     </ul>
   )
 }

@@ -10,10 +10,12 @@ export interface TabItem {
 interface TabsProps {
   tabs: readonly TabItem[]
   defaultId?: string
+  /** Tighter tabs for narrow columns. */
+  compact?: boolean
 }
 
 /** Accessible tabs: Left/Right/Home/End move between tabs. */
-export function Tabs({ tabs, defaultId }: TabsProps) {
+export function Tabs({ tabs, defaultId, compact = false }: TabsProps) {
   const base = useId()
   const [active, setActive] = useState(defaultId ?? tabs[0]?.id ?? '')
   const refs = useRef<Array<HTMLButtonElement | null>>([])
@@ -44,7 +46,7 @@ export function Tabs({ tabs, defaultId }: TabsProps) {
 
   return (
     <div>
-      <div role="tablist" className="flex gap-1 border-b border-border">
+      <div role="tablist" className="flex min-w-0 gap-0.5 overflow-x-auto border-b border-border">
         {tabs.map((t, i) => {
           const selected = t.id === activeTab?.id
           return (
@@ -61,7 +63,7 @@ export function Tabs({ tabs, defaultId }: TabsProps) {
               tabIndex={selected ? 0 : -1}
               onClick={() => setActive(t.id)}
               onKeyDown={(e) => onKey(e, i)}
-              className={`relative px-4 py-2 font-display text-sm font-medium transition-colors ${
+              className={`relative shrink-0 font-display text-sm font-medium transition-colors ${compact ? 'px-2.5 py-1.5' : 'px-4 py-2'} ${
                 selected ? 'text-accent' : 'text-muted hover:text-primary'
               }`}
             >
@@ -82,7 +84,7 @@ export function Tabs({ tabs, defaultId }: TabsProps) {
           id={`${base}-panel-${activeTab.id}`}
           aria-labelledby={`${base}-tab-${activeTab.id}`}
           tabIndex={0}
-          className="pt-4"
+          className={compact ? 'pt-2' : 'pt-4'}
         >
           {activeTab.content}
         </div>

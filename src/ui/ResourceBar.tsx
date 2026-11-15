@@ -21,6 +21,8 @@ interface ResourceBarProps {
    */
   mode?: 'depleting' | 'filling'
   decimals?: number
+  /** Custom number text (e.g. "600k"); replaces the default formatting. */
+  format?: (n: number) => string
   /** Overrides the thresholds with the engine's verdict. */
   status?: 'ok' | 'warn' | 'fail'
 }
@@ -50,6 +52,7 @@ export function ResourceBar({
   dangerAt,
   mode = 'depleting',
   decimals = 0,
+  format,
   status: statusOverride,
 }: ResourceBarProps) {
   const id = useId()
@@ -58,10 +61,12 @@ export function ResourceBar({
     : statusOf(value, warnAt, dangerAt, mode === 'filling')
   const pct = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0
   const fmt = (n: number) =>
-    n.toLocaleString(undefined, {
-      maximumFractionDigits: decimals,
-      minimumFractionDigits: decimals,
-    })
+    format
+      ? format(n)
+      : n.toLocaleString(undefined, {
+          maximumFractionDigits: decimals,
+          minimumFractionDigits: decimals,
+        })
 
   // Track the previous value during render (React's recommended pattern) to show a delta.
   const [prev, setPrev] = useState(value)
@@ -87,7 +92,7 @@ export function ResourceBar({
 
   return (
     <div className="w-full">
-      <div className="mb-1.5 flex items-center gap-2">
+      <div className="mb-1 flex min-w-0 items-center gap-2">
         {icon && (
           <Icon
             name={icon}
@@ -95,10 +100,10 @@ export function ResourceBar({
             className={TONE_TEXT[status === 'accent' ? 'neutral' : status]}
           />
         )}
-        <span id={id} className="label-caps text-sm text-muted">
+        <span id={id} className="label-caps min-w-0 truncate text-sm text-muted">
           {label}
         </span>
-        <span className="relative ml-auto font-mono text-sm tabular-nums">
+        <span className="relative ml-auto font-mono text-sm whitespace-nowrap tabular-nums">
           <AnimatePresence>
             {delta && delta.amount !== 0 && (
               <motion.span

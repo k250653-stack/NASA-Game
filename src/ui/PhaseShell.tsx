@@ -23,6 +23,11 @@ interface PhaseShellProps {
   /** Replaces the default "go to the next phase" (e.g. Launch). */
   onNext?: () => void
   nextHint?: string
+  /**
+   * Fill the popup/screen height and let the content lay itself out in columns that scroll on
+   * their own. The screen then draws its own Back/Next (no shell footer).
+   */
+  fill?: boolean
 }
 
 /** Layout for phase screens: heading, content, Back/Next. Navigation is the store's phase. */
@@ -38,6 +43,7 @@ export function PhaseShell({
   nextDisabled = false,
   nextHint,
   onNext,
+  fill = false,
 }: PhaseShellProps) {
   const phase = useStore((s) => s.game.phase)
   const nextPhase = useStore((s) => s.nextPhase)
@@ -80,7 +86,12 @@ export function PhaseShell({
   )
 
   return (
-    <ScreenLayout sidebar={sidebar} footer={footer} topBarExtra={topBarExtra}>
+    <ScreenLayout
+      sidebar={sidebar}
+      footer={fill ? undefined : footer}
+      topBarExtra={topBarExtra}
+      fill={fill}
+    >
       {/* Title bar: "PERSONNEL · RECRUIT CREW" in a popup, "PHASE 4 / 10 · RECRUIT" on its own. */}
       <div
         className={`flex items-center justify-between gap-4 border-b-2 border-border pb-3 ${popup ? 'pr-10' : ''}`}
