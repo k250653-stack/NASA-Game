@@ -2,7 +2,7 @@
  * Typed asset paths. Files live in public/assets/<kind>/<id>.<ext> and are served from /assets/.
  * See public/assets/ASSETS.md for the list of expected files.
  */
-export const IMAGE_KINDS = ['portraits', 'sprites', 'backgrounds'] as const
+export const IMAGE_KINDS = ['portraits', 'sprites', 'backgrounds', 'events'] as const
 export const AUDIO_KINDS = ['sounds', 'music'] as const
 
 export type ImageAssetKind = (typeof IMAGE_KINDS)[number]
@@ -13,6 +13,7 @@ const EXTENSION: Record<AssetKind, string> = {
   portraits: 'webp',
   sprites: 'webp',
   backgrounds: 'webp',
+  events: 'png',
   sounds: 'mp3',
   music: 'mp3',
 }

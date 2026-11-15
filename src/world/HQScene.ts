@@ -7,10 +7,31 @@
 import Phaser from 'phaser'
 import { getAsset } from '@/ui/assets'
 import { playSound } from '@/ui/sound'
-import { animKey, facingFrom, FOOT_Y, FRAME_RATE, FRAME_SIZE, FRAMES_PER_DIR, HEAD_Y, MOTIONS, SHEET_DIRS, SHEET_FILE, sheetDir, type Facing, type Motion } from './character'
+import {
+  animKey,
+  facingFrom,
+  FOOT_Y,
+  FRAME_RATE,
+  FRAME_SIZE,
+  FRAMES_PER_DIR,
+  HEAD_Y,
+  MOTIONS,
+  SHEET_DIRS,
+  SHEET_FILE,
+  sheetDir,
+  type Facing,
+  type Motion,
+} from './character'
 import { canStand, distanceToPolygon, pointInPolygon, type Point, type Polygon } from './geometry'
 import { drawPadlock, roomLight, tokenColor, type RoomLight } from './hqArt'
-import { gatedRooms, getHqMap, type HqMap, type PlacedDoor, type PlacedRoom, type PlacedStation } from './hqMap'
+import {
+  gatedRooms,
+  getHqMap,
+  type HqMap,
+  type PlacedDoor,
+  type PlacedRoom,
+  type PlacedStation,
+} from './hqMap'
 import type { Step } from './rooms/room'
 import { addCutOutTexture } from './roomTexture'
 
@@ -45,7 +66,10 @@ export interface SceneCallbacks {
   locks: () => Record<string, string | null>
 }
 
-type Keys = Record<'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd' | 'shift', Phaser.Input.Keyboard.Key>
+type Keys = Record<
+  'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd' | 'shift',
+  Phaser.Input.Keyboard.Key
+>
 
 export class HQScene extends Phaser.Scene {
   private readonly cb: () => SceneCallbacks
@@ -90,7 +114,9 @@ export class HQScene extends Phaser.Scene {
       const url = getAsset('sprites', `maincharacter/${SHEET_FILE[motion]}`, 'png')
       this.load.spritesheet(motion, url, { frameWidth: FRAME_SIZE, frameHeight: FRAME_SIZE })
     }
-    this.load.on('loaderror', (file: Phaser.Loader.File) => console.warn(`[world] could not load "${file.src}"`))
+    this.load.on('loaderror', (file: Phaser.Loader.File) =>
+      console.warn(`[world] could not load "${file.src}"`),
+    )
   }
 
   create() {
@@ -98,21 +124,38 @@ export class HQScene extends Phaser.Scene {
       const key = `room-${placed.room.id}`
       if (!this.textures.exists(key)) continue
       addCutOutTexture(this, key, `${key}-cut`)
-      const image = this.add.image(placed.at[0], placed.at[1], `${key}-cut`).setOrigin(0).setDepth(1)
+      const image = this.add
+        .image(placed.at[0], placed.at[1], `${key}-cut`)
+        .setOrigin(0)
+        .setDepth(1)
       this.roomLights.set(placed.room.id, roomLight(image))
     }
     this.applyLocks(false)
 
     this.createAnims()
     const [sx, sy] = this.spawn
-    this.player = this.add.sprite(sx, sy, 'idle').setOrigin(0.5, FOOT_Y / FRAME_SIZE).setScale(this.map.lobby.room.playerScale).setDepth(5)
+    this.player = this.add
+      .sprite(sx, sy, 'idle')
+      .setOrigin(0.5, FOOT_Y / FRAME_SIZE)
+      .setScale(this.map.lobby.room.playerScale)
+      .setDepth(5)
     this.playAnim('idle')
     this.saved = { at: 0, x: sx, y: sy }
     this.inDoor = this.doorAt(this.spawn)?.key ?? null
 
     const kb = this.input.keyboard!
     const K = Phaser.Input.Keyboard.KeyCodes
-    this.keys = kb.addKeys({ up: K.UP, down: K.DOWN, left: K.LEFT, right: K.RIGHT, w: K.W, a: K.A, s: K.S, d: K.D, shift: K.SHIFT }) as Keys
+    this.keys = kb.addKeys({
+      up: K.UP,
+      down: K.DOWN,
+      left: K.LEFT,
+      right: K.RIGHT,
+      w: K.W,
+      a: K.A,
+      s: K.S,
+      d: K.D,
+      shift: K.SHIFT,
+    }) as Keys
     kb.on('keydown-E', () => this.onUse())
     kb.addCapture(K.F2)
     kb.on('keydown-F2', () => this.toggleDebug())
@@ -155,7 +198,8 @@ export class HQScene extends Phaser.Scene {
   // ---- doors -------------------------------------------------------------------------------
 
   private doorAt(p: Point): PlacedDoor | undefined {
-    for (const r of this.map.rooms) for (const d of r.doors) if (d.target && pointInPolygon(p, d.area)) return d
+    for (const r of this.map.rooms)
+      for (const d of r.doors) if (d.target && pointInPolygon(p, d.area)) return d
     return undefined
   }
 
@@ -223,16 +267,28 @@ export class HQScene extends Phaser.Scene {
   private setLocked(roomId: string) {
     this.roomLights.get(roomId)?.set(0)
     const room = this.map.rooms.find((r) => r.room.id === roomId)
-    if (room && !this.padlocks.has(roomId)) this.padlocks.set(roomId, drawPadlock(this, [room.center[0], room.center[1] - 40]))
+    if (room && !this.padlocks.has(roomId))
+      this.padlocks.set(roomId, drawPadlock(this, [room.center[0], room.center[1] - 40]))
   }
 
   /** Lights come on: the room brightens over ~1 s and its padlock fades away. */
   private animateUnlock(roomId: string) {
     const light = this.roomLights.get(roomId)
-    this.tweens.addCounter({ from: 0, to: 1, duration: UNLOCK_MS, onUpdate: (tw) => light?.set(tw.getValue() ?? 1) })
+    this.tweens.addCounter({
+      from: 0,
+      to: 1,
+      duration: UNLOCK_MS,
+      onUpdate: (tw) => light?.set(tw.getValue() ?? 1),
+    })
     const padlock = this.padlocks.get(roomId)
     this.padlocks.delete(roomId)
-    if (padlock) this.tweens.add({ targets: padlock, alpha: 0, duration: UNLOCK_MS / 2, onComplete: () => padlock.destroy() })
+    if (padlock)
+      this.tweens.add({
+        targets: padlock,
+        alpha: 0,
+        duration: UNLOCK_MS / 2,
+        onComplete: () => padlock.destroy(),
+      })
     playSound('unlock')
   }
 
@@ -252,7 +308,11 @@ export class HQScene extends Phaser.Scene {
   /** Moves if the new spot is standable; otherwise slides along one axis. */
   private move(mx: number, my: number) {
     const { x, y } = this.player
-    const tries: Point[] = [[x + mx, y + my], [x + mx, y], [x, y + my]]
+    const tries: Point[] = [
+      [x + mx, y + my],
+      [x + mx, y],
+      [x, y + my],
+    ]
     const next = tries.find((p) => canStand(p, this.walkable, this.blocked))
     if (next) this.player.setPosition(next[0], next[1])
   }
@@ -300,7 +360,13 @@ export class HQScene extends Phaser.Scene {
     g.fillStyle(color, 0.08).fillPoints(pts, true)
     g.lineStyle(6, color, 0.25).strokePoints(pts, true)
     g.lineStyle(2, color, 0.9).strokePoints(pts, true)
-    this.tweens.add({ targets: g, alpha: { from: 0.35, to: 1 }, duration: 650, yoyo: true, repeat: -1 })
+    this.tweens.add({
+      targets: g,
+      alpha: { from: 0.35, to: 1 },
+      duration: 650,
+      yoyo: true,
+      repeat: -1,
+    })
     this.glow = g
   }
 
@@ -322,7 +388,10 @@ export class HQScene extends Phaser.Scene {
     const cam = this.cameras.main
     cam.centerOn(this.cam.x, this.cam.y)
     const headY = this.player.y - (FOOT_Y - HEAD_Y) * this.player.scaleY
-    this.cb().onPlayerScreen((this.player.x - cam.worldView.x) * cam.zoom, (headY - cam.worldView.y) * cam.zoom)
+    this.cb().onPlayerScreen(
+      (this.player.x - cam.worldView.x) * cam.zoom,
+      (headY - cam.worldView.y) * cam.zoom,
+    )
   }
 
   private reportPosition(time: number) {
@@ -358,7 +427,10 @@ export class HQScene extends Phaser.Scene {
         const start = i * FRAMES_PER_DIR
         this.anims.create({
           key,
-          frames: this.anims.generateFrameNumbers(motion, { start, end: start + FRAMES_PER_DIR - 1 }),
+          frames: this.anims.generateFrameNumbers(motion, {
+            start,
+            end: start + FRAMES_PER_DIR - 1,
+          }),
           frameRate: FRAME_RATE[motion],
           repeat: -1,
         })

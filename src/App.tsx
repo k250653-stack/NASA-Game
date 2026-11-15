@@ -11,7 +11,6 @@ import RoleSelect from '@/screens/RoleSelect'
 import Recruit from '@/screens/Recruit'
 import PlanningBoard from '@/screens/PlanningBoard'
 import LaunchCheck from '@/screens/LaunchCheck'
-import MissionControl from '@/screens/MissionControl'
 import FailureReview from '@/screens/FailureReview'
 import Codex from '@/screens/Codex'
 import Styleguide from '@/screens/styleguide/Styleguide'
@@ -20,6 +19,8 @@ import { useWorld } from '@/world/worldStore'
 
 /** Phaser is large, so the walkable world loads only when the HQ is first opened. */
 const HQWorld = lazy(() => import('@/world/HQWorld'))
+/** The mission run plays in the habitat (also Phaser). */
+const HabitatWorld = lazy(() => import('@/world/HabitatWorld'))
 
 /** No router: the current phase in the store decides which screen is shown. */
 const SCREENS: Record<Phase, ComponentType> = {
@@ -30,7 +31,7 @@ const SCREENS: Record<Phase, ComponentType> = {
   recruit: Recruit,
   planning: PlanningBoard,
   launch: LaunchCheck,
-  mission: MissionControl,
+  mission: HabitatWorld,
   review: FailureReview,
   codex: Codex,
   hq: HQWorld,

@@ -23,7 +23,10 @@ export function distanceToPolygon(p: Point, poly: Polygon): number {
     const [bx, by] = poly[i]!
     const dx = bx - ax
     const dy = by - ay
-    const t = Math.max(0, Math.min(1, ((p[0] - ax) * dx + (p[1] - ay) * dy) / (dx * dx + dy * dy || 1)))
+    const t = Math.max(
+      0,
+      Math.min(1, ((p[0] - ax) * dx + (p[1] - ay) * dy) / (dx * dx + dy * dy || 1)),
+    )
     best = Math.min(best, Math.hypot(p[0] - (ax + t * dx), p[1] - (ay + t * dy)))
   }
   return best
@@ -36,7 +39,11 @@ export function centroid(poly: Polygon): Point {
 }
 
 /** Inside any walkable polygon and outside every blocked one. */
-export function canStand(p: Point, walkable: readonly Polygon[], blocked: readonly Polygon[]): boolean {
+export function canStand(
+  p: Point,
+  walkable: readonly Polygon[],
+  blocked: readonly Polygon[],
+): boolean {
   return walkable.some((w) => pointInPolygon(p, w)) && !blocked.some((b) => pointInPolygon(p, b))
 }
 

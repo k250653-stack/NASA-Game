@@ -39,6 +39,20 @@ const stationSchema = z.object({
   reach: z.number().positive().default(48),
 })
 
+/** Habitat workstations the mission run uses (crew posts, event actions, the airlock). */
+export const WORKSTATION_KINDS = ['power', 'comms', 'science', 'repair', 'airlock'] as const
+export type WorkstationKind = (typeof WORKSTATION_KINDS)[number]
+
+const workstationSchema = z.object({
+  kind: z.enum(WORKSTATION_KINDS),
+  label: z.string(),
+  /** Outline of the equipment: glows when the player is near. */
+  area: polygon,
+  /** Floor spot where a crew member stands to work it. */
+  stand: point,
+  reach: z.number().positive().default(56),
+})
+
 const roomSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -52,15 +66,20 @@ const roomSchema = z.object({
   blocked: z.array(polygon),
   doors: z.array(doorSchema),
   stations: z.array(stationSchema),
+  workstations: z.array(workstationSchema).default([]),
 })
 
 export type Room = z.infer<typeof roomSchema>
 export type Door = z.infer<typeof doorSchema>
 export type Station = z.infer<typeof stationSchema>
+export type Workstation = z.infer<typeof workstationSchema>
 
 export const LOBBY_ID = 'hq-lobby'
 
-const files = import.meta.glob<unknown>(['./*.json', '!./hq-map.json'], { eager: true, import: 'default' })
+const files = import.meta.glob<unknown>(['./*.json', '!./hq-map.json'], {
+  eager: true,
+  import: 'default',
+})
 let rooms: Map<string, Room> | null = null
 
 function loadRooms(): Map<string, Room> {
@@ -72,7 +91,8 @@ function loadRooms(): Map<string, Room> {
   }
   for (const room of map.values()) {
     for (const door of room.doors) {
-      if (!map.has(door.to)) throw new Error(`Room ${room.id}: door "${door.id}" leads to unknown room "${door.to}"`)
+      if (!map.has(door.to))
+        throw new Error(`Room ${room.id}: door "${door.id}" leads to unknown room "${door.to}"`)
     }
   }
   return map

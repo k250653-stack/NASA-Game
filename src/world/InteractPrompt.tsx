@@ -13,7 +13,14 @@ interface InteractPromptProps {
 }
 
 /** Small pixel prompt above the player's head. */
-export function InteractPrompt({ ref, action, lockedLabel, lockReason, x, y }: InteractPromptProps) {
+export function InteractPrompt({
+  ref,
+  action,
+  lockedLabel,
+  lockReason,
+  x,
+  y,
+}: InteractPromptProps) {
   return (
     <div
       ref={ref}

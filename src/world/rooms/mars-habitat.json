@@ -60,5 +60,66 @@
       "locked": false
     }
   ],
-  "stations": []
+  "stations": [],
+  "workstations": [
+    {
+      "kind": "power",
+      "label": "Power & Life Support Panel",
+      "area": [
+        [285, 330],
+        [430, 262],
+        [440, 410],
+        [340, 470],
+        [290, 440]
+      ],
+      "stand": [405, 478]
+    },
+    {
+      "kind": "comms",
+      "label": "Comms Station",
+      "area": [
+        [425, 265],
+        [575, 215],
+        [585, 330],
+        [460, 410],
+        [430, 380]
+      ],
+      "stand": [535, 428]
+    },
+    {
+      "kind": "science",
+      "label": "Science Bench",
+      "area": [
+        [830, 330],
+        [935, 330],
+        [985, 395],
+        [950, 430],
+        [830, 362]
+      ],
+      "stand": [880, 428]
+    },
+    {
+      "kind": "repair",
+      "label": "Repair Station",
+      "area": [
+        [955, 300],
+        [1090, 330],
+        [1090, 460],
+        [1050, 500],
+        [955, 420]
+      ],
+      "stand": [995, 500]
+    },
+    {
+      "kind": "airlock",
+      "label": "Airlock",
+      "area": [
+        [565, 200],
+        [660, 160],
+        [665, 290],
+        [575, 330]
+      ],
+      "stand": [628, 378]
+    }
+  ]
 }

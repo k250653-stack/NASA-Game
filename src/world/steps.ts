@@ -47,6 +47,8 @@ export function doorLockReason(door: Door, planningDone: boolean): string | null
     case 'briefing':
       return teamReady() ? null : 'Recruit a full crew in Personnel first.'
     case 'launch':
-      return planningDone || mission.run !== null ? null : 'Finish the mission plan in Briefing first.'
+      return planningDone || mission.run !== null
+        ? null
+        : 'Finish the mission plan in Briefing first.'
   }
 }

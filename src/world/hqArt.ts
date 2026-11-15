@@ -5,7 +5,16 @@ import type { Point } from './geometry'
 /** Theme colour token (index.css) as a Phaser colour number. */
 export function tokenColor(name: string): number {
   const hex = getComputedStyle(document.documentElement).getPropertyValue(`--color-${name}`).trim()
-  return hex.startsWith('#') ? Phaser.Display.Color.HexStringToColor(hex.slice(0, 7)).color : 0xffffff
+  return hex.startsWith('#')
+    ? Phaser.Display.Color.HexStringToColor(hex.slice(0, 7)).color
+    : 0xffffff
+}
+
+/** Theme colour token (index.css) as a CSS colour string, for Phaser text. */
+export function tokenCss(name: string): string {
+  return (
+    getComputedStyle(document.documentElement).getPropertyValue(`--color-${name}`).trim() || 'white'
+  )
 }
 
 /** Small padlock drawn with shapes (no image asset needed). */
@@ -18,7 +27,9 @@ export function drawPadlock(scene: Phaser.Scene, [x, y]: Point): Phaser.GameObje
   g.arc(x, y - 14, 11, Math.PI, 0)
   g.strokePath()
   g.fillStyle(body, 1).fillRoundedRect(x - 18, y - 14, 36, 30, 4)
-  g.fillStyle(dark, 1).fillCircle(x, y - 2, 4).fillRect(x - 1.5, y, 3, 9)
+  g.fillStyle(dark, 1)
+    .fillCircle(x, y - 2, 4)
+    .fillRect(x - 1.5, y, 3, 9)
   return g
 }
 

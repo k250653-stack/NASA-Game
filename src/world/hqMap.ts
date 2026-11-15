@@ -54,7 +54,8 @@ function arrivalPoint(area: Polygon, floors: Polygon[], blocked: Polygon[], cent
   const from = centroid(area)
   for (let t = 0; t <= 1; t += 0.01) {
     const p: Point = [from[0] + (center[0] - from[0]) * t, from[1] + (center[1] - from[1]) * t]
-    const onFloor = floors.some((f) => pointInPolygon(p, f)) && !blocked.some((b) => pointInPolygon(p, b))
+    const onFloor =
+      floors.some((f) => pointInPolygon(p, f)) && !blocked.some((b) => pointInPolygon(p, b))
     if (onFloor && !pointInPolygon(p, area)) {
       // A little further in, so the player does not stand on the threshold.
       const s = Math.min(1, t + 0.06)
@@ -106,7 +107,8 @@ export function getHqMap(): HqMap {
   if (!lobby) throw new Error('hq-map.json: the lobby must be placed')
   const doors = new Map(rooms.flatMap((r) => r.doors.map((d) => [d.key, d] as const)))
   for (const d of doors.values()) {
-    if (d.target && !doors.has(d.target)) throw new Error(`Door ${d.key} leads to unknown door ${d.target}`)
+    if (d.target && !doors.has(d.target))
+      throw new Error(`Door ${d.key} leads to unknown door ${d.target}`)
   }
   cached = { rooms, lobby, doors }
   return cached
@@ -114,5 +116,7 @@ export function getHqMap(): HqMap {
 
 /** Rooms behind a gated lobby door, with that door (for lock reasons). */
 export function gatedRooms(map: HqMap): { roomId: string; door: Door }[] {
-  return map.lobby.doors.filter((d) => d.door.gate && d.target).map((d) => ({ roomId: d.door.to, door: d.door }))
+  return map.lobby.doors
+    .filter((d) => d.door.gate && d.target)
+    .map((d) => ({ roomId: d.door.to, door: d.door }))
 }
