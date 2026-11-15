@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { offerTip } from '@/nova/tips'
 import { canEdit, ownerOfChange } from '@/engine/planning'
 import { launchReadiness, planningGauges, roleUsage } from '@/engine/planningHints'
 import { playerRoleOf } from '@/engine/recruitment'
@@ -58,7 +59,10 @@ export default function PlanningBoard() {
     ? planningGauges(p.design, p.content).find((g) => g.id === 'mass')?.status
     : undefined
   useEffect(() => {
-    if (massStatus === 'fail') emitConcept('mass_budget')
+    if (massStatus === 'fail') {
+      emitConcept('mass_budget')
+      offerTip('planning-over-limit')
+    }
   }, [massStatus])
 
   // Unsolicited requests: a squeezed teammate speaks up, at most once a minute.

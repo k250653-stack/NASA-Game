@@ -4,6 +4,8 @@ import { useStore } from '@/store'
 import { subscribeConcepts } from '@/store/concepts'
 import { useSettings } from '@/ui/settingsStore'
 import { LessonPopup } from './LessonPopup'
+import { TipBubble } from './TipBubble'
+import { offerTip, resetTipsForRun } from './tips'
 import { NovaCodex } from './NovaCodex'
 import { hintsOn, openLesson, useNova } from './novaStore'
 
@@ -12,6 +14,16 @@ import { hintsOn, openLesson, useNova } from './novaStore'
  * quietly adds it to the notes (hints off). Also renders the lesson popup and the Codex.
  */
 export function NovaLayer() {
+  // Store-driven tips: picking a destination, and a fresh tip list for every launch.
+  useEffect(
+    () =>
+      useStore.subscribe((s, prev) => {
+        const d = s.game.destinationId
+        if (d && d !== prev.game.destinationId) offerTip(`destination:${d}`)
+        if (s.mission.run && !prev.mission.run) resetTipsForRun()
+      }),
+    [],
+  )
   useEffect(
     () =>
       subscribeConcepts((concept) => {
@@ -30,6 +42,7 @@ export function NovaLayer() {
   return (
     <>
       <NovaCodex />
+      <TipBubble />
       <LessonPopup />
     </>
   )

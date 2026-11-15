@@ -16,6 +16,8 @@ interface NovaState {
   tutorialSkipped: boolean
   /** NOVA has explained "Do it yourself" hands-on tasks. */
   diyTipShown: boolean
+  /** NOVA tip ids shown at least once: the Codex "NOVA notes". */
+  tipsSeen: string[]
   /** Lesson ids opened at least once: the Codex. */
   lessonsSeen: string[]
   openLessonId: string | null
@@ -36,6 +38,7 @@ export const useNova = create<NovaState>()(
     (set) => ({
       ...initialTutorial,
       lessonsSeen: [],
+      tipsSeen: [],
       openLessonId: null,
       codexOpen: false,
       set: (patch) => set(patch),
@@ -51,6 +54,7 @@ export const useNova = create<NovaState>()(
         tutorialSkipped: s.tutorialSkipped,
         diyTipShown: s.diyTipShown,
         lessonsSeen: s.lessonsSeen,
+        tipsSeen: s.tipsSeen,
       }),
     },
   ),

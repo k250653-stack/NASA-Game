@@ -19,6 +19,7 @@ import { useReleaseFocus } from './useReleaseFocus'
 import { WorldCanvas } from './WorldCanvas'
 import { closePopup, openStep, savePlayerPos, useWorld } from './worldStore'
 import { setAmbience, setStationHum } from '@/ui/ambience'
+import { offerTip } from '@/nova/tips'
 
 /** A finished mission waits at the Briefing meeting table until the player redesigns. */
 function debriefReady(): boolean {
@@ -31,6 +32,14 @@ function interact(target: Target): void {
   if (target.kind !== 'station') return
   if (target.opens === 'briefing' && debriefReady()) useStore.getState().setPhase('review')
   else openStep(target.opens)
+}
+
+/** HQ room behind each station step (for NOVA's first-visit tips). */
+const STEP_ROOM: Record<Step, string> = {
+  planning: 'mission-planning',
+  personnel: 'personnel',
+  briefing: 'briefing',
+  launch: 'launch-control',
 }
 
 /** Popup title-bar section for each station step. */
@@ -66,6 +75,10 @@ function useRoomLocks(): Record<string, string | null> {
  */
 export default function HQWorld({ popup }: { popup?: ReactNode }) {
   const popupStep = useWorld((s) => s.popup)
+  // NOVA: the first time each room's station is used.
+  useEffect(() => {
+    if (popupStep) offerTip(`room:${STEP_ROOM[popupStep]}`)
+  }, [popupStep])
   const setPhase = useStore((s) => s.setPhase)
   const debriefOpen = useStore((s) => s.game.phase === 'review')
   const debriefAvailable = useStore((s) => s.mission.run !== null && isMissionOver(s.mission.run))

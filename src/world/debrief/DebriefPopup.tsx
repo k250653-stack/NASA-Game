@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { offerTip } from '@/nova/tips'
 import { analyzeCauses } from '@/engine/causes'
 import { compareRuns } from '@/engine/compareRuns'
 import { computeScore } from '@/engine/score'
@@ -43,6 +44,7 @@ export function DebriefPopup({ onClose }: { onClose: () => void }) {
   const [newEvents, setNewEvents] = useState(false)
   const [confirmNew, setConfirmNew] = useState(false)
 
+  useEffect(() => offerTip('debrief'), [])
   const view = useMemo(() => {
     if (!run || !p.design) return null
     const opts = { tradesCount: trades }

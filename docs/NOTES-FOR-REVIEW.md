@@ -282,3 +282,28 @@ Everything is generated (Web Audio + ZzFX), with no files. If an mp3 exists, it 
 - **Positional sound:** stations hum louder as the player gets closer (within 160 px). In the HQ, stepping into a doorway plays a pneumatic hiss. Footsteps ring slightly metallic in the habitat and softer in the HQ. They come faster when sprinting, because the footfall interval follows the speed.
 - **UI:** buttons tick on hover, and toasts ping. Popup open/close, NOVA typing blips and the alert beep already existed.
 - **Unsure:** the levels were set by ear with no audition, since there was no browser this session. Try **Settings → Sound test** (dev builds) and the master slider first.
+
+### Task 5: contextual NOVA tips
+- **Content:** `src/content/novaTips.json` (Zod: `src/schemas/novaTip.ts`) holds 19 situation tips and 6 science facts. The facts are lunar day length, the Mars signal delay range, dust on panels, CO2 scrubbing, surface radiation, and mass versus cost. Each has a source line, and the CO2 one says "TODO: verify".
+- **Rules (`src/nova/tips.ts`):** at most one tip per 60 s of play. None while an event popup, proposal or task panel is open. The same tip never twice per run (the list resets on each launch).
+- **Setting:** Settings has "NOVA tips: lots / some / off", default lots. "Some" shows only the important tips and the facts.
+- **Display:** a bubble bottom-left with typewriter text, "Learn more" when a lesson exists, and "Got it". It auto-hides after 14 s.
+- **Codex:** every tip shown is saved as a "NOVA note" (Codex screen and the pause-menu notes list), with a source link and a lesson link.
+- **Triggers wired:**
+  - picking a destination
+  - the first use of each HQ station
+  - over mass or budget on the Planning Board
+  - a supply under 30 %
+  - the first event of each category
+  - a failed repair
+  - choosing DO IT YOURSELF
+  - Mars signal delay
+  - the long dark period
+  - an ice discovery, as the "good science day"
+  - the launch check
+  - the debrief
+  - a quiet turn, which shows a fact
+- **Unsure:**
+  - "Entering each HQ room the first time" is approximated by using that room's station, because the HQ scene doesn't report room changes to React.
+  - The "science day" tip fires on the ice-discovery event only.
+  - Tips that fire together with a lesson popup can sit behind it.

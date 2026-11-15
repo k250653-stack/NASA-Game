@@ -8,6 +8,7 @@ import { runKey, TASK_LABEL, useCrewTask, useTaskStats } from './mission/crewTas
 import { ProblemButtons, ProblemLogPanel } from './mission/ProblemLog'
 import { problemLog, reopenProblem, useProblems } from './mission/problems'
 import { alertCategory, setAlert } from '@/ui/alertLayer'
+import { offerTip } from '@/nova/tips'
 import { setAmbience, setStationHum } from '@/ui/ambience'
 import { Button } from '@/ui/Button'
 import { Modal } from '@/ui/Modal'
@@ -95,8 +96,10 @@ export default function HabitatWorld() {
     if (
       destinationId &&
       !p.content.constants.settings.liveResponseDestinations.includes(destinationId)
-    )
+    ) {
       emitConcept('signal_delay')
+      offerTip('signal-delay')
+    }
   }, [destinationId, p.content])
   useEffect(() => {
     live.current = paused
@@ -150,6 +153,24 @@ export default function HabitatWorld() {
       setStationHum(0)
     }
   }, [bedKind])
+  // NOVA tips by situation: event category, night, a science find, a resource under 30 %.
+  const tipEvent = m.run?.pendingEvents[0]?.eventId ?? null
+  useEffect(() => {
+    if (!tipEvent) return
+    if (tipEvent === 'long-dark-period') offerTip('night')
+    else if (tipEvent === 'ice-discovery') offerTip('science-day')
+    else offerTip(`event:${alertCategory(tipEvent)}`)
+  }, [tipEvent])
+  const lowKey =
+    m.run && p.design
+      ? gauges(m.run, p.design, p.content, scienceTarget)
+          .filter((g) => g.status !== 'ok' && !['science', 'suits', 'spares'].includes(g.id))
+          .map((g) => g.id)
+          .join(',')
+      : ''
+  useEffect(() => {
+    if (lowKey) offerTip('resource-low')
+  }, [lowKey])
   // Alert layer: plays while anything is pending, in the first problem's category.
   const firstPending = m.run?.pendingEvents[0]?.eventId ?? null
   useEffect(() => {

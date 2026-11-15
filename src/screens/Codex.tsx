@@ -1,4 +1,4 @@
-import { CodexList } from '@/nova/NovaCodex'
+import { CodexList, NovaNotes } from '@/nova/NovaCodex'
 import { Panel } from '@/ui/Panel'
 import { PhaseShell } from '@/ui/PhaseShell'
 
@@ -11,6 +11,7 @@ export default function Codex() {
     >
       <Panel title="NOVA's notes">
         <CodexList />
+        <NovaNotes />
       </Panel>
     </PhaseShell>
   )

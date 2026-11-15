@@ -1,0 +1,179 @@
+{
+  "_note": "NOVA tips (situations) and facts (shown on quiet turns). Numbers are approximate teaching values. Sources marked TODO: verify still need a checked NASA URL.",
+  "items": [
+    {
+      "id": "room-mission-planning",
+      "trigger": "room:mission-planning",
+      "kind": "tip",
+      "text": "Mission Planning: pick where you fly and how hard. The Moon is close and forgiving; Mars is the long game."
+    },
+    {
+      "id": "room-personnel",
+      "trigger": "room:personnel",
+      "kind": "tip",
+      "text": "Personnel: your seat decides which calls are yours. Teammates cover the rest, so pick people whose strengths fill your gaps."
+    },
+    {
+      "id": "room-briefing",
+      "trigger": "room:briefing",
+      "kind": "tip",
+      "text": "The Briefing table is the planning board. Every part costs mass, power and money from one shared pot.",
+      "lessonId": "mass-budget"
+    },
+    {
+      "id": "room-launch-control",
+      "trigger": "room:launch-control",
+      "kind": "tip",
+      "text": "Launch Control: everyone votes go or no-go. One real no-go stops the launch.",
+      "lessonId": "go-no-go-poll"
+    },
+    {
+      "id": "destination-moon",
+      "trigger": "destination:moon",
+      "kind": "tip",
+      "text": "Moon: about 3 days away, and you can talk to Earth almost live. Watch out for the two-week lunar night.",
+      "lessonId": "power-dark"
+    },
+    {
+      "id": "destination-mars",
+      "trigger": "destination:mars",
+      "kind": "tip",
+      "text": "Mars: months away, and messages take minutes. Your crew will lean on standing orders.",
+      "lessonId": "signal-delay"
+    },
+    {
+      "id": "planning-over-limit",
+      "trigger": "planning-over-limit",
+      "kind": "tip",
+      "text": "Over mass or budget. Lighter parts, fewer spares or a bigger rocket: each fix costs something else.",
+      "lessonId": "mass-budget",
+      "important": true
+    },
+    {
+      "id": "resource-low",
+      "trigger": "resource-low",
+      "kind": "tip",
+      "text": "A supply is under 30 %. Check the Power & Life Support panel for the days left.",
+      "lessonId": "life-support",
+      "important": true
+    },
+    {
+      "id": "event-power",
+      "trigger": "event:power",
+      "kind": "tip",
+      "text": "Power problem: batteries carry you only so long. Shedding science load buys time.",
+      "lessonId": "power-dark"
+    },
+    {
+      "id": "event-comms",
+      "trigger": "event:comms",
+      "kind": "tip",
+      "text": "Comms problem: science only counts once it reaches Earth. A stuck backlog is a quiet loss.",
+      "lessonId": "data-downlink"
+    },
+    {
+      "id": "event-crew",
+      "trigger": "event:crew",
+      "kind": "tip",
+      "text": "Crew problem: tired or upset people make more mistakes. Rest is a real repair."
+    },
+    {
+      "id": "event-environment",
+      "trigger": "event:environment",
+      "kind": "tip",
+      "text": "The environment bites back: dust, radiation and flares. Shelter and spares are your friends.",
+      "lessonId": "dust-solar"
+    },
+    {
+      "id": "repair-failed",
+      "trigger": "repair-failed",
+      "kind": "tip",
+      "text": "The repair failed. Try again with a rested crew member, or do it yourself at the station.",
+      "important": true
+    },
+    {
+      "id": "diy-chosen",
+      "trigger": "diy-chosen",
+      "kind": "tip",
+      "text": "Hands-on task: finish it in time and the odds go up. The clock only runs while the panel is open."
+    },
+    {
+      "id": "signal-delay",
+      "trigger": "signal-delay",
+      "kind": "tip",
+      "text": "Under signal delay, urgent problems are handled by your standing orders before you can answer.",
+      "lessonId": "signal-delay",
+      "important": true
+    },
+    {
+      "id": "night",
+      "trigger": "night",
+      "kind": "tip",
+      "text": "Lunar night: two weeks without sun. Batteries and fuel cells keep the heaters and air running.",
+      "lessonId": "power-dark"
+    },
+    {
+      "id": "science-day",
+      "trigger": "science-day",
+      "kind": "tip",
+      "text": "Good science day! Data only counts once it is sent home, so keep the downlink clear.",
+      "lessonId": "data-downlink"
+    },
+    {
+      "id": "launch-check",
+      "trigger": "launch-check",
+      "kind": "tip",
+      "text": "Go / no-go: warnings can be accepted, failures cannot. Read every seat before you launch.",
+      "lessonId": "go-no-go-poll",
+      "important": true
+    },
+    {
+      "id": "debrief",
+      "trigger": "debrief",
+      "kind": "tip",
+      "text": "Debrief: every red line has a cause. Fix the biggest one and fly again."
+    },
+    {
+      "id": "fact-lunar-day",
+      "trigger": "quiet",
+      "kind": "fact",
+      "text": "A day on the Moon, sunrise to sunrise, lasts about 29.5 Earth days: roughly two weeks of light, then two weeks of night.",
+      "source": "https://science.nasa.gov/moon/"
+    },
+    {
+      "id": "fact-mars-delay",
+      "trigger": "quiet",
+      "kind": "fact",
+      "text": "A radio message between Earth and Mars takes roughly 4 to 24 minutes one way, depending on where the planets are.",
+      "source": "https://science.nasa.gov/mars/"
+    },
+    {
+      "id": "fact-dust",
+      "trigger": "quiet",
+      "kind": "fact",
+      "text": "Mars dust is fine enough to coat solar panels. Some rovers lost much of their power to it; others were saved by gusts of wind.",
+      "source": "https://science.nasa.gov/mars/"
+    },
+    {
+      "id": "fact-co2",
+      "trigger": "quiet",
+      "kind": "fact",
+      "text": "Every breath adds CO2 to the cabin air. Scrubbers pull it out; without them the air would turn unsafe within hours.",
+      "source": "TODO: verify"
+    },
+    {
+      "id": "fact-radiation",
+      "trigger": "quiet",
+      "kind": "fact",
+      "text": "The Moon and Mars have no global magnetic field like Earth, so their surfaces get far more space radiation.",
+      "source": "https://science.nasa.gov/moon/"
+    },
+    {
+      "id": "fact-mass-cost",
+      "trigger": "quiet",
+      "kind": "fact",
+      "text": "Most of a rocket is fuel. Every extra kilogram of payload needs more fuel to lift it, so mass drives cost.",
+      "source": "https://science.nasa.gov/learn/basics-of-space-flight/"
+    }
+  ]
+}

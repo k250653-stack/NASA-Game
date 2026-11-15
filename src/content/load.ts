@@ -13,6 +13,7 @@ import {
   GameEventSchema,
   LessonSchema,
   CrewTaskSchema,
+  NovaTipSchema,
   PartSchema,
   RocketSchema,
   RoleInfoSchema,
@@ -25,6 +26,7 @@ import {
   type GameEvent,
   type Lesson,
   type CrewTask,
+  type NovaTip,
   type Part,
   type Rocket,
   type Scenario,
@@ -37,6 +39,7 @@ import rocketsJson from './rockets.json'
 import eventsJson from './events.json'
 import lessonsJson from './lessons.json'
 import tasksJson from './tasks.json'
+import novaTipsJson from './novaTips.json'
 import constantsJson from './constants.json'
 import rolesJson from './roles.json'
 import baseSlotsJson from './baseSlots.json'
@@ -51,6 +54,7 @@ export interface GameContent {
   events: GameEvent[]
   lessons: Lesson[]
   tasks: CrewTask[]
+  novaTips: NovaTip[]
   roles: RoleInfo[]
   baseSlots: BaseSlots[]
 }
@@ -235,6 +239,7 @@ export function validateContent(raw: {
   lessons: unknown
   /** Optional so callers that predate hands-on tasks still work; defaults to tasks.json. */
   tasks?: unknown
+  novaTips?: unknown
   roles: unknown
   baseSlots: unknown
 }): GameContent {
@@ -248,6 +253,7 @@ export function validateContent(raw: {
     events: parseContentFile('events.json', GameEventSchema, raw.events),
     lessons: parseContentFile('lessons.json', LessonSchema, raw.lessons),
     tasks: parseContentFile('tasks.json', CrewTaskSchema, raw.tasks ?? tasksJson),
+    novaTips: parseContentFile('novaTips.json', NovaTipSchema, raw.novaTips ?? novaTipsJson),
     roles: parseContentFile('roles.json', RoleInfoSchema, raw.roles),
     baseSlots: parseContentFile('baseSlots.json', BaseSlotsSchema, raw.baseSlots),
   }
@@ -261,6 +267,7 @@ export function validateContent(raw: {
       ['events.json', content.events],
       ['lessons.json', content.lessons],
       ['tasks.json', content.tasks],
+      ['novaTips.json', content.novaTips],
     ] as const
   ).forEach(([file, items]) => assertUniqueIds(file, items))
   checkReferences(content)
@@ -277,6 +284,7 @@ export const RAW_CONTENT = {
   events: eventsJson,
   lessons: lessonsJson,
   tasks: tasksJson,
+  novaTips: novaTipsJson,
   roles: rolesJson,
   baseSlots: baseSlotsJson,
 } as const

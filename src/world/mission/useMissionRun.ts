@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { isEvaOption, resolveEvent } from '@/engine/events'
+import { offerTip } from '@/nova/tips'
 import { shakeScreen } from '@/ui/feel'
 import { playSound } from '@/ui/sound'
 import { advanceTurn, dropPending, isMissionOver } from '@/engine/mission'
@@ -111,6 +112,8 @@ export function useMissionRun(
       shakeScreen('small')
     }
     if (isMissionOver(state)) setFastForward(false)
+    // A quiet turn is a good moment for a real-science fact.
+    if (newEvents.length === 0) offerTip('quiet')
   }, [design, content, setRun])
 
   // Fast-forward: one turn every FF_STEP_MS until an event needs the player or the mission ends.
@@ -155,6 +158,7 @@ export function useMissionRun(
       const label = option?.label ?? 'Done'
       playSound(result.success ? 'success' : 'fail')
       if (!result.success && option && isEvaOption(option)) shakeScreen()
+      if (!result.success) offerTip('repair-failed')
       const detail = result.effectsApplied.filter(Boolean).join(', ')
       setToast({
         id: Date.now(),

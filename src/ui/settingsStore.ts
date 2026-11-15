@@ -15,6 +15,8 @@ interface SettingsState {
   reducedMotion: boolean
   /** NOVA tutorial and lesson pop-ups. null = by difficulty (on for Cadet/Engineer). */
   hints: boolean | null
+  /** NOVA tips: lots (default), some (important ones), off. */
+  novaTips: 'lots' | 'some' | 'off'
   /** 0-1, multiplies sound and music. */
   masterVolume: number
   /** 0-1 */
@@ -29,6 +31,7 @@ interface SettingsState {
   setMusicOn: (on: boolean) => void
   setReducedMotion: (on: boolean) => void
   setHints: (on: boolean | null) => void
+  setNovaTips: (mode: 'lots' | 'some' | 'off') => void
   setMasterVolume: (v: number) => void
   setSoundVolume: (v: number) => void
   setMusicVolume: (v: number) => void
@@ -43,6 +46,7 @@ export const useSettings = create<SettingsState>()(
       musicOn: true,
       reducedMotion: false,
       hints: null,
+      novaTips: 'lots',
       masterVolume: 0.8,
       soundVolume: 0.8,
       musicVolume: 0.5,
@@ -52,6 +56,7 @@ export const useSettings = create<SettingsState>()(
       setMusicOn: (musicOn) => set({ musicOn }),
       setReducedMotion: (reducedMotion) => set({ reducedMotion }),
       setHints: (hints) => set({ hints }),
+      setNovaTips: (novaTips) => set({ novaTips }),
       setMasterVolume: (masterVolume) => set({ masterVolume }),
       setSoundVolume: (soundVolume) => set({ soundVolume }),
       setMusicVolume: (musicVolume) => set({ musicVolume }),
@@ -66,6 +71,7 @@ export const useSettings = create<SettingsState>()(
         musicOn: s.musicOn,
         reducedMotion: s.reducedMotion,
         hints: s.hints,
+        novaTips: s.novaTips,
         masterVolume: s.masterVolume,
         soundVolume: s.soundVolume,
         musicVolume: s.musicVolume,

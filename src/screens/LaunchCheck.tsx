@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { offerTip } from '@/nova/tips'
 import { goNoGoPoll, overallCall } from '@/engine/launchPoll'
 import { runLaunchCheck } from '@/engine/launchCheck'
 import { initMission } from '@/engine/mission'
@@ -27,6 +28,7 @@ export default function LaunchCheck() {
 
   useEffect(() => {
     emitConcept('go_no_go_poll')
+    offerTip('launch-check')
   }, [])
 
   if (!p.design || !p.destination) {

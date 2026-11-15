@@ -3,6 +3,44 @@ import { getContent } from '@/content/load'
 import { ROLE_LABEL } from '@/ui/labels'
 import { closeCodex, openLesson, useNova } from './novaStore'
 
+/** Short NOVA notes: every tip and fact NOVA has shown so far. */
+export function NovaNotes() {
+  const seen = useNova((s) => s.tipsSeen)
+  const tips = getContent().novaTips.filter((t) => seen.includes(t.id))
+  if (tips.length === 0) return null
+  return (
+    <section className="mt-4 border-t-2 border-border pt-3" data-testid="nova-notes">
+      <h3 className="label-caps text-sm text-alert">NOVA notes</h3>
+      <ul className="mt-1 space-y-2">
+        {tips.map((t) => (
+          <li key={t.id} className="text-sm text-muted">
+            {t.text}
+            {t.source?.startsWith('http') && (
+              <a
+                href={t.source}
+                target="_blank"
+                rel="noreferrer"
+                className="ml-2 text-accent underline"
+              >
+                source
+              </a>
+            )}
+            {t.lessonId && seen && useNova.getState().lessonsSeen.includes(t.lessonId) && (
+              <button
+                type="button"
+                className="ml-2 text-accent underline"
+                onClick={() => openLesson(t.lessonId!)}
+              >
+                lesson
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 /** Every lesson: seen ones can be replayed, the rest show as locked. */
 export function CodexList() {
   const seen = useNova((s) => s.lessonsSeen)
@@ -90,6 +128,7 @@ export function NovaCodex() {
         </header>
         <div className="mt-3">
           <CodexList />
+          <NovaNotes />
         </div>
         <button
           type="button"

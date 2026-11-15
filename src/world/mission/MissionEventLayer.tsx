@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { offerTip } from '@/nova/tips'
 import { useProblems } from './problems'
 import { AnimatePresence, motion } from 'motion/react'
 import type { Design, EngineContent, MissionState } from '@/engine/types'
@@ -84,10 +85,11 @@ export function MissionEventLayer(p: MissionEventLayerProps) {
       ? {
           label: TASK_LABEL[task.taskType],
           station: stationName(task.station),
-          onPick: () =>
-            useCrewTask
-              .getState()
-              .set({ active: { uid, eventId: ev.id, task, plan }, open: false }),
+          onPick: () => {
+            useCrewTask.getState().set({ active: { uid, eventId: ev.id, task, plan }, open: false })
+            // The popup is gone once the task runs, so the tip can show now.
+            setTimeout(() => offerTip('diy-chosen'), 300)
+          },
         }
       : undefined
   // Repair options get the timing bar first (unless mini-games are off in Settings).

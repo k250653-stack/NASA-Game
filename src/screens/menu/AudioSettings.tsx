@@ -109,6 +109,36 @@ export function MinigameToggle() {
   )
 }
 
+/** NOVA tips: Lots / Some / Off (default Lots). */
+export function NovaTipsSetting() {
+  const mode = useSettings((s) => s.novaTips)
+  const set = useSettings((s) => s.setNovaTips)
+  return (
+    <div className="flex items-center justify-between gap-6 py-3" data-testid="setting-nova-tips">
+      <span>
+        <span className="block text-primary">NOVA tips</span>
+        <span className="block text-sm text-muted">
+          Short hints as things happen. At most one a minute.
+        </span>
+      </span>
+      <span className="flex gap-1" role="radiogroup" aria-label="NOVA tips">
+        {(['lots', 'some', 'off'] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            role="radio"
+            aria-checked={mode === m}
+            onClick={() => set(m)}
+            className={`label-caps border-2 px-2 py-0.5 text-sm ${mode === m ? 'border-accent text-accent' : 'border-border text-muted hover:text-primary'}`}
+          >
+            {m}
+          </button>
+        ))}
+      </span>
+    </div>
+  )
+}
+
 /** Dev builds only: one button per sound effect, to hear and judge them. */
 export function SoundTest() {
   if (!import.meta.env.DEV) return null
