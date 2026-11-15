@@ -401,10 +401,16 @@ export class HabitatScene extends Phaser.Scene {
     if (paused === this.paused) return
     this.paused = paused
     const kb = this.input.keyboard!
-    kb.enabled = !paused
-    if (paused) kb.disableGlobalCapture()
-    else kb.enableGlobalCapture()
     kb.resetKeys()
+    if (paused) {
+      kb.enabled = false
+      kb.disableGlobalCapture()
+      return
+    }
+    // Last popup closed: restore everything (see HQScene.syncPaused).
+    kb.enabled = true
+    kb.manager.enabled = true
+    kb.enableGlobalCapture()
   }
 
   private move(mx: number, my: number) {

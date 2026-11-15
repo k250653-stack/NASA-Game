@@ -28,6 +28,7 @@ import { StationPopup } from './mission/StationPopup'
 import { attention } from './mission/stationStatus'
 import { CrewStatusPopup } from './mission/StatusPopups'
 import { useMissionRun } from './mission/useMissionRun'
+import { useReleaseFocus } from './useReleaseFocus'
 import { PauseMenu, type PauseState } from './PauseMenu'
 import { getRoom, type WorkstationKind } from './rooms/room'
 
@@ -60,6 +61,8 @@ export default function HabitatWorld() {
   const anchor = useRef({ x: 0, y: 0 })
   const live = useRef(false)
   const paused = popup !== null || menu !== null || m.pending !== null || ending || novaOpen
+  // Popups closing must always hand the keyboard back to the player.
+  useReleaseFocus(paused)
   const tutorial = useHabitatTutorial(paused)
   // NOVA: the first arrival somewhere without live contact with Earth (Mars).
   const destinationId = p.destination?.id

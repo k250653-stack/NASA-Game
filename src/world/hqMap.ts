@@ -5,15 +5,15 @@
  */
 import { z } from 'zod'
 import { IMAGE_KINDS } from '@/ui/assets'
-import { centroid, convexHull, type Point, type Polygon } from './geometry'
+import { centroid, type Point, type Polygon } from './geometry'
 import mapJson from './rooms/hq-map.json'
 import { STEPS, type Step } from './rooms/room'
 
 const point = z.tuple([z.number(), z.number()])
 const polygon = z.array(point).min(3)
 
-/** What a station opens: a mission step, or the lobby's small HQ info popup. */
-export type StationOpens = Step | 'info'
+/** What a station opens: a mission step's screens. */
+export type StationOpens = Step
 
 const mapSchema = z.object({
   image: z.object({ kind: z.enum(IMAGE_KINDS), id: z.string(), ext: z.string() }),
@@ -45,16 +45,17 @@ const mapSchema = z.object({
   ),
   blocked: z.array(polygon),
   /**
-   * Tall furniture drawn again over the player when the player stands behind it (foot-Y
-   * sorting): its silhouette is the footprint raised by `height` pixels.
+   * Parts of the picture drawn again IN FRONT of the player when the player stands behind them
+   * (door frames, front low walls, tall furniture): a masked copy of the map clipped to `area`,
+   * depth-sorted by `baseY` (the floor line the object stands on) against the player's foot Y.
    */
-  occluders: z.array(z.object({ id: z.string(), height: z.number(), footprint: polygon })),
+  occluders: z.array(z.object({ id: z.string(), baseY: z.number(), area: polygon })),
   stations: z.array(
     z.object({
       id: z.string(),
       label: z.string(),
       room: z.string(),
-      opens: z.union([z.enum(STEPS), z.literal('info')]),
+      opens: z.enum(STEPS),
       area: polygon,
       /** How close (px) the player's feet must be to use it. */
       reach: z.number().positive().default(48),
@@ -66,7 +67,9 @@ const mapSchema = z.object({
   briefingArrival: point,
 })
 
-type MapJson = z.infer<typeof mapSchema>
+/** The raw JSON (what the hitbox editor edits and saves). */
+export type HqMapJson = z.infer<typeof mapSchema>
+type MapJson = HqMapJson
 
 export interface HqRoom {
   id: string
@@ -96,9 +99,9 @@ export interface HqStation {
 
 export interface HqOccluder {
   id: string
-  /** Silhouette in world pixels. */
+  /** Outline in world pixels. */
   shape: Polygon
-  /** Foot line: the player is behind the object when their feet are above this y. */
+  /** Floor line: the player is behind the object when their feet are above this y. */
   baseY: number
 }
 
@@ -121,15 +124,26 @@ export const LOBBY_ROOM = 'lobby'
 
 let cached: HqMap | null = null
 
+/** The map as shipped (src/world/rooms/hq-map.json). */
 export function getHqMap(): HqMap {
-  if (cached) return cached
-  const m = mapSchema.parse(mapJson)
+  cached ??= buildHqMap(mapJson)
+  return cached
+}
+
+/** A deep copy of the shipped JSON, for the hitbox editor to change. */
+export function rawHqMap(): HqMapJson {
+  return mapSchema.parse(structuredClone(mapJson))
+}
+
+/** Validates map JSON (shipped or edited) and derives what the scene needs. */
+export function buildHqMap(json: unknown): HqMap {
+  const m = mapSchema.parse(json)
   const roomIds = new Set(m.rooms.map((r) => r.id))
   for (const d of m.doorways) {
     if (!roomIds.has(d.room))
       throw new Error(`hq-map.json: doorway ${d.id} leads to unknown room ${d.room}`)
   }
-  cached = {
+  return {
     image: m.image,
     size: m.size,
     spawn: m.spawn as Point,
@@ -143,15 +157,7 @@ export function getHqMap(): HqMap {
     })),
     doorways: m.doorways.map((d) => ({ ...d, area: d.area as Polygon })),
     blocked: m.blocked as Polygon[],
-    occluders: m.occluders.map((o) => {
-      const foot = o.footprint as Polygon
-      const raised = foot.map(([x, y]) => [x, y - o.height] as const)
-      return {
-        id: o.id,
-        shape: convexHull([...foot, ...raised]),
-        baseY: Math.max(...foot.map((p) => p[1])),
-      }
-    }),
+    occluders: m.occluders.map((o) => ({ id: o.id, shape: o.area as Polygon, baseY: o.baseY })),
     stations: m.stations.map((s) => ({
       key: s.id,
       label: s.label,
@@ -164,7 +170,6 @@ export function getHqMap(): HqMap {
     tableCenter: m.tableCenter as Point,
     briefingArrival: m.briefingArrival as Point,
   }
-  return cached
 }
 
 /** Rooms that lock until a step is reachable, each with its gate. */

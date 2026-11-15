@@ -47,22 +47,27 @@ export function canStand(
   return walkable.some((w) => pointInPolygon(p, w)) && !blocked.some((b) => pointInPolygon(p, b))
 }
 
-/** Smallest convex polygon around the points (monotone chain), counter-clockwise. */
-export function convexHull(points: readonly Point[]): Polygon {
-  const pts = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1])
-  if (pts.length < 3) return pts
-  const cross = (o: Point, a: Point, b: Point) =>
-    (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
-  const half = (list: Point[]) => {
-    const out: Point[] = []
-    for (const p of list) {
-      while (out.length >= 2 && cross(out[out.length - 2]!, out[out.length - 1]!, p) <= 0) out.pop()
-      out.push(p)
-    }
-    out.pop()
-    return out
-  }
-  return [...half(pts), ...half([...pts].reverse())]
+/** The player's collision shape: a small ellipse at the feet (half-width, half-height in px). */
+export const FOOT_RX = 7
+export const FOOT_RY = 3.5
+
+/**
+ * The foot ellipse fits: its centre and its four extreme points are each on some walkable
+ * polygon and none is inside a blocker. Only the feet collide, never the drawn body.
+ */
+export function canStandFeet(
+  [x, y]: Point,
+  walkable: readonly Polygon[],
+  blocked: readonly Polygon[],
+): boolean {
+  const pts: Point[] = [
+    [x, y],
+    [x - FOOT_RX, y],
+    [x + FOOT_RX, y],
+    [x, y - FOOT_RY],
+    [x, y + FOOT_RY],
+  ]
+  return pts.every((p) => canStand(p, walkable, blocked))
 }
 
 export function translate(poly: Polygon, [dx, dy]: Point): Polygon {

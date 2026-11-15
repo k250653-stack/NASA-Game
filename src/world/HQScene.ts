@@ -2,8 +2,9 @@
  * The HQ in one Phaser scene over ONE map picture (rooms/hq-map.json): the player walks through
  * open doorways between rooms (no portals), collides with walls and furniture, and is drawn
  * behind tall furniture by foot Y. Locked rooms are dimmed with a padlock and their doorway is
- * closed; unlocking fades the lights on. Stations glow and open React popups. F2 shows every
- * polygon in world coordinates. Prompts, popups and menus are React (HQWorld).
+ * closed; unlocking fades the lights on. Stations glow and open React popups. Only a small
+ * ellipse at the feet collides. F2 shows every polygon (and, in dev builds, edits them: see
+ * editor/HitboxEditor.ts). Prompts, popups and menus are React (HQWorld).
  */
 import Phaser from 'phaser'
 import { getAsset } from '@/ui/assets'
@@ -21,8 +22,9 @@ import {
   sheetDir,
   type Facing,
 } from './character'
+import { HitboxEditor } from './editor/HitboxEditor'
 import {
-  canStand,
+  canStandFeet,
   centroid,
   distanceToPolygon,
   pointInPolygon,
@@ -31,9 +33,12 @@ import {
 } from './geometry'
 import { drawPadlock, popOutline, tokenColor } from './hqArt'
 import {
+  buildHqMap,
   gatedRooms,
   getHqMap,
+  rawHqMap,
   type HqMap,
+  type HqMapJson,
   type HqRoom,
   type HqStation,
   type StationOpens,
@@ -58,7 +63,6 @@ const DEPTH_DIM = 2
 const DEPTH_GLOW = 4
 const DEPTH_ACTORS = 5
 const DEPTH_MARKER = 9
-const DEPTH_DEBUG = 10
 
 export type Target =
   | { kind: 'station'; key: string; label: string; opens: StationOpens }
@@ -96,7 +100,7 @@ const footDepth = (y: number) => DEPTH_ACTORS + y / 10000
 
 export class HQScene extends Phaser.Scene {
   private readonly cb: () => SceneCallbacks
-  private readonly map: HqMap
+  private map: HqMap
   private readonly spawn: Point
   private readonly crew: readonly HqCrew[]
   private actor!: PlayerActor
@@ -110,7 +114,8 @@ export class HQScene extends Phaser.Scene {
   private dimmers = new Map<string, Phaser.GameObjects.Graphics>()
   private padlocks = new Map<string, Phaser.GameObjects.Graphics>()
   private glow: Phaser.GameObjects.Graphics | null = null
-  private debug: Phaser.GameObjects.Graphics | null = null
+  private editor: HitboxEditor | null = null
+  private occluders: Phaser.GameObjects.Image[] = []
   private marker: Phaser.GameObjects.Graphics | null = null
   private cam = { x: 0, y: 0 }
   private saved = { at: 0, x: 0, y: 0 }
@@ -148,7 +153,7 @@ export class HQScene extends Phaser.Scene {
     this.applyLocks(false)
     this.createAnims()
 
-    const start = canStand(this.spawn, this.walkable, this.map.blocked)
+    const start = canStandFeet(this.spawn, this.walkable, this.map.blocked)
       ? this.spawn
       : this.map.spawn
     this.actor = new PlayerActor(this, start[0], start[1])
@@ -173,7 +178,9 @@ export class HQScene extends Phaser.Scene {
     }) as Keys
     kb.on('keydown-E', () => this.onUse())
     kb.addCapture(K.F2)
-    kb.on('keydown-F2', () => this.toggleDebug())
+    // F2: overlay of every polygon; in dev builds also the hitbox editor.
+    this.editor = new HitboxEditor(this, rawHqMap(), (raw) => this.applyMap(raw), import.meta.env.DEV)
+    kb.on('keydown-F2', () => this.editor?.toggle())
     this.input.on('pointerdown', (p: Phaser.Input.Pointer) => this.onPointerDown(p))
     this.input.on('pointermove', (p: Phaser.Input.Pointer) => {
       this.input.setDefaultCursor(this.stationAt(p) ? 'pointer' : 'default')
@@ -211,22 +218,54 @@ export class HQScene extends Phaser.Scene {
 
   // ---- map pieces ---------------------------------------------------------------------------
 
-  /** Copies of tall furniture, cut to their silhouette, sorted by foot Y like the player. */
+  /**
+   * Door frames, front low walls and tall furniture: masked copies of the map, clipped to their
+   * outline and depth-sorted by their floor line against the player's feet.
+   */
   private addOccluders() {
+    for (const img of this.occluders) {
+      img.clearMask(true)
+      img.destroy()
+    }
+    this.occluders = []
+    if (!this.textures.exists('hq-map')) return
     for (const o of this.map.occluders) {
+      const xs = o.shape.map((p) => p[0])
+      const ys = o.shape.map((p) => p[1])
+      const x0 = Math.floor(Math.min(...xs))
+      const y0 = Math.floor(Math.min(...ys))
       const shape = this.make.graphics({}, false)
-      shape
-        .fillStyle(0xffffff, 1)
-        .fillPoints(
-          o.shape.map(([x, y]) => new Phaser.Math.Vector2(x, y)),
-          true,
-        )
-      this.add
+      shape.fillStyle(0xffffff, 1).fillPoints(
+        o.shape.map(([x, y]) => new Phaser.Math.Vector2(x, y)),
+        true,
+      )
+      const img = this.add
         .image(0, 0, 'hq-map')
         .setOrigin(0)
+        .setCrop(x0, y0, Math.ceil(Math.max(...xs)) - x0 + 1, Math.ceil(Math.max(...ys)) - y0 + 1)
         .setDepth(footDepth(o.baseY))
         .setMask(shape.createGeometryMask())
+      this.occluders.push(img)
     }
+  }
+
+  /** The hitbox editor changed the JSON: rebuild collision, occluders and lock overlays. */
+  private applyMap(raw: HqMapJson) {
+    try {
+      this.map = buildHqMap(raw)
+    } catch (e) {
+      console.warn('[world] edited map is not valid yet:', e)
+      return
+    }
+    this.addOccluders()
+    for (const dim of this.dimmers.values()) dim.destroy()
+    this.dimmers.clear()
+    for (const p of this.padlocks.values()) p.destroy()
+    this.padlocks.clear()
+    this.locked.clear()
+    this.applyLocks(false)
+    this.target = null
+    this.drawGlow()
   }
 
   private addCrew(c: HqCrew) {
@@ -326,15 +365,24 @@ export class HQScene extends Phaser.Scene {
 
   // ---- movement, targets, camera ------------------------------------------------------------
 
+  /**
+   * Popups and menus take the keyboard; when the last one closes, everything is restored:
+   * plugin and manager enabled, key capture back on, stale key states cleared.
+   */
   private syncPaused() {
     const paused = this.cb().isPaused()
     if (paused === this.paused) return
     this.paused = paused
     const kb = this.input.keyboard!
-    kb.enabled = !paused
-    if (paused) kb.disableGlobalCapture()
-    else kb.enableGlobalCapture()
     kb.resetKeys()
+    if (paused) {
+      kb.enabled = false
+      kb.disableGlobalCapture()
+      return
+    }
+    kb.enabled = true
+    kb.manager.enabled = true
+    kb.enableGlobalCapture()
   }
 
   /** Moves if the new spot is standable; otherwise slides along one axis. */
@@ -345,7 +393,7 @@ export class HQScene extends Phaser.Scene {
       [x + mx, y],
       [x, y + my],
     ]
-    const next = tries.find((p) => canStand(p, this.walkable, this.map.blocked))
+    const next = tries.find((p) => canStandFeet(p, this.walkable, this.map.blocked))
     if (next) this.player.setPosition(next[0], next[1])
   }
 
@@ -482,12 +530,8 @@ export class HQScene extends Phaser.Scene {
   }
 
   private onPointerDown(p: Phaser.Input.Pointer) {
-    if (this.debug) {
-      const w = this.cameras.main.getWorldPoint(p.x, p.y)
-      console.log(`[world] world px: [${Math.round(w.x)}, ${Math.round(w.y)}]`)
-      return
-    }
-    if (this.paused) return
+    // While F2 is on, clicks belong to the overlay / editor.
+    if (this.editor?.isVisible() || this.paused) return
     const s = this.stationAt(p)
     if (s) {
       this.popStation(s.key)
@@ -502,28 +546,5 @@ export class HQScene extends Phaser.Scene {
     cam.setSize(width, height)
     const ideal = Math.min(width / VIEW_W, height / VIEW_H)
     cam.setZoom(ideal >= 1 ? Math.floor(ideal) : ideal)
-  }
-
-  /** All polygons in world coordinates; clicks log world coordinates. */
-  private toggleDebug() {
-    if (this.debug) {
-      this.debug.destroy()
-      this.debug = null
-      return
-    }
-    const g = this.add.graphics().setDepth(DEPTH_DEBUG)
-    const draw = (poly: Polygon, color: number) => {
-      const pts = poly.map(([x, y]) => new Phaser.Math.Vector2(x, y))
-      g.fillStyle(color, 0.22).fillPoints(pts, true)
-      g.lineStyle(1, color, 1).strokePoints(pts, true)
-    }
-    this.map.rooms.forEach((r) => draw(r.floor, tokenColor('success')))
-    this.map.outdoor.forEach((o) => draw(o, tokenColor('success')))
-    this.map.blocked.forEach((b) => draw(b, tokenColor('danger')))
-    this.map.occluders.forEach((o) => draw(o.shape, tokenColor('role-science')))
-    this.map.stations.forEach((s) => draw(s.area, tokenColor('accent')))
-    this.map.doorways.forEach((d) => draw(d.area, tokenColor(d.color)))
-    this.debug = g
-    console.log('[world] F2 overlay on: click to log WORLD pixel coordinates (hq-map.json)')
   }
 }
