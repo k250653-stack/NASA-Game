@@ -22,20 +22,22 @@ export function DestinationCard({ destination: d, selected, onSelect }: Destinat
       padded={false}
       testId={`destination-card-${d.id}`}
     >
-      <AssetImage
-        kind="backgrounds"
-        id={`dest-${d.id}`}
-        ext="png"
-        label={d.name}
-        className="h-32 w-full object-cover"
-      />
+      <div className="flex h-[200px] items-center justify-center bg-bg">
+        <AssetImage
+          kind="backgrounds"
+          id={`dest-${d.id}`}
+          ext="png"
+          label={d.name}
+          className="size-full object-contain object-center"
+        />
+      </div>
       <div className="p-3">
         <div className="flex items-start justify-between gap-3">
           <h2 className="font-display text-xl font-bold text-primary">{d.name}</h2>
           <Badge variant={d.recommendation.tone}>{d.recommendation.label}</Badge>
         </div>
         <p className="mt-1 text-sm text-muted">{d.pitch}</p>
-        <div className="mt-2 grid grid-cols-2 gap-1.5">
+        <div className="mt-2 grid grid-cols-3 gap-1">
           <StatChip compact className="w-full" icon="IconRocket" label="Transit" value={facts.transit} />
           <StatChip compact className="w-full" icon="IconAntenna" label="Signal delay" value={facts.signalDelay} />
           <StatChip compact className="w-full" icon="IconSolarPanel" label="Avg sunlight" value={facts.sunlight} />
