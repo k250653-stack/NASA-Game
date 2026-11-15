@@ -1,0 +1,80 @@
+import { useSettings } from '@/ui/settingsStore'
+import { SOUND_IDS } from '@/ui/sfx'
+import { playSound } from '@/ui/sound'
+
+function Slider({
+  id,
+  label,
+  value,
+  onChange,
+}: {
+  id: string
+  label: string
+  value: number
+  onChange: (v: number) => void
+}) {
+  return (
+    <label className="flex items-center gap-4 py-3">
+      <span className="w-32 text-primary">{label}</span>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={5}
+        value={Math.round(value * 100)}
+        onChange={(e) => onChange(Number(e.target.value) / 100)}
+        className="flex-1 accent-alert"
+        data-testid={`setting-${id}`}
+      />
+      <span className="w-10 text-right font-mono text-sm text-muted tabular-nums">
+        {Math.round(value * 100)}
+      </span>
+    </label>
+  )
+}
+
+/** Sound and music volume. */
+export function VolumeSliders() {
+  const soundVolume = useSettings((s) => s.soundVolume)
+  const musicVolume = useSettings((s) => s.musicVolume)
+  const setSoundVolume = useSettings((s) => s.setSoundVolume)
+  const setMusicVolume = useSettings((s) => s.setMusicVolume)
+  return (
+    <>
+      <Slider
+        id="sound-volume"
+        label="Sound volume"
+        value={soundVolume}
+        onChange={setSoundVolume}
+      />
+      <Slider
+        id="music-volume"
+        label="Music volume"
+        value={musicVolume}
+        onChange={setMusicVolume}
+      />
+    </>
+  )
+}
+
+/** Dev builds only: one button per sound effect, to hear and judge them. */
+export function SoundTest() {
+  if (!import.meta.env.DEV) return null
+  return (
+    <div className="py-3" data-testid="sound-test">
+      <p className="label-caps text-sm text-muted">Sound test (dev only)</p>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {SOUND_IDS.map((id) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => playSound(id)}
+            className="border-2 border-border-strong px-2 py-0.5 font-mono text-xs text-primary hover:border-accent hover:text-accent"
+          >
+            {id}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}

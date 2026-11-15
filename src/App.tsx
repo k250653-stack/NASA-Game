@@ -1,9 +1,10 @@
-import { lazy, Suspense, useLayoutEffect, type ComponentType } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, type ComponentType } from 'react'
 import { MotionConfig } from 'motion/react'
 import { useStore, type Phase } from '@/store'
 import { Starfield } from '@/ui/Starfield'
 import { Toaster } from '@/ui/Toaster'
 import { NovaLayer } from '@/nova/NovaLayer'
+import { setMusicTrack } from '@/ui/sound'
 import { useSettings } from '@/ui/settingsStore'
 import Title from '@/screens/Title'
 import DestinationSelect from '@/screens/DestinationSelect'
@@ -47,6 +48,18 @@ export default function App() {
   const popup = useWorld((s) => s.popup)
   // The debrief (phase review) is a popup over the HQ Briefing room.
   const inWorld = phase === 'hq' || phase === 'review' || popup !== null
+  // Scene music: an mp3 if present, else the generated drone. Starts after the first click.
+  const track =
+    phase === 'title'
+      ? 'menu'
+      : phase === 'mission'
+        ? 'mission'
+        : phase === 'review'
+          ? 'debrief'
+          : inWorld
+            ? 'hq'
+            : 'menu'
+  useEffect(() => setMusicTrack(track), [track])
   // Each screen opens at the top (runs before a screen's own effects, e.g. Fix in Planning).
   useLayoutEffect(() => {
     window.scrollTo(0, 0)

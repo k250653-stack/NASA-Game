@@ -1,6 +1,7 @@
 import { Button } from '@/ui/Button'
 import { Modal } from '@/ui/Modal'
 import { useSettings } from '@/ui/settingsStore'
+import { SoundTest, VolumeSliders } from './AudioSettings'
 import { hintsOn } from '@/nova/novaStore'
 import { useStore } from '@/store'
 
@@ -85,6 +86,8 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           on={hintsOn(hints, difficulty)}
           onChange={setHints}
         />
+        <VolumeSliders />
+        <SoundTest />
       </div>
     </Modal>
   )

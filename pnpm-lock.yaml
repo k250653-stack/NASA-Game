@@ -50,6 +50,9 @@ importers:
       zustand:
         specifier: ^5.1.0
         version: 5.1.0(@types/react@19.3.0)(immer@11.2.10)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
+      zzfx:
+        specifier: ^1.4.0
+        version: 1.4.0
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -1548,6 +1551,9 @@ packages:
       use-sync-external-store:
         optional: true
 
+  zzfx@1.4.0:
+    resolution: {integrity: sha512-yV/7JnIBPThWh/ZLVZLlmadms5bHQQeoWKKA+DafX4554FHypsop1BQrDHhsf2xxXweUmwjWrnpiB42uBGyGlQ==}
+
 snapshots:
 
   '@babel/code-frame@7.29.7':
@@ -2795,3 +2801,5 @@ snapshots:
       immer: 11.2.10
       react: 19.3.1
       use-sync-external-store: 1.7.0(react@19.3.1)
+
+  zzfx@1.4.0: {}
