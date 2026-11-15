@@ -204,3 +204,31 @@ RESULT: all checks passed
   - The teamwork score maths is unchanged. It only uses morale, conflicts and trades, so the counts are shown, not scored.
 - **Fast-forward:** it skips quiet turns and stops at the next event, with a "Day X: event!" banner, a ZzFX sting and a 2 px shake.
 - **Unit tests that will need updating:** a few tests in `src/engine/__tests__/mission.test.ts` assume the old routing, where teammates answer their own events and standing orders answer every delayed urgent event. They were not run, as requested.
+
+## Hands-on crew tasks
+
+`src/content/tasks.json` maps each event (its `id`) to one task, a station, a time limit and a bonus. Every task has `successBonus` 0.3, capped at 95% by the same cap as the repair mini-game.
+
+| Task | Events | Station | Time limit |
+| ---- | ------ | ------- | ---------- |
+| Wire patch | battery-fault, long-dark-period | Power & Life Support | 15 s |
+| Wire patch | solar-flare | Comms | 15 s |
+| Panel clean | solar-panel-damage, dust-storm, dust-devil-cleaning | Airlock (the panels are outside) | 15 s |
+| Dish align | comms-outage, ground-station-request, data-overflow | Comms | 15 s |
+| Pressure valve | recycler-failure, co2-scrubber | Power & Life Support | 12 s |
+| Pressure valve | micrometeoroid-hit, radiation-spike | Repair | 12 s |
+
+How it works:
+- **Starting a task:** "Do it yourself" is the top option in the event popup, for your own events and after OVERRIDE. Picking it leaves the event pending, so mission time stays paused. The task appears in the HUD list, and a cyan arrow bobs over the station.
+- **Doing it:** walk there and press E to open the task panel. The time limit runs only while the panel is open. Esc steps away, and the task stays. "Skip task", running out of time, or 3 missed valve tries count as giving up.
+- **Which engine option it stands for:** the event's `repair` option, else its first workable option. Your own player character acts if able, else the best rested crew member.
+- **The outcome:** the engine still rolls it with the seeded generator. A finished task adds the bonus to the chance.
+- **Log lines:** they read "You, hands-on task done: …" or "You, hands-on task not finished: …".
+- **The debrief:** it shows "Hands-on tasks: X/Y completed", counted per launch.
+
+Unsure:
+- **comms-outage** was listed for both Wire Patch and Dish Align. One task per event, so it uses Dish Align.
+- **dust-devil-cleaning** is good news, where wind cleans the panels. Its "workable option" may not be a repair, so the task just adds to that option's chance.
+- **radiation-spike** fits a valve only loosely, but it was mapped to Pressure Valve as asked.
+- **Events with no crew option** (`crewId: null`): the bonus still applies to the chance, but nobody walks to a station.
+- **No screen-edge arrow:** the habitat room always fits on screen, so the arrow over the station is enough.

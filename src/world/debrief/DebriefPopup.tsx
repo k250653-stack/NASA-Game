@@ -12,6 +12,7 @@ import { CauseList } from './CauseList'
 import { changeLines, graphSeries, newMission, redesignAndRetry } from './debrief'
 import { CrewReactions, H3, RunCompare, ScoreBreakdown } from './DebriefSections'
 import { decisionCounts, type DecisionCounts } from '../mission/proposal'
+import { runKey, useTaskStats } from '../mission/crewTask'
 import { MissionGraph } from './MissionGraph'
 
 const OUTCOME = {
@@ -95,6 +96,7 @@ export function DebriefPopup({ onClose }: { onClose: () => void }) {
           </p>
         </header>
         <DecisionLine counts={decisionCounts(run, p.design, p.content)} />
+        <TaskLine runKey={runKey(run)} />
 
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-8">
           <div className="space-y-6">
@@ -186,5 +188,20 @@ function DecisionLine({ counts }: { counts: DecisionCounts }) {
         </li>
       ))}
     </ul>
+  )
+}
+
+/** "Hands-on tasks: X/Y completed" for this mission (counts kept per launch). */
+function TaskLine({ runKey: key }: { runKey: string }) {
+  const stats = useTaskStats((s) => s)
+  const mine = stats.runKey === key
+  return (
+    <p className="mt-1 flex items-baseline gap-2" data-testid="task-counts">
+      <span className="label-caps text-sm text-muted">Hands-on tasks</span>
+      <span className="font-mono text-lg text-primary tabular-nums">
+        {mine ? stats.completed : 0}/{mine ? stats.attempted : 0}
+      </span>
+      <span className="label-caps text-sm text-muted">completed</span>
+    </p>
   )
 }

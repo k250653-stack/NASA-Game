@@ -14,6 +14,8 @@ interface NovaState {
   stepSaid: number
   habitatIntroDone: boolean
   tutorialSkipped: boolean
+  /** NOVA has explained "Do it yourself" hands-on tasks. */
+  diyTipShown: boolean
   /** Lesson ids opened at least once: the Codex. */
   lessonsSeen: string[]
   openLessonId: string | null
@@ -26,6 +28,7 @@ const initialTutorial = {
   stepSaid: -1,
   habitatIntroDone: false,
   tutorialSkipped: false,
+  diyTipShown: false,
 }
 
 export const useNova = create<NovaState>()(
@@ -46,6 +49,7 @@ export const useNova = create<NovaState>()(
         stepSaid: s.stepSaid,
         habitatIntroDone: s.habitatIntroDone,
         tutorialSkipped: s.tutorialSkipped,
+        diyTipShown: s.diyTipShown,
         lessonsSeen: s.lessonsSeen,
       }),
     },

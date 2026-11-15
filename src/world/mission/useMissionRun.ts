@@ -164,10 +164,14 @@ export function useMissionRun(
 
   /** The player's own choice (their event, or an override of a teammate's proposal). */
   const choose = useCallback(
-    (event: GameEvent, optionId: string, crewId: string | null, chanceBonus = 0) => {
+    (event: GameEvent, optionId: string, crewId: string | null, chanceBonus = 0, note?: string) => {
       const own = design ? isOwnEvent(event, design) : true
       const how = own ? 'You' : 'You (override)'
-      const prefix = chanceBonus > 0 ? `${how}, hands-on repair hit: ` : `${how}: `
+      const prefix = note
+        ? `${how}, ${note}: `
+        : chanceBonus > 0
+          ? `${how}, hands-on repair hit: `
+          : `${how}: `
       return resolve(event, optionId, crewId, 'player', prefix, chanceBonus)
     },
     [design, resolve],

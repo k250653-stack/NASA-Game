@@ -6,6 +6,8 @@ import { successChance } from '@/engine/events'
 import { useSettings } from '@/ui/settingsStore'
 import { EventPopup } from './EventPopup'
 import { RepairTiming } from './RepairTiming'
+import { useStore } from '@/store'
+import { diyPlan, TASK_LABEL, taskFor, useCrewTask } from './crewTask'
 import { isOwnEvent, teammateProposal, type Proposal } from './proposal'
 import { ProposalPopup, StandingOrderNotice } from './ProposalPopup'
 import type { Notice } from './useMissionRun'
@@ -35,6 +37,8 @@ interface MissionEventLayerProps {
   ) => void
   onApprove: (event: GameEvent, proposal: Proposal) => void
   onAckNotice: () => void
+  /** Station kind -> its label in this habitat, e.g. "power" -> "Power & Life Support Panel". */
+  stationLabels: Record<string, string>
 }
 
 /**
@@ -49,6 +53,24 @@ export function MissionEventLayer(p: MissionEventLayerProps) {
   const proposal =
     ev && !isOwnEvent(ev, p.design) ? teammateProposal(p.run, ev, p.design, p.content) : null
   const decideMyself = ev && (!proposal || overridden === uid)
+  // Hands-on task: offered on mapped events you decide yourself; while it runs, no popup.
+  const seat = useStore((s) => s.game.roleChoice)
+  const activeTask = useCrewTask((s) => s.active)
+  const taskRunning = activeTask !== null && activeTask.uid === uid
+  const task = ev ? taskFor(ev.id) : undefined
+  const plan = ev && task ? diyPlan(p.run, ev, p.design, p.content, seat) : null
+  const stationName = (k: string) => p.stationLabels[k] ?? k
+  const diy =
+    ev && uid && task && plan
+      ? {
+          label: TASK_LABEL[task.taskType],
+          station: stationName(task.station),
+          onPick: () =>
+            useCrewTask
+              .getState()
+              .set({ active: { uid, eventId: ev.id, task, plan }, open: false }),
+        }
+      : undefined
   // Repair options get the timing bar first (unless mini-games are off in Settings).
   const minigamesOn = useSettings((s) => s.minigames)
   const [timing, setTiming] = useState<Timing | null>(null)
@@ -97,7 +119,7 @@ export function MissionEventLayer(p: MissionEventLayerProps) {
           }}
         />
       )}
-      {ev && !p.acting && !timing && decideMyself && (
+      {ev && !p.acting && !timing && !taskRunning && decideMyself && (
         <EventPopup
           key={`${uid}-decide`}
           event={ev}
@@ -105,9 +127,10 @@ export function MissionEventLayer(p: MissionEventLayerProps) {
           design={p.design}
           content={p.content}
           onChoose={(o, c) => pick(ev, o, c)}
+          diy={diy}
         />
       )}
-      {ev && !p.acting && !decideMyself && proposal && (
+      {ev && !p.acting && !taskRunning && !decideMyself && proposal && (
         <ProposalPopup
           key={`${uid}-proposal`}
           event={ev}

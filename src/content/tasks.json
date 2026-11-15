@@ -1,0 +1,96 @@
+{
+  "_note": "Hands-on crew tasks: id = the event that offers Do it yourself. successBonus is a game-design value (+30 points, capped by constants.minigame.maxChance). comms-outage is listed for both wire_patch and dish_align in the brief; one task per event, so it uses dish_align at the comms station.",
+  "items": [
+    {
+      "id": "battery-fault",
+      "taskType": "wire_patch",
+      "station": "power",
+      "timeLimitSec": 15,
+      "successBonus": 0.3
+    },
+    {
+      "id": "solar-flare",
+      "taskType": "wire_patch",
+      "station": "comms",
+      "timeLimitSec": 15,
+      "successBonus": 0.3
+    },
+    {
+      "id": "long-dark-period",
+      "taskType": "wire_patch",
+      "station": "power",
+      "timeLimitSec": 15,
+      "successBonus": 0.3
+    },
+    {
+      "id": "solar-panel-damage",
+      "taskType": "panel_clean",
+      "station": "airlock",
+      "timeLimitSec": 15,
+      "successBonus": 0.3
+    },
+    {
+      "id": "dust-storm",
+      "taskType": "panel_clean",
+      "station": "airlock",
+      "timeLimitSec": 15,
+      "successBonus": 0.3
+    },
+    {
+      "id": "dust-devil-cleaning",
+      "taskType": "panel_clean",
+      "station": "airlock",
+      "timeLimitSec": 15,
+      "successBonus": 0.3
+    },
+    {
+      "id": "comms-outage",
+      "taskType": "dish_align",
+      "station": "comms",
+      "timeLimitSec": 15,
+      "successBonus": 0.3
+    },
+    {
+      "id": "ground-station-request",
+      "taskType": "dish_align",
+      "station": "comms",
+      "timeLimitSec": 15,
+      "successBonus": 0.3
+    },
+    {
+      "id": "data-overflow",
+      "taskType": "dish_align",
+      "station": "comms",
+      "timeLimitSec": 15,
+      "successBonus": 0.3
+    },
+    {
+      "id": "recycler-failure",
+      "taskType": "pressure_valve",
+      "station": "power",
+      "timeLimitSec": 12,
+      "successBonus": 0.3
+    },
+    {
+      "id": "co2-scrubber",
+      "taskType": "pressure_valve",
+      "station": "power",
+      "timeLimitSec": 12,
+      "successBonus": 0.3
+    },
+    {
+      "id": "micrometeoroid-hit",
+      "taskType": "pressure_valve",
+      "station": "repair",
+      "timeLimitSec": 12,
+      "successBonus": 0.3
+    },
+    {
+      "id": "radiation-spike",
+      "taskType": "pressure_valve",
+      "station": "repair",
+      "timeLimitSec": 12,
+      "successBonus": 0.3
+    }
+  ]
+}

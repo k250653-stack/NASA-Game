@@ -19,10 +19,12 @@ interface EventPopupProps {
   design: Design
   content: EngineContent
   onChoose: (optionId: string, crewId: string | null) => void
+  /** Offered on repair-type events with a hands-on task (content/tasks.json). */
+  diy?: { label: string; station: string; onPick: () => void }
 }
 
 /** An event for the player's seat: what happened, and every option with who, cost and odds. */
-export function EventPopup({ event, run, design, content, onChoose }: EventPopupProps) {
+export function EventPopup({ event, run, design, content, onChoose, diy }: EventPopupProps) {
   const options = availableOptions(run, event, design, content)
   // Urgent events sound the alarm; routine ones come in over the radio.
   const urgent = event.urgency === 'urgent'
@@ -45,6 +47,27 @@ export function EventPopup({ event, run, design, content, onChoose }: EventPopup
           </div>
         </div>
         <ul className="mt-4 space-y-2">
+          {diy && (
+            <li
+              className="flex items-center gap-3 border-2 border-alert px-3 py-2"
+              data-testid="option-diy"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="label-caps text-lg text-alert">Do it yourself</p>
+                <p className="font-mono text-xs text-muted">
+                  {diy.label} at the {diy.station} · finish in time for a better chance
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={diy.onPick}
+                className="border-2 border-alert bg-alert px-3 py-1 font-display tracking-widest text-on-alert uppercase hover:bg-alert-strong"
+                data-testid="choose-diy"
+              >
+                Go
+              </button>
+            </li>
+          )}
           {options.map((a) => (
             <OptionRow
               key={a.option.id}

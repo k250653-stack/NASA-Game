@@ -12,6 +12,7 @@ import {
   DestinationSchema,
   GameEventSchema,
   LessonSchema,
+  CrewTaskSchema,
   PartSchema,
   RocketSchema,
   RoleInfoSchema,
@@ -23,6 +24,7 @@ import {
   type Destination,
   type GameEvent,
   type Lesson,
+  type CrewTask,
   type Part,
   type Rocket,
   type Scenario,
@@ -34,6 +36,7 @@ import partsJson from './parts.json'
 import rocketsJson from './rockets.json'
 import eventsJson from './events.json'
 import lessonsJson from './lessons.json'
+import tasksJson from './tasks.json'
 import constantsJson from './constants.json'
 import rolesJson from './roles.json'
 import baseSlotsJson from './baseSlots.json'
@@ -47,6 +50,7 @@ export interface GameContent {
   rockets: Rocket[]
   events: GameEvent[]
   lessons: Lesson[]
+  tasks: CrewTask[]
   roles: RoleInfo[]
   baseSlots: BaseSlots[]
 }
@@ -132,6 +136,12 @@ function assertUniqueIds(file: string, items: ReadonlyArray<{ id: string }>): vo
 function checkReferences(content: GameContent): void {
   const destinationIds = new Set(content.destinations.map((d) => d.id))
   const problems: Array<[string, string]> = []
+
+  const eventIds = new Set(content.events.map((e) => e.id))
+  content.tasks.forEach((t) => {
+    if (!eventIds.has(t.id))
+      problems.push(['tasks.json', `task "${t.id}" does not match any event id in events.json`])
+  })
 
   content.scenarios.forEach((s) => {
     const destination = content.destinations.find((d) => d.id === s.destinationId)
@@ -223,6 +233,8 @@ export function validateContent(raw: {
   rockets: unknown
   events: unknown
   lessons: unknown
+  /** Optional so callers that predate hands-on tasks still work; defaults to tasks.json. */
+  tasks?: unknown
   roles: unknown
   baseSlots: unknown
 }): GameContent {
@@ -235,6 +247,7 @@ export function validateContent(raw: {
     rockets: parseContentFile('rockets.json', RocketSchema, raw.rockets),
     events: parseContentFile('events.json', GameEventSchema, raw.events),
     lessons: parseContentFile('lessons.json', LessonSchema, raw.lessons),
+    tasks: parseContentFile('tasks.json', CrewTaskSchema, raw.tasks ?? tasksJson),
     roles: parseContentFile('roles.json', RoleInfoSchema, raw.roles),
     baseSlots: parseContentFile('baseSlots.json', BaseSlotsSchema, raw.baseSlots),
   }
@@ -247,6 +260,7 @@ export function validateContent(raw: {
       ['rockets.json', content.rockets],
       ['events.json', content.events],
       ['lessons.json', content.lessons],
+      ['tasks.json', content.tasks],
     ] as const
   ).forEach(([file, items]) => assertUniqueIds(file, items))
   checkReferences(content)
@@ -262,6 +276,7 @@ export const RAW_CONTENT = {
   rockets: rocketsJson,
   events: eventsJson,
   lessons: lessonsJson,
+  tasks: tasksJson,
   roles: rolesJson,
   baseSlots: baseSlotsJson,
 } as const

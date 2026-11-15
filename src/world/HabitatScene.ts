@@ -68,6 +68,8 @@ export interface HabitatCallbacks {
   alerts?: () => readonly WorkstationKind[]
   /** Crew whose event it is right now: a "!" bubble floats over them. */
   crewAlerts?: () => readonly string[]
+  /** Station of the hands-on task waiting for the player: a cyan arrow bobs over it. */
+  taskStation?: () => WorkstationKind | null
 }
 
 interface Npc {
@@ -104,6 +106,7 @@ export class HabitatScene extends Phaser.Scene {
   private debug: Phaser.GameObjects.Graphics | null = null
   private cam = { x: 0, y: 0 }
   private dimmer: Phaser.GameObjects.Rectangle | null = null
+  private taskArrow: Phaser.GameObjects.Graphics | null = null
   /** Seeded, so idle fidgets never use Math.random (CLAUDE.md rule 7). */
   private idleRng = createRng(31)
   private alertMarks = new Map<WorkstationKind, Phaser.GameObjects.Text>()
@@ -210,6 +213,7 @@ export class HabitatScene extends Phaser.Scene {
     this.player.setDepth(5 + this.player.y / 10000)
     this.updateTarget()
     this.updateAlerts(_time)
+    this.updateTaskArrow(_time)
     this.updateCamera(deltaMs)
   }
 
@@ -241,6 +245,25 @@ export class HabitatScene extends Phaser.Scene {
       }
       mark.setVisible(true).setAlpha(0.55 + 0.45 * Math.abs(Math.sin(time / 300)))
     }
+  }
+
+  /** Cyan arrow over the station where a hands-on task waits. */
+  private updateTaskArrow(time: number) {
+    const kind = this.cb().taskStation?.() ?? null
+    const station = kind ? this.station(kind) : undefined
+    if (!station) {
+      this.taskArrow?.setVisible(false)
+      return
+    }
+    if (!this.taskArrow) {
+      const g = this.add.graphics().setDepth(9)
+      g.fillStyle(tokenColor('accent'), 1).fillTriangle(-12, -18, 12, -18, 0, 0)
+      g.fillStyle(tokenColor('bg'), 1).fillRect(-3, -15, 6, 6)
+      this.taskArrow = g
+    }
+    const [x] = centroid(station.area)
+    const top = Math.min(...station.area.map((p) => p[1]))
+    this.taskArrow.setVisible(true).setPosition(x, top - 10 + Math.sin(time / 260) * 5)
   }
 
   /** Room lights flicker briefly (power events). Skipped with reduced motion. */

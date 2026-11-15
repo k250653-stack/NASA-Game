@@ -3,6 +3,9 @@ import { motion } from 'motion/react'
 import { usePlanning } from '@/screens/planning/usePlanning'
 import { useStore } from '@/store'
 import { NovaCompanion } from '@/nova/NovaCompanion'
+import { useHints } from '@/nova/tutorial'
+import { runKey, useCrewTask, useTaskStats } from './mission/crewTask'
+import { TaskList, TaskPanel } from './mission/TaskPanel'
 import { skipTutorial, useNova } from '@/nova/novaStore'
 import { useHabitatTutorial } from '@/nova/tutorial'
 import { emitConcept } from '@/store/concepts'
@@ -33,6 +36,8 @@ import { PauseMenu, type PauseState } from './PauseMenu'
 import { getRoom, type WorkstationKind } from './rooms/room'
 
 /** After the mission ends: a beat in the room, then the title card, then the debrief. */
+/** NOVA's one-line tip for the first hands-on task. */
+const DIY_TIP = 'You can fix this yourself. Walk to the glowing station and press E.'
 const END_PAUSE_MS = 1200
 const END_CARD_MS = 2800
 /** Event that shakes the screen when it hits. */
@@ -60,8 +65,16 @@ export default function HabitatWorld() {
   const promptRef = useRef<HTMLDivElement>(null)
   const anchor = useRef({ x: 0, y: 0 })
   const live = useRef(false)
+  const activeTask = useCrewTask((s) => s.active)
+  const taskOpen = useCrewTask((s) => s.open)
   const paused =
-    popup !== null || menu !== null || m.pending !== null || m.notice !== null || ending || novaOpen
+    popup !== null ||
+    menu !== null ||
+    (m.pending !== null && activeTask === null) ||
+    taskOpen ||
+    m.notice !== null ||
+    ending ||
+    novaOpen
   // Popups closing must always hand the keyboard back to the player.
   useReleaseFocus(paused)
   const tutorial = useHabitatTutorial(paused)
@@ -115,6 +128,11 @@ export default function HabitatWorld() {
   }, [alerts])
 
   const room = getRoom(p.destination?.id === 'mars' ? 'mars-habitat' : 'moon-habitat')
+  const stationLabels = Object.fromEntries(room.workstations.map((w) => [w.kind, w.label]))
+  // NOVA: one tip the first time a hands-on task is waiting.
+  const hintsOn = useHints()
+  const diyTipShown = useNova((s) => s.diyTipShown)
+  const diyTip = activeTask !== null && !diyTipShown && !taskOpen && hintsOn
   const crew = useMemo<NpcSpec[]>(
     () =>
       p.team.map((c) => ({
@@ -129,11 +147,18 @@ export default function HabitatWorld() {
     () => ({
       onTarget: setTarget,
       onInteract: (t) => {
+        // A hands-on task waiting at this station: E opens it instead of the station info.
+        const task = useCrewTask.getState().active
+        if (task && t.kind === 'station' && t.key === task.task.station) {
+          useCrewTask.getState().set({ open: true })
+          return
+        }
         if (t.kind === 'crew') setPopup({ kind: 'crew', id: t.key })
         else setPopup({ kind: 'station', key: t.key })
       },
       isPaused: () => live.current,
       alerts: () => alertsRef.current,
+      taskStation: () => useCrewTask.getState().active?.task.station ?? null,
       crewAlerts: () => crewAlertRef.current,
       onPlayerScreen: (x, y) => {
         anchor.current = { x, y }
@@ -220,7 +245,19 @@ export default function HabitatWorld() {
         />
       )}
       <HudFrame
-        topLeft={<DayBadge info={dayInfo(run, p.destination, p.content)} />}
+        topLeft={
+          <>
+            <DayBadge info={dayInfo(run, p.destination, p.content)} />
+            <TaskList
+              active={activeTask}
+              stationLabel={
+                activeTask
+                  ? (stationLabels[activeTask.task.station] ?? activeTask.task.station)
+                  : ''
+              }
+            />
+          </>
+        }
         topCenter={<ResultToast toast={m.toast} />}
         topRight={<GaugeStrip gauges={bars} />}
         bottomLeft={
@@ -242,11 +279,33 @@ export default function HabitatWorld() {
       />
       <NovaCompanion
         className="bottom-40 left-4"
-        lines={tutorial.lines}
-        onDone={tutorial.onDone}
+        lines={tutorial.lines ?? (diyTip ? [DIY_TIP] : null)}
+        onDone={tutorial.lines ? tutorial.onDone : () => useNova.setState({ diyTipShown: true })}
         onSkip={tutorial.active ? skipTutorial : undefined}
       />
+      {activeTask && taskOpen && (
+        <TaskPanel
+          key={activeTask.uid}
+          active={activeTask}
+          stationLabel={stationLabels[activeTask.task.station] ?? activeTask.task.station}
+          onClose={() => useCrewTask.getState().set({ open: false })}
+          onFinish={(completed) => {
+            const ev = p.content.events.find((e) => e.id === activeTask.eventId)
+            useTaskStats.getState().record(runKey(run), completed)
+            useCrewTask.getState().set({ active: null, open: false })
+            if (ev)
+              void m.choose(
+                ev,
+                activeTask.plan.optionId,
+                activeTask.plan.crewId,
+                completed ? activeTask.task.successBonus : 0,
+                completed ? 'hands-on task done' : 'hands-on task not finished',
+              )
+          }}
+        />
+      )}
       <MissionEventLayer
+        stationLabels={stationLabels}
         run={run}
         design={p.design}
         content={p.content}

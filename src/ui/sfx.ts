@@ -31,6 +31,10 @@ export const SOUND_IDS = [
   'event-sting',
   'minigame-hit',
   'minigame-miss',
+  'wire-click',
+  'scrub',
+  'signal-beep',
+  'valve-hiss',
 ] as const
 export type SoundId = (typeof SOUND_IDS)[number]
 
@@ -67,6 +71,11 @@ const SOUNDS: Record<SoundId, number[]> = {
   'minigame-miss': [
     0.25, 0, 160, 0, 0.06, 0.14, 1, 1, -1.5, 0, 0, 0, 0, 0.2, 0, 0, 0, 0.8, 0, 0, 700,
   ],
+  // Crew tasks: plug click, soft scrub hiss, rising lock-on beep, valve hiss.
+  'wire-click': [0.3, 0, 300, 0, 0.01, 0.03, 4, 1, 0, 0, 0, 0, 0, 0.4, 0, 0, 0, 1, 0, 0, 1800],
+  scrub: [0.08, 0, 600, 0.01, 0.05, 0.06, 4, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0.6, 0, 0, 1400],
+  'signal-beep': [0.14, 0, 700, 0, 0.04, 0.05, 0, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2600],
+  'valve-hiss': [0.07, 0, 400, 0.02, 0.1, 0.1, 4, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0.5, 0, 0, 1200],
 }
 
 /** How much a sound's pitch may wander per play (0 = never); the rest play the same each time. */
