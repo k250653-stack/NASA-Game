@@ -5,7 +5,6 @@ import { AssetImage } from '@/ui/AssetImage'
 import { Card } from '@/ui/Card'
 import { Icon } from '@/ui/Icon'
 import { StatChip } from '@/ui/StatChip'
-import { destinationArt } from '../destination/DestinationCard'
 
 interface ScenarioCardProps {
   scenario: Scenario
@@ -28,7 +27,7 @@ export function ScenarioCard({ scenario: s, difficulty, selected, onSelect }: Sc
       <div className="grid grid-cols-[10rem_minmax(0,1fr)]">
         <AssetImage
           kind="backgrounds"
-          id={destinationArt(s.destinationId)}
+          id={`dest-${s.destinationId}`}
           ext="png"
           label={s.name}
           className="h-full max-h-36 w-full object-cover"
