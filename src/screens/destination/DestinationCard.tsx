@@ -5,6 +5,11 @@ import { Badge } from '@/ui/Badge'
 import { Card } from '@/ui/Card'
 import { StatChip } from '@/ui/StatChip'
 
+/** Card art in public/assets/backgrounds: the Mars planet picture, dest-moon for the Moon. */
+export function destinationArt(destinationId: string): string {
+  return destinationId === 'mars' ? 'mars' : `dest-${destinationId}`
+}
+
 interface DestinationCardProps {
   destination: Destination
   selected: boolean
@@ -25,7 +30,7 @@ export function DestinationCard({ destination: d, selected, onSelect }: Destinat
       <div className="flex h-[200px] items-center justify-center bg-bg">
         <AssetImage
           kind="backgrounds"
-          id={`dest-${d.id}`}
+          id={destinationArt(d.id)}
           ext="png"
           label={d.name}
           className="size-full object-contain object-center"
