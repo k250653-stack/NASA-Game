@@ -44,3 +44,29 @@ Choices made while working unattended. Nothing here was run in a browser or test
   `breifing.jpg`, `launchcontrol.jpg`) are no longer used but were not deleted.
 - **Credits:** I don't know how `hq-map.png` was made. If it is AI-generated it needs a CREDITS.md
   row and, per the event rules, a visible watermark.
+
+## Task 2 — Rocket launch on the main menu
+
+- **Timeline** (`src/screens/menu/menuLaunch.ts`): menu text fades in 0.3 s; beeps at 0.35 /
+  0.7 / 1.05 s while the base vapour grows; ignition at 1.3 s (flame sprite, `launch` rumble,
+  ~0.9 s screen shake, smoke clouds rolling out along the pad); lift-off at 1.7 s, rising slow then
+  fast for 2.6 s with a fading smoke trail while the scene dims; fade to black 4.1–4.5 s. Any key
+  or click skips to a 0.3 s fade. Reduced motion (the game setting or the OS one): only the
+  short fade, no shake.
+- **Flame sprites are not whole-number scaled.** `rocket-*-flameon.png` are drawn at about
+  2.3–2.45× the resolution of the standing `rocket-*.png`. To swap without the rocket jumping in
+  size, the flame art is scaled by (rocket scale ÷ that ratio), e.g. 3 ÷ 2.44 ≈ 1.23× at
+  1366×768, still with `image-rendering: pixelated`. The standing rocket and all smoke stay on
+  whole pixels. The calibration (ratio, centre line, nozzle line per rocket) is in
+  `src/ui/rocketSprite.ts` (`ROCKET_ART`) if the flame looks a few pixels off.
+- **Smoke** is deterministic chunky square puffs snapped to the art-pixel grid (no randomness),
+  computed from the launch clock in `launchSmoke.ts`.
+- **Sandbox mode** also launches, and now also asks "Start a new mission?" when a save exists
+  (the brief said the confirm applies before both). After the launch Sandbox still goes to the
+  destination screen (its old direct flow); only PLAY GAME goes to "Choose your astronaut".
+- **CONTINUE GAME** is unchanged: no launch.
+- **Mid-task request:** the in-game launch sequence (Launch Check → lift-off) now also switches to
+  the matching `rocket-*-flameon.png` at ignition, using the same calibrated component
+  (`src/ui/RocketArt.tsx`).
+- **Credits:** the three `rocket-*-flameon.png` files were untracked and are now committed. I
+  don't know how they were made; if AI-generated they need CREDITS.md rows.

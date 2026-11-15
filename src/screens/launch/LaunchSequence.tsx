@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { createRng } from '@/engine/rng'
 import type { Destination, Rocket } from '@/schemas'
-import { AssetImage } from '@/ui/AssetImage'
 import { Button } from '@/ui/Button'
 import { shakeScreen } from '@/ui/feel'
 import { playSound } from '@/ui/sound'
-import { rocketSprite } from '@/ui/rocketSprite'
+import { RocketArt } from '@/ui/RocketArt'
+import { rocketSize } from '@/ui/rocketSprite'
 import { TransitMap } from './TransitMap'
 
 /** Timing of the sequence, in ms. Kept short: it plays every launch. */
@@ -144,11 +144,12 @@ export function LaunchSequence({ rocket, destination, onDone }: LaunchSequencePr
               stage === 'liftoff' ? { duration: LIFTOFF_MS / 1000, ease: 'easeIn' } : undefined
             }
           >
-            <AssetImage
-              kind="sprites"
-              id={rocketSprite(rocket)}
-              label={rocket.name}
-              className="h-48 w-auto"
+            {/* Engines ignite at lift-off: the flame version of the same rocket. */}
+            <RocketArt
+              size={rocketSize(rocket)}
+              scale={1}
+              flame={stage === 'liftoff'}
+              className="z-10"
             />
             {hasStages && (
               <motion.div
