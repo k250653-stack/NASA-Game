@@ -57,6 +57,8 @@ export interface HabitatCallbacks {
   onInteract: (target: HabitatTarget) => void
   onPlayerScreen: (x: number, y: number) => void
   isPaused: () => boolean
+  /** Stations that need attention: a pulsing "!" floats above each. */
+  alerts?: () => readonly WorkstationKind[]
 }
 
 interface Npc {
@@ -89,6 +91,7 @@ export class HabitatScene extends Phaser.Scene {
   private glow: Phaser.GameObjects.Graphics | null = null
   private debug: Phaser.GameObjects.Graphics | null = null
   private cam = { x: 0, y: 0 }
+  private alertMarks = new Map<WorkstationKind, Phaser.GameObjects.Text>()
 
   constructor(room: Room, crew: NpcSpec[], callbacks: () => HabitatCallbacks) {
     super('habitat')
@@ -170,7 +173,38 @@ export class HabitatScene extends Phaser.Scene {
     }
     this.player.setDepth(5 + this.player.y / 10000)
     this.updateTarget()
+    this.updateAlerts(_time)
     this.updateCamera(deltaMs)
+  }
+
+  /** Pulsing "!" above stations React says need attention. */
+  private updateAlerts(time: number) {
+    const on = this.cb().alerts?.() ?? []
+    for (const w of this.room.workstations) {
+      let mark = this.alertMarks.get(w.kind)
+      if (!on.includes(w.kind)) {
+        mark?.setVisible(false)
+        continue
+      }
+      if (!mark) {
+        const [x] = centroid(w.area)
+        const top = Math.min(...w.area.map((p) => p[1]))
+        mark = this.add
+          .text(x, top - 6, '!', {
+            fontFamily: 'Barlow Condensed, Arial Narrow, sans-serif',
+            fontSize: '30px',
+            fontStyle: 'bold',
+            color: tokenCss('alert'),
+            backgroundColor: tokenCss('bg'),
+            padding: { x: 7, y: 0 },
+          })
+          .setOrigin(0.5, 1)
+          .setDepth(9)
+          .setResolution(2)
+        this.alertMarks.set(w.kind, mark)
+      }
+      mark.setVisible(true).setAlpha(0.55 + 0.45 * Math.abs(Math.sin(time / 300)))
+    }
   }
 
   // ---- crew actions (called from React) --------------------------------------------------------

@@ -3,6 +3,7 @@ import type { CrewMember } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
 import { ROLE_LABEL } from '@/ui/labels'
 import { PopupPanel } from '../PopupPanel'
+import { StationShell } from './StationShell'
 import { dailyUse, type Gauge } from './missionRun'
 
 const TITLE = 'font-title text-2xl tracking-wide text-primary uppercase'
@@ -73,6 +74,7 @@ interface ResourcesProps {
   run: MissionState
   design: Design
   gauges: Gauge[]
+  talk?: { member: CrewMember; line: string }
   onClose: () => void
 }
 
@@ -83,12 +85,16 @@ const CONSUMABLES = [
 ] as const
 
 /** The Power & Life Support panel: every resource, and how long the consumables last. */
-export function ResourcesPopup({ run, design, gauges, onClose }: ResourcesProps) {
+export function ResourcesPopup({ run, design, gauges, talk, onClose }: ResourcesProps) {
   return (
-    <PopupPanel size="compact" label="Resources" onClose={onClose}>
-      <div className="p-5" data-testid="resources-popup">
-        <h2 className={TITLE}>Power &amp; Life Support</h2>
-        <table className="mt-3 w-full font-mono text-sm">
+    <StationShell
+      title="Power & Life Support"
+      testId="resources-popup"
+      talk={talk}
+      onClose={onClose}
+    >
+      <div>
+        <table className="w-full font-mono text-sm">
           <thead>
             <tr className="text-left font-title tracking-wide text-subtle uppercase">
               <th className="py-1 font-normal">Supply</th>
@@ -127,6 +133,6 @@ export function ResourcesPopup({ run, design, gauges, onClose }: ResourcesProps)
           ))}
         </ul>
       </div>
-    </PopupPanel>
+    </StationShell>
   )
 }

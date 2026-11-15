@@ -14,7 +14,9 @@ import { EventPopup } from './mission/EventPopup'
 import { MissionEndCard } from './mission/MissionEndCard'
 import { DayBadge, GaugeStrip, MissionLog, ResultToast, TurnControls } from './mission/MissionHud'
 import { dayInfo, gauges, ROLE_POST, ROLE_TOKEN } from './mission/missionRun'
-import { CrewStatusPopup, ResourcesPopup } from './mission/StatusPopups'
+import { StationPopup } from './mission/StationPopup'
+import { attention } from './mission/stationStatus'
+import { CrewStatusPopup } from './mission/StatusPopups'
 import { useMissionRun } from './mission/useMissionRun'
 import { PauseMenu, type PauseState } from './PauseMenu'
 import { getRoom, type WorkstationKind } from './rooms/room'
@@ -23,7 +25,7 @@ import { getRoom, type WorkstationKind } from './rooms/room'
 const END_PAUSE_MS = 1200
 const END_CARD_MS = 2800
 
-type Popup = { kind: 'crew'; id: string } | { kind: 'resources' } | null
+type Popup = { kind: 'crew'; id: string } | { kind: 'station'; key: WorkstationKind } | null
 
 /** Phase "mission": the run plays out in the habitat with the crew at their posts. */
 export default function HabitatWorld() {
@@ -36,9 +38,11 @@ export default function HabitatWorld() {
   )
   const [menu, setMenu] = useState<PauseState>(null)
   const novaOpen = useNova((s) => s.openLessonId !== null || s.codexOpen)
-  const m = useMissionRun(p.design, p.content, act, novaOpen || menu !== null)
-  const [target, setTarget] = useState<HabitatTarget | null>(null)
   const [popup, setPopup] = useState<Popup>(null)
+  // A lesson, the pause menu or a station popup holds fast-forward until it closes.
+  const m = useMissionRun(p.design, p.content, act, novaOpen || menu !== null || popup !== null)
+  const [target, setTarget] = useState<HabitatTarget | null>(null)
+  const trades = useStore((s) => s.design.tradesAccepted)
   const [ending, setEnding] = useState(false)
   const promptRef = useRef<HTMLDivElement>(null)
   const anchor = useRef({ x: 0, y: 0 })
@@ -58,6 +62,21 @@ export default function HabitatWorld() {
     live.current = paused
   }, [paused])
 
+  // Stations needing attention get a pulsing "!" in the room.
+  const scenario = p.content.scenarios.find((s) => s.id === p.design?.scenarioId)
+  const scienceTarget = scenario?.scienceTarget ?? 1
+  const alerts = useMemo(
+    () =>
+      m.run && p.design
+        ? attention(m.run, p.design, p.content, gauges(m.run, p.design, p.content, scienceTarget))
+        : [],
+    [m.run, p.design, p.content, scienceTarget],
+  )
+  const alertsRef = useRef(alerts)
+  useEffect(() => {
+    alertsRef.current = alerts
+  }, [alerts])
+
   const room = getRoom(p.destination?.id === 'mars' ? 'mars-habitat' : 'moon-habitat')
   const crew = useMemo<NpcSpec[]>(
     () =>
@@ -74,9 +93,10 @@ export default function HabitatWorld() {
       onTarget: setTarget,
       onInteract: (t) => {
         if (t.kind === 'crew') setPopup({ kind: 'crew', id: t.key })
-        else if (t.key === 'power') setPopup({ kind: 'resources' })
+        else setPopup({ kind: 'station', key: t.key })
       },
       isPaused: () => live.current,
+      alerts: () => alertsRef.current,
       onPlayerScreen: (x, y) => {
         anchor.current = { x, y }
         if (promptRef.current) promptRef.current.style.transform = promptTransform(x, y)
@@ -133,16 +153,10 @@ export default function HabitatWorld() {
       </main>
     )
   }
-  const scenario = p.content.scenarios.find((s) => s.id === p.design?.scenarioId)
-  const bars = gauges(run, p.design, p.content, scenario?.scienceTarget ?? 1)
+  const bars = gauges(run, p.design, p.content, scienceTarget)
   const member = popup?.kind === 'crew' ? p.team.find((c) => c.id === popup.id) : undefined
   const showPrompt = target && !popup && !menu && !pending && !ending
-  const action =
-    target?.kind === 'crew'
-      ? `Talk to ${target.label}`
-      : target?.key === 'power'
-        ? 'Check resources'
-        : target?.label
+  const action = target?.kind === 'crew' ? `Talk to ${target.label}` : `Use ${target?.label ?? ''}`
 
   return (
     <motion.main
@@ -205,8 +219,20 @@ export default function HabitatWorld() {
           onClose={() => setPopup(null)}
         />
       )}
-      {popup?.kind === 'resources' && (
-        <ResourcesPopup run={run} design={p.design} gauges={bars} onClose={() => setPopup(null)} />
+      {popup?.kind === 'station' && (
+        <StationPopup
+          kind={popup.key}
+          run={run}
+          design={p.design}
+          content={p.content}
+          team={p.team}
+          gauges={bars}
+          day={dayInfo(run, p.destination, p.content)}
+          alerts={alerts}
+          scienceTarget={scienceTarget}
+          trades={trades}
+          onClose={() => setPopup(null)}
+        />
       )}
       {ending && <MissionEndCard run={run} />}
       <PauseMenu
