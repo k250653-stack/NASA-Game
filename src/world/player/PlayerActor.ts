@@ -16,9 +16,8 @@ import {
   PLAYER_APPEARANCES,
   PLAYER_VARIANTS,
   playerAssetUrl,
-  RUN_SPEED_FACTOR,
   sheetKey,
-  WALK_SPEED_FACTOR,
+  speedFactor,
   type PlayerAction,
   type PlayerAppearance,
   type PlayerDirection,
@@ -114,7 +113,7 @@ export class PlayerActor {
     }
     if (moving) {
       this.direction = facingFromKeys(input.dx, input.dy, this.direction)
-      const factor = input.running ? RUN_SPEED_FACTOR : WALK_SPEED_FACTOR
+      const factor = speedFactor(input.running)
       const v = groundVelocity(this.manifest, this.direction)
       const k = (COMPACT_SCALE * DISPLAY_SCALE * factor * deltaMs) / 1000
       tryMove(v.x * k, v.y * k)

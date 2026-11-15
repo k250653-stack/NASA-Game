@@ -241,3 +241,8 @@ Unsure:
 - **Doorways win:** `canStandFeet` takes the open doorway areas. A foot point inside a doorway ignores every blocker, and doorway areas were already counted as walkable.
 - **Unstuck safety:** both scenes remember the last spot where the feet fitted and snap back to it if the player is ever off the floor.
 - **Skipped:** I didn't widen any doorway. All four HQ doorway areas are already about 95–190 px wide and overlap both floors, as the hitbox check showed. The habitat rooms have no doorways. The Mission Planning polygons are untouched.
+
+### Task 2: faster movement
+- **Speeds:** walk is now 3.5× the player pack's walk, up from 2.2×. Sprint (Shift) is walk × 1.6 = 5.6×, up from 3.6×. The values are in `constants.json` under `player`.
+- **Animation:** the walk animation already runs at the same factor as the movement (`PlayerActor` speeds its frame clock by the factor), so the feet keep planted. Footstep sounds come faster too.
+- **HQ and habitat:** both scenes use the same `PlayerActor`, so they move at the same speed.

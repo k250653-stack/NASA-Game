@@ -60,6 +60,12 @@ export const ConstantsSchema = z.strictObject({
     playerApprovesAllEvents: z.boolean(),
     source: NonEmptyString,
   }),
+  /** Player movement (world/player): speed factor on the pack walk, and the Shift multiplier. */
+  player: z.strictObject({
+    walkSpeedFactor: z.number().positive(),
+    sprintMultiplier: z.number().min(1),
+    source: NonEmptyString,
+  }),
   /** Repair timing mini-game (world/mission/RepairTiming): which options, and the bonus for a hit. */
   minigame: z.strictObject({
     eventIds: z.array(z.string()),

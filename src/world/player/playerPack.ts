@@ -5,6 +5,7 @@
  *
  * Layout of every atlas: rows N, NE, E, SE, S, SW, W, NW; columns = frames (idle 8, walk 12).
  */
+import { getContent } from '@/content/load'
 
 export const PLAYER_APPEARANCES = ['player_female', 'player_male'] as const
 export type PlayerAppearance = (typeof PLAYER_APPEARANCES)[number]
@@ -123,9 +124,12 @@ export const COMPACT_SCALE = 0.5
 /**
  * The pack's walk speed is slow for these big rooms, so the walk is played faster: animation
  * rate and movement are multiplied by the same factor, which keeps the feet planted.
+ * Values live in content (constants.player); sprint = walk x sprintMultiplier.
  */
-export const WALK_SPEED_FACTOR = 2.2
-export const RUN_SPEED_FACTOR = 3.6
+export function speedFactor(running: boolean): number {
+  const p = getContent().constants.player
+  return running ? p.walkSpeedFactor * p.sprintMultiplier : p.walkSpeedFactor
+}
 
 /** Index into a row-major spritesheet (8 rows of `frameCount` columns). */
 export function frameIndex(

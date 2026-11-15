@@ -152,5 +152,10 @@
     "sweepMs": 1100,
     "minZone": 0.08,
     "source": "Game design values for the repair timing mini-game (gameplay, not physics)."
+  },
+  "player": {
+    "walkSpeedFactor": 3.5,
+    "sprintMultiplier": 1.6,
+    "source": "Game feel values. walkSpeedFactor multiplies the player pack walk (movement and walk animation together, so feet stay planted); sprint = walk x sprintMultiplier (Shift). Same in HQ and habitat."
   }
 }
