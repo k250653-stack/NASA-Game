@@ -16,7 +16,8 @@
     "e2e": "playwright test -c e2e/playwright.config.ts",
     "check": "pnpm lint && pnpm test && pnpm build && pnpm e2e",
     "e2e:watch": "cross-env WATCH=1 playwright test -c e2e/playwright.config.ts",
-    "e2e:ui": "playwright test -c e2e/playwright.config.ts --ui"
+    "e2e:ui": "playwright test -c e2e/playwright.config.ts --ui",
+    "walkthrough": "npx playwright test e2e/walkthrough.spec.ts --headed --workers=1"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

@@ -39,3 +39,6 @@ test-results
 CLAUDE.md
 .claude/
 .mcp.json
+
+# Walkthrough recordings
+e2e/walkthrough-video/

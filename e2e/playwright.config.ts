@@ -8,6 +8,8 @@ const WATCH = process.env.WATCH === '1'
 
 export default defineConfig({
   testDir: '.',
+  // The watchable walkthrough is run on its own (pnpm walkthrough).
+  testIgnore: ['walkthrough.spec.ts'],
   outputDir: './test-results',
   fullyParallel: true,
   // The dev server is shared; more workers make every page slower than it really is.
