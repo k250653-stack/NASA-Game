@@ -1,10 +1,17 @@
+import { CodexList } from '@/nova/NovaCodex'
+import { Panel } from '@/ui/Panel'
 import { PhaseShell } from '@/ui/PhaseShell'
 
+/** Library of every NOVA lesson: unlocked ones can be replayed, the rest are locked. */
 export default function Codex() {
   return (
     <PhaseShell
       title="Codex"
-      description="Library of every NOVA lesson unlocked so far, each with its formula, visual and NASA source link."
-    />
+      description="Every NOVA lesson you have unlocked, with its visual, formula and source."
+    >
+      <Panel title="NOVA's notes">
+        <CodexList />
+      </Panel>
+    </PhaseShell>
   )
 }

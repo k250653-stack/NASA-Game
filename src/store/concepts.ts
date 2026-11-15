@@ -12,6 +12,8 @@ export const CONCEPTS = [
   'data_downlink',
   'launch_capacity',
   'go_no_go_poll',
+  'dust_solar',
+  'signal_delay',
 ] as const
 export type ConceptKey = (typeof CONCEPTS)[number]
 

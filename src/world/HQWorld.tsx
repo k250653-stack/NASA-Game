@@ -10,6 +10,9 @@ import type { SceneCallbacks, Target } from './HQScene'
 import { InteractPrompt, promptTransform } from './InteractPrompt'
 import { PauseMenu, type PauseState } from './PauseMenu'
 import { PopupPanel } from './PopupPanel'
+import { NovaCompanion } from '@/nova/NovaCompanion'
+import { skipTutorial, useNova } from '@/nova/novaStore'
+import { useHqTutorial } from '@/nova/tutorial'
 import { doorLockReason } from './steps'
 import { WorldCanvas } from './WorldCanvas'
 import { closePopup, openStep, savePlayerPos, useWorld } from './worldStore'
@@ -67,10 +70,13 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
   const [menu, setMenu] = useState<PauseState>(null)
   const promptRef = useRef<HTMLDivElement>(null)
   const anchor = useRef({ x: 0, y: 0 })
-  const live = useRef({ paused: false, locks })
+  const novaOpen = useNova((s) => s.openLessonId !== null || s.codexOpen)
+  const busy = popupStep !== null || menu !== null || debriefOpen || novaOpen
+  const tutorial = useHqTutorial(locks, busy)
+  const live = useRef({ paused: false, locks, marker: null as string | null })
   useEffect(() => {
-    live.current = { paused: popupStep !== null || menu !== null || debriefOpen, locks }
-  }, [popupStep, menu, debriefOpen, locks])
+    live.current = { paused: busy, locks, marker: tutorial.marker }
+  }, [busy, locks, tutorial.marker])
 
   // Back from a mission: the debrief opens by itself after a moment in the Briefing room.
   useEffect(() => {
@@ -89,6 +95,7 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
       onPlayerMoved: savePlayerPos,
       isPaused: () => live.current.paused,
       locks: () => live.current.locks,
+      marker: () => live.current.marker,
       onPlayerScreen: (x, y) => {
         anchor.current = { x, y }
         if (promptRef.current) promptRef.current.style.transform = promptTransform(x, y)
@@ -133,6 +140,11 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
           y={anchor.current.y}
         />
       )}
+      <NovaCompanion
+        lines={tutorial.lines}
+        onDone={tutorial.onDone}
+        onSkip={tutorial.active ? skipTutorial : undefined}
+      />
       <p className="pointer-events-none absolute bottom-4 left-4 font-mono text-xs text-subtle">
         WASD / arrows move · Shift run · E use · Esc pause · F2 debug
       </p>

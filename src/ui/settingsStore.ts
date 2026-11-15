@@ -13,9 +13,12 @@ interface SettingsState {
   soundOn: boolean
   musicOn: boolean
   reducedMotion: boolean
+  /** NOVA tutorial and lesson pop-ups. null = by difficulty (on for Cadet/Engineer). */
+  hints: boolean | null
   setSoundOn: (on: boolean) => void
   setMusicOn: (on: boolean) => void
   setReducedMotion: (on: boolean) => void
+  setHints: (on: boolean | null) => void
 }
 
 export const useSettings = create<SettingsState>()(
@@ -24,9 +27,11 @@ export const useSettings = create<SettingsState>()(
       soundOn: true,
       musicOn: true,
       reducedMotion: false,
+      hints: null,
       setSoundOn: (soundOn) => set({ soundOn }),
       setMusicOn: (musicOn) => set({ musicOn }),
       setReducedMotion: (reducedMotion) => set({ reducedMotion }),
+      setHints: (hints) => set({ hints }),
     }),
     {
       name: SETTINGS_KEY,
@@ -35,6 +40,7 @@ export const useSettings = create<SettingsState>()(
         soundOn: s.soundOn,
         musicOn: s.musicOn,
         reducedMotion: s.reducedMotion,
+        hints: s.hints,
       }),
     },
   ),

@@ -2,6 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { usePlanning } from '@/screens/planning/usePlanning'
 import { useStore } from '@/store'
+import { NovaCompanion } from '@/nova/NovaCompanion'
+import { skipTutorial, useNova } from '@/nova/novaStore'
+import { useHabitatTutorial } from '@/nova/tutorial'
+import { emitConcept } from '@/store/concepts'
 import { returnToEarth } from './debrief/debrief'
 import { HabitatCanvas } from './HabitatCanvas'
 import type { HabitatCallbacks, HabitatScene, HabitatTarget, NpcSpec } from './HabitatScene'
@@ -30,15 +34,26 @@ export default function HabitatWorld() {
     (id: string, kind: WorkstationKind) => sceneRef.current?.act(id, kind) ?? Promise.resolve(),
     [],
   )
-  const m = useMissionRun(p.design, p.content, act)
+  const [menu, setMenu] = useState<PauseState>(null)
+  const novaOpen = useNova((s) => s.openLessonId !== null || s.codexOpen)
+  const m = useMissionRun(p.design, p.content, act, novaOpen || menu !== null)
   const [target, setTarget] = useState<HabitatTarget | null>(null)
   const [popup, setPopup] = useState<Popup>(null)
-  const [menu, setMenu] = useState<PauseState>(null)
   const [ending, setEnding] = useState(false)
   const promptRef = useRef<HTMLDivElement>(null)
   const anchor = useRef({ x: 0, y: 0 })
   const live = useRef(false)
-  const paused = popup !== null || menu !== null || m.pending !== null || ending
+  const paused = popup !== null || menu !== null || m.pending !== null || ending || novaOpen
+  const tutorial = useHabitatTutorial(paused)
+  // NOVA: the first arrival somewhere without live contact with Earth (Mars).
+  const destinationId = p.destination?.id
+  useEffect(() => {
+    if (
+      destinationId &&
+      !p.content.constants.settings.liveResponseDestinations.includes(destinationId)
+    )
+      emitConcept('signal_delay')
+  }, [destinationId, p.content])
   useEffect(() => {
     live.current = paused
   }, [paused])
@@ -155,6 +170,12 @@ export default function HabitatWorld() {
       <DayBadge info={dayInfo(run, p.destination, p.content)} />
       <GaugeStrip gauges={bars} />
       <MissionLog log={run.eventLog} />
+      <NovaCompanion
+        className="bottom-36 left-4"
+        lines={tutorial.lines}
+        onDone={tutorial.onDone}
+        onSkip={tutorial.active ? skipTutorial : undefined}
+      />
       <p className="pointer-events-none absolute bottom-4 left-4 font-mono text-xs text-subtle">
         WASD move · Shift run · E use · Esc pause · F2 debug
       </p>

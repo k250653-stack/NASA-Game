@@ -3,6 +3,7 @@ import { MotionConfig } from 'motion/react'
 import { useStore, type Phase } from '@/store'
 import { Starfield } from '@/ui/Starfield'
 import { Toaster } from '@/ui/Toaster'
+import { NovaLayer } from '@/nova/NovaLayer'
 import { useSettings } from '@/ui/settingsStore'
 import Title from '@/screens/Title'
 import DestinationSelect from '@/screens/DestinationSelect'
@@ -61,6 +62,7 @@ export default function App() {
           <Screen />
         )}
       </Suspense>
+      <NovaLayer />
       <Toaster />
     </MotionConfig>
   )

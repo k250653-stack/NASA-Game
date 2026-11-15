@@ -4,6 +4,7 @@ import { advanceTurn, isMissionOver } from '@/engine/mission'
 import type { Design, EngineContent, MissionState } from '@/engine/types'
 import type { GameEvent } from '@/schemas'
 import { useStore } from '@/store'
+import { emitConcept } from '@/store/concepts'
 import type { WorkstationKind } from '../rooms/room'
 import { actionPost, rngFor } from './missionRun'
 
@@ -11,6 +12,8 @@ import { actionPost, rngFor } from './missionRun'
 const FF_STEP_MS = 450
 /** How long the result line stays up. */
 const TOAST_MS = 3500
+/** Event that teaches dust on solar panels the first time it fires. */
+const DUST_STORM_EVENT = 'dust-storm'
 
 export interface Toast {
   id: number
@@ -25,7 +28,13 @@ export type ActFn = (crewId: string, kind: WorkstationKind) => Promise<void>
  * Drives the mission with the engine: Next Turn, Fast-Forward (stops when the player is needed
  * or the mission ends) and the player's answers. Every new state is saved to the store.
  */
-export function useMissionRun(design: Design | null, content: EngineContent, act: ActFn) {
+export function useMissionRun(
+  design: Design | null,
+  content: EngineContent,
+  act: ActFn,
+  /** A lesson or menu is open: fast-forward waits, then carries on. */
+  paused = false,
+) {
   const run = useStore((s) => s.mission.run)
   const setRun = useStore((s) => s.setRun)
   const [fastForward, setFastForward] = useState(false)
@@ -62,8 +71,11 @@ export function useMissionRun(design: Design | null, content: EngineContent, act
   const nextTurn = useCallback(() => {
     const s = useStore.getState().mission.run
     if (!s || !design || isMissionOver(s) || s.pendingEvents.length > 0) return
-    const { state } = advanceTurn(s, design, content, rngFor(s))
+    const { state, newEvents } = advanceTurn(s, design, content, rngFor(s))
     setRun(state)
+    // NOVA: the first time dust builds up on the panels.
+    if (state.dustLevel > s.dustLevel || newEvents.some((e) => e.id === DUST_STORM_EVENT))
+      emitConcept('dust_solar')
     // Fast-forward stops when the player is needed or the mission ends.
     if (state.pendingEvents.length > 0 || isMissionOver(state)) setFastForward(false)
     playDecisions(s, state)
@@ -71,10 +83,10 @@ export function useMissionRun(design: Design | null, content: EngineContent, act
 
   // Fast-forward: one turn every FF_STEP_MS until an event needs the player or the mission ends.
   useEffect(() => {
-    if (!fastForward || pending || over || acting) return
+    if (!fastForward || pending || over || acting || paused) return
     const t = setTimeout(nextTurn, FF_STEP_MS)
     return () => clearTimeout(t)
-  }, [fastForward, pending, over, acting, run, nextTurn])
+  }, [fastForward, pending, over, acting, paused, run, nextTurn])
 
   /** The player's answer: resolve, close the popup, play the action, then show the result. */
   const choose = useCallback(

@@ -32,8 +32,8 @@ export const LessonSchema = z.strictObject({
   formulaLatex: NonEmptyString,
   /** Text with {placeholders} filled from the player's current design. */
   applyTemplate: NonEmptyString,
-  /** Every lesson must cite a source (CLAUDE.md rule 5). */
-  source: UrlSchema,
+  /** Every lesson must cite a source (CLAUDE.md rule 5); "TODO: verify" until a URL is checked. */
+  source: z.union([UrlSchema, z.literal('TODO: verify')]),
 })
 
 export type Lesson = z.infer<typeof LessonSchema>

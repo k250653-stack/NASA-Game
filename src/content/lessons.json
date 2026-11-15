@@ -1,37 +1,228 @@
 {
-  "_note": "Sample NOVA lesson. Every lesson must have a source URL (CLAUDE.md rule 5) and Lane 3 verifies the physics against that source before the demo. vizParams numbers are approximate.",
+  "_note": "NOVA lessons, one per concept event (trigger = concept key in src/store/concepts.ts). All numbers in steps and vizParams are approximate teaching values, not mission data. Sources marked \"TODO: verify\" still need a checked NASA URL (CLAUDE.md rule 5).",
   "items": [
     {
-      "id": "moon-transfer-orbit",
-      "title": "Why the Moon takes three days",
-      "role": "comms_nav",
-      "trigger": "launch_check_open",
+      "id": "mass-budget",
+      "title": "Why every kilogram matters",
+      "role": "launch_budget",
+      "trigger": "mass_budget",
       "predictQuestion": {
-        "question": "You are in low Earth orbit and fire the engine to speed up. What happens to the far side of your orbit?",
+        "question": "Your lander is 500 kg over what the rocket can carry. What happens?",
         "options": [
-          "It gets higher, stretching the orbit into an ellipse",
-          "It gets lower, pulling you back toward Earth",
-          "It stays the same, you just go round faster",
-          "The orbit becomes a perfect circle"
+          "The rocket burns a little longer and makes up for it",
+          "It cannot reach the destination: something must come off",
+          "It arrives, just a few hours late"
         ],
-        "correctIndex": 0
+        "correctIndex": 1
       },
       "steps": [
-        "Speeding up at one point of an orbit raises the opposite point, so a burn in low Earth orbit stretches the orbit into a long ellipse.",
-        "If the far end of that ellipse reaches the Moon's distance, the spacecraft coasts there with the engine off.",
-        "Coasting along the ellipse to the Moon's distance takes roughly three days; a faster trajectory needs more fuel and a bigger rocket.",
-        "The same idea with a much bigger ellipse around the Sun is why Mars takes months instead of days."
+        "A rocket can only push a fixed mass to the Moon or Mars. That number is its capacity.",
+        "Most of a rocket is fuel. Adding payload means needing even more fuel to lift that fuel.",
+        "So past the limit there is no 'a bit late': the mission simply does not fit.",
+        "Planners keep a margin of roughly 10–20% for growth, because designs always get heavier."
       ],
-      "viz": "orbit",
-      "vizParams": {
-        "earthRadiusKm": 6371,
-        "parkingOrbitAltKm": 400,
-        "targetDistanceKm": 384400,
-        "coastDays": 3
+      "viz": "mass",
+      "vizParams": { "capacityKg": 8000, "startMassKg": 7000, "maxMassKg": 11000 },
+      "formulaLatex": "\\text{margin} = \\frac{m_{\\text{capacity}} - m_{\\text{payload}}}{m_{\\text{capacity}}}",
+      "applyTemplate": "Your design weighs {totalMassKg} kg against the {rocketName}'s {capacityKg} kg: a margin of {marginPct}.",
+      "source": "https://science.nasa.gov/learn/basics-of-space-flight/"
+    },
+    {
+      "id": "launch-capacity",
+      "title": "Bigger rockets, bigger bills",
+      "role": "launch_budget",
+      "trigger": "launch_capacity",
+      "predictQuestion": {
+        "question": "Switching to a heavier rocket gives you more capacity. What is the catch?",
+        "options": [
+          "There is none, bigger is always better",
+          "It costs more, leaving less budget for parts and crew",
+          "It is always less reliable"
+        ],
+        "correctIndex": 1
       },
-      "formulaLatex": "v = \\sqrt{\\mu \\left( \\frac{2}{r} - \\frac{1}{a} \\right)}",
-      "applyTemplate": "Your {rocketName} must add about {deltaVKms} km/s in low Earth orbit. After that the coast to {destinationName} takes about {transitDays} days with the engine off.",
-      "source": "https://science.nasa.gov/learn/basics-of-space-flight/chapter4-1/"
+      "steps": [
+        "A heavier rocket lifts more mass, so you can carry more supplies and spares.",
+        "It also costs far more per launch, and that comes out of the same budget as everything else.",
+        "Each rocket has its own track record. Reliability is the share of launches that work.",
+        "Good planners pick the smallest rocket that still leaves a healthy mass margin."
+      ],
+      "viz": "mass",
+      "vizParams": {
+        "capacityKg": 8000,
+        "startMassKg": 6000,
+        "maxMassKg": 26000,
+        "compareCapacityKg": 25000
+      },
+      "formulaLatex": "\\text{budget left} = B - (C_{\\text{rocket}} + C_{\\text{parts}} + C_{\\text{crew}})",
+      "applyTemplate": "The {rocketName} costs ${rocketCostM}M of your ${budgetM}M budget, carries {capacityKg} kg and is about {reliabilityPct} reliable.",
+      "source": "TODO: verify"
+    },
+    {
+      "id": "power-dark",
+      "title": "Surviving the dark",
+      "role": "power_life",
+      "trigger": "power_dark",
+      "predictQuestion": {
+        "question": "Your base runs on solar panels. What keeps the heaters and air system running at night?",
+        "options": [
+          "The panels still work a little in starlight",
+          "Batteries charged during the day, or a power source that ignores the Sun",
+          "Nothing: the crew sleeps until sunrise"
+        ],
+        "correctIndex": 1
+      },
+      "steps": [
+        "Solar panels only produce power while the Sun is up.",
+        "Life support never switches off, so night-time power must be stored in batteries.",
+        "The battery has to hold the base's load for every hour of darkness, with some to spare.",
+        "Long nights, like the lunar night, need huge batteries, so some bases add a fission power unit."
+      ],
+      "viz": "power",
+      "vizParams": { "loadW": 2000, "solarW": 6000, "batteryWh": 30000, "darkHours": 14 },
+      "formulaLatex": "E_{\\text{battery}} \\geq P_{\\text{load}} \\times t_{\\text{dark}}",
+      "applyTemplate": "Your base needs about {nightNeedWh} Wh to get through {darkHours} dark hours; your batteries hold {batteryWh} Wh.",
+      "source": "https://science.nasa.gov/moon/"
+    },
+    {
+      "id": "life-support",
+      "title": "What a person uses every day",
+      "role": "power_life",
+      "trigger": "life_support",
+      "predictQuestion": {
+        "question": "Roughly how much oxygen does one astronaut breathe per day?",
+        "options": ["About 80 grams", "About 0.8 kg", "About 8 kg"],
+        "correctIndex": 1
+      },
+      "steps": [
+        "Each crew member uses roughly 0.8 kg of oxygen, 2 kg of food and 3 kg of water a day (approximate).",
+        "Multiply by the crew and the days, and supplies quickly become the heaviest thing on board.",
+        "Recyclers win back most of the water and some oxygen, so less has to be launched.",
+        "Running out of any one of the three ends the mission, so planners add reserve days."
+      ],
+      "viz": "life_support",
+      "vizParams": {
+        "crew": 4,
+        "days": 30,
+        "oxygenKgPerDay": 0.84,
+        "waterKgPerDay": 3,
+        "foodKgPerDay": 1.8
+      },
+      "formulaLatex": "m = n_{\\text{crew}} \\times d \\times r \\times (1 - \\eta_{\\text{recycle}})",
+      "applyTemplate": "Your crew of {crewCount} uses about {oxygenPerDay} kg oxygen and {waterPerDay} kg water a day; with your recyclers the supplies last {supplyDays} days.",
+      "source": "TODO: verify"
+    },
+    {
+      "id": "data-downlink",
+      "title": "Science only counts if it gets home",
+      "role": "comms_nav",
+      "trigger": "data_downlink",
+      "predictQuestion": {
+        "question": "Your instruments collect 10 GB a day, but your radio can send only 4 GB. What happens to the rest?",
+        "options": [
+          "It is sent later, for free",
+          "It piles up on board and may never reach scientists",
+          "The instruments slow down automatically"
+        ],
+        "correctIndex": 1
+      },
+      "steps": [
+        "Data only becomes science once it reaches Earth.",
+        "How much you can send is the radio's data rate times the hours you are in contact each day.",
+        "Anything you collect beyond that waits in storage, and storage fills up.",
+        "Better antennas or more contact time are often worth more than another instrument."
+      ],
+      "viz": "signal",
+      "vizParams": { "rateMbps": 20, "contactHours": 8, "dataGbPerDay": 10, "delayMin": 0 },
+      "formulaLatex": "D = R \\times t_{\\text{contact}}",
+      "applyTemplate": "You collect {dataGenGbPerDay} GB/day and can send {dataReturnGbPerDay} GB/day in {contactHours} contact hours: {dataReturnPct} gets home.",
+      "source": "TODO: verify"
+    },
+    {
+      "id": "go-no-go-poll",
+      "title": "Go, no-go: how a launch is called",
+      "role": "launch_budget",
+      "trigger": "go_no_go_poll",
+      "predictQuestion": {
+        "question": "Before launch, the flight director asks every console 'go or no-go'. Why ask everyone?",
+        "options": [
+          "Tradition, the answer is always go",
+          "Each console knows one system best, and one real problem can stop the launch",
+          "To decide the launch time by vote"
+        ],
+        "correctIndex": 1
+      },
+      "steps": [
+        "Each controller watches one system: power, life support, communications, the rocket.",
+        "In the poll, each one says go or no-go for their own system, out loud.",
+        "One no-go holds the launch until the problem is understood and fixed.",
+        "Known small risks can be accepted, but only if everyone hears them first."
+      ],
+      "viz": "mass",
+      "vizParams": { "capacityKg": 8000, "startMassKg": 7400, "maxMassKg": 10000 },
+      "formulaLatex": "\\text{GO} \\iff \\text{no failing checks}",
+      "applyTemplate": "Your checklist right now: {okCount} ok, {warnCount} warnings and {failCount} failing checks.",
+      "source": "TODO: verify"
+    },
+    {
+      "id": "dust-solar",
+      "title": "Dust on the panels",
+      "role": "power_life",
+      "trigger": "dust_solar",
+      "predictQuestion": {
+        "question": "A dust storm leaves a thin layer on your solar panels. What changes?",
+        "options": [
+          "Nothing, dust is see-through",
+          "Less sunlight reaches the cells, so less power",
+          "The panels overheat and make more power"
+        ],
+        "correctIndex": 1
+      },
+      "steps": [
+        "Fine dust settles on panels and blocks part of the sunlight.",
+        "Power drops with every layer; storms also darken the sky itself.",
+        "Mars rovers have lost much of their power this way, and some were saved when wind cleaned them.",
+        "Bases plan extra panel area, cleaning, or power that does not need sunlight."
+      ],
+      "viz": "power",
+      "vizParams": {
+        "loadW": 2000,
+        "solarW": 6000,
+        "batteryWh": 30000,
+        "darkHours": 12,
+        "dustSlider": true
+      },
+      "formulaLatex": "P = P_{\\text{rated}} \\times f_{\\text{sun}} \\times (1 - d)",
+      "applyTemplate": "Your panels are rated {solarRatedW} W; dust has cut them by about {dustNowPct} so far.",
+      "source": "https://science.nasa.gov/mars/"
+    },
+    {
+      "id": "signal-delay",
+      "title": "Talking to Mars takes minutes",
+      "role": "comms_nav",
+      "trigger": "signal_delay",
+      "predictQuestion": {
+        "question": "Mission Control spots an alarm on your Mars base. How soon can their answer reach you?",
+        "options": ["Instantly", "A few seconds", "Several minutes to over 20 minutes"],
+        "correctIndex": 2
+      },
+      "steps": [
+        "Radio travels at the speed of light, but Mars is tens to hundreds of millions of km away.",
+        "A one-way message takes roughly 4 to 22 minutes, depending on where the planets are (approximate).",
+        "So for urgent problems the crew cannot wait for Earth's answer.",
+        "That is why you set standing orders: rules the crew follows on their own."
+      ],
+      "viz": "signal",
+      "vizParams": {
+        "rateMbps": 2,
+        "contactHours": 8,
+        "dataGbPerDay": 2,
+        "delayMin": 12,
+        "delaySlider": true
+      },
+      "formulaLatex": "t = \\frac{d}{c}",
+      "applyTemplate": "Today the one-way delay to {destinationName} is about {delayMin} min, so urgent events are handled under your standing orders.",
+      "source": "https://science.nasa.gov/mars/"
     }
   ]
 }

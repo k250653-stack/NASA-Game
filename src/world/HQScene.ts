@@ -22,7 +22,14 @@ import {
   type Facing,
   type Motion,
 } from './character'
-import { canStand, distanceToPolygon, pointInPolygon, type Point, type Polygon } from './geometry'
+import {
+  canStand,
+  centroid,
+  distanceToPolygon,
+  pointInPolygon,
+  type Point,
+  type Polygon,
+} from './geometry'
 import { drawPadlock, roomLight, tokenColor, type RoomLight } from './hqArt'
 import {
   gatedRooms,
@@ -72,6 +79,8 @@ export interface SceneCallbacks {
   isPaused: () => boolean
   /** Lock reason per gated room id (null/missing = open). */
   locks: () => Record<string, string | null>
+  /** Room NOVA is pointing the player to (tutorial), or null for no marker. */
+  marker?: () => string | null
 }
 
 type Keys = Record<
@@ -100,6 +109,7 @@ export class HQScene extends Phaser.Scene {
   private padlocks = new Map<string, Phaser.GameObjects.Graphics>()
   private glow: Phaser.GameObjects.Graphics | null = null
   private debug: Phaser.GameObjects.Graphics | null = null
+  private marker: Phaser.GameObjects.Graphics | null = null
   private cam = { x: 0, y: 0 }
   private saved = { at: 0, x: 0, y: 0 }
 
@@ -215,6 +225,7 @@ export class HQScene extends Phaser.Scene {
     }
     this.updateTarget()
     this.updateCamera(deltaMs)
+    this.updateMarker(time)
     this.reportPosition(time)
   }
 
@@ -369,6 +380,36 @@ export class HQScene extends Phaser.Scene {
     this.target = target
     this.drawGlow()
     this.cb().onTarget(target)
+  }
+
+  /** NOVA's tutorial arrow: over the room's lobby door, or its station once inside the room. */
+  private updateMarker(time: number) {
+    const roomId = this.cb().marker?.() ?? null
+    const target = roomId ? this.markerPoint(roomId) : null
+    if (!target) {
+      this.marker?.setVisible(false)
+      return
+    }
+    if (!this.marker) {
+      const g = this.add.graphics().setDepth(9)
+      g.fillStyle(tokenColor('alert'), 1)
+      g.fillTriangle(-12, -18, 12, -18, 0, 0)
+      g.fillStyle(tokenColor('bg'), 1).fillRect(-3, -15, 6, 6)
+      this.marker = g
+    }
+    const bob = Math.sin(time / 260) * 6
+    this.marker.setVisible(true).setPosition(target[0], target[1] - 40 + bob)
+  }
+
+  private markerPoint(roomId: string): Point | null {
+    const room = this.map.rooms.find((r) => r.room.id === roomId)
+    if (!room) return null
+    if (this.room === room) {
+      const station = room.stations[0]
+      return station ? centroid(station.area) : room.center
+    }
+    const door = this.map.lobby.doors.find((d) => d.door.to === roomId)
+    return door ? centroid(door.area) : null
   }
 
   private drawGlow() {

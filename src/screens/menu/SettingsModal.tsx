@@ -1,6 +1,8 @@
 import { Button } from '@/ui/Button'
 import { Modal } from '@/ui/Modal'
 import { useSettings } from '@/ui/settingsStore'
+import { hintsOn } from '@/nova/novaStore'
+import { useStore } from '@/store'
 
 interface ToggleRowProps {
   id: string
@@ -42,6 +44,9 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   const setSoundOn = useSettings((s) => s.setSoundOn)
   const setMusicOn = useSettings((s) => s.setMusicOn)
   const setReducedMotion = useSettings((s) => s.setReducedMotion)
+  const hints = useSettings((s) => s.hints)
+  const setHints = useSettings((s) => s.setHints)
+  const difficulty = useStore((s) => s.game.difficulty)
 
   return (
     <Modal
@@ -72,6 +77,13 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           description="Turns off sliding and zooming animations."
           on={reducedMotion}
           onChange={setReducedMotion}
+        />
+        <ToggleRow
+          id="hints"
+          label="NOVA hints"
+          description="Tutorial and lesson pop-ups. On by default for Cadet and Engineer."
+          on={hintsOn(hints, difficulty)}
+          onChange={setHints}
         />
       </div>
     </Modal>
