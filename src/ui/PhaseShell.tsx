@@ -49,7 +49,9 @@ export function PhaseShell({
   const isLast = index === PHASES.length - 1
 
   const footer = (
-    <div className="flex items-start justify-between gap-6 border-t-2 border-border pt-4">
+    <div
+      className={`flex items-start justify-between gap-6 border-t-2 border-border pt-4 ${popup ? 'sticky bottom-0 z-20 -mb-4 bg-panel pb-3' : ''}`}
+    >
       <Button variant="secondary" onClick={prevPhase} data-testid="back-button">
         ← {backLabel}
       </Button>

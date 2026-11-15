@@ -53,7 +53,8 @@ export const useStore = create<RootState>()(
         const p = (persisted ?? {}) as Partial<PersistedState>
         return {
           ...current,
-          game: { ...current.game, ...p.game },
+          // Always boot on the main menu; CONTINUE GAME opens the HQ with the saved progress.
+          game: { ...current.game, ...p.game, phase: current.game.phase },
           design: { ...current.design, ...p.design },
           crew: { ...current.crew, ...p.crew },
           mission: { ...current.mission, ...p.mission },

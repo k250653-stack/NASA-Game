@@ -5,9 +5,9 @@ import { NovaSprite } from './NovaSprite'
 import { openCodex } from './novaStore'
 
 /** Typewriter speed. */
-const CHAR_MS = 22
+const CHAR_MS = 14
 /** NOVA blips once per this many letters. */
-const BEEP_EVERY = 3
+const BEEP_EVERY = 6
 
 interface NovaCompanionProps {
   /** Lines to say, one bubble each; null or empty = NOVA just hovers. */

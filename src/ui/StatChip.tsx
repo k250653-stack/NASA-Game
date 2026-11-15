@@ -9,6 +9,8 @@ interface StatChipProps {
   value: ReactNode
   unit?: string
   tone?: Tone
+  /** Smaller padding and text, for dense cards. */
+  compact?: boolean
   className?: string
   testId?: string
 }
@@ -20,17 +22,18 @@ export function StatChip({
   value,
   unit,
   tone = 'neutral',
+  compact = false,
   className = '',
   testId,
 }: StatChipProps) {
   return (
     <div
       data-testid={testId}
-      className={`inline-flex items-center gap-2 border-2 border-border bg-surface px-2.5 py-1 ${className}`}
+      className={`inline-flex items-center border-2 border-border bg-surface ${compact ? 'gap-1.5 px-2 py-0.5' : 'gap-2 px-2.5 py-1'} ${className}`}
     >
-      {icon && <Icon name={icon} size={16} className="text-muted" />}
+      {icon && <Icon name={icon} size={compact ? 14 : 16} className="text-muted" />}
       <span className="label-caps text-xs text-muted">{label}</span>
-      <span className={`font-mono text-sm tabular-nums ${TONE_TEXT[tone]}`}>
+      <span className={`font-mono tabular-nums ${compact ? 'ml-auto text-xs' : 'text-sm'} ${TONE_TEXT[tone]}`}>
         {value}
         {unit && <span className="ml-0.5 text-subtle">{unit}</span>}
       </span>

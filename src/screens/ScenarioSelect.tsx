@@ -52,7 +52,7 @@ export default function ScenarioSelect() {
               onChange={setDifficulty}
             />
           </Panel>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {scenarios.map((s) => (
               <ScenarioCard
                 key={s.id}

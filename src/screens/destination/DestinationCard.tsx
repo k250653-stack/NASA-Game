@@ -25,27 +25,28 @@ export function DestinationCard({ destination: d, selected, onSelect }: Destinat
       <AssetImage
         kind="backgrounds"
         id={`dest-${d.id}`}
+        ext="png"
         label={d.name}
-        className="h-56 w-full rounded-t-lg object-cover"
+        className="h-32 w-full object-cover"
       />
-      <div className="p-5">
+      <div className="p-3">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="font-display text-2xl font-bold text-primary">{d.name}</h2>
+          <h2 className="font-display text-xl font-bold text-primary">{d.name}</h2>
           <Badge variant={d.recommendation.tone}>{d.recommendation.label}</Badge>
         </div>
-        <p className="mt-2 text-muted">{d.pitch}</p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <StatChip icon="IconRocket" label="Transit" value={facts.transit} />
-          <StatChip icon="IconAntenna" label="Signal delay" value={facts.signalDelay} />
-          <StatChip icon="IconSolarPanel" label="Avg sunlight" value={facts.sunlight} />
-          <StatChip icon="IconWeight" label="Gravity" value={facts.gravity} />
+        <p className="mt-1 text-sm text-muted">{d.pitch}</p>
+        <div className="mt-2 grid grid-cols-2 gap-1.5">
+          <StatChip compact className="w-full" icon="IconRocket" label="Transit" value={facts.transit} />
+          <StatChip compact className="w-full" icon="IconAntenna" label="Signal delay" value={facts.signalDelay} />
+          <StatChip compact className="w-full" icon="IconSolarPanel" label="Avg sunlight" value={facts.sunlight} />
+          <StatChip compact className="w-full" icon="IconWeight" label="Gravity" value={facts.gravity} />
           <StatChip
             icon="IconPackage"
             label="Resupply"
             value={facts.resupply}
             tone={d.resupplyPossible ? 'success' : 'alert'}
           />
-          <StatChip label="Mission length" value={facts.missionLength} tone="accent" />
+          <StatChip compact className="w-full" label="Mission length" value={facts.missionLength} tone="accent" />
         </div>
       </div>
     </Card>

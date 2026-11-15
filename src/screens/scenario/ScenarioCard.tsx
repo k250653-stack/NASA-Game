@@ -24,30 +24,33 @@ export function ScenarioCard({ scenario: s, difficulty, selected, onSelect }: Sc
       padded={false}
       testId={`scenario-card-${s.id}`}
     >
-      <div className="grid grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="grid grid-cols-[10rem_minmax(0,1fr)]">
         <AssetImage
           kind="backgrounds"
-          id={`scenario-${s.id}`}
+          id={`dest-${s.destinationId}`}
+          ext="png"
           label={s.name}
-          className="h-full min-h-48 w-full object-cover"
+          className="h-full max-h-36 w-full object-cover"
         />
-        <div className="p-5">
-          <h2 className="font-display text-2xl font-bold text-primary">{s.name}</h2>
-          <p className="mt-2 text-muted">{s.objective}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <StatChip label="Duration" value={s.durationDays} unit="days" />
-            <StatChip icon="IconUsers" label="Crew" value={s.crewSize} />
+        <div className="p-3">
+          <h2 className="font-display text-xl font-bold text-primary">{s.name}</h2>
+          <p className="mt-1 text-sm text-muted">{s.objective}</p>
+          <div className="mt-2 grid grid-cols-4 gap-1.5">
+            <StatChip compact className="w-full" label="Duration" value={s.durationDays} unit="days" />
+            <StatChip compact className="w-full" icon="IconUsers" label="Crew" value={s.crewSize} />
             <StatChip
+              compact
+              className="w-full"
               icon="IconCoin"
               label="Budget"
               value={`$${budget.toLocaleString('en-US')}`}
               unit="M"
               tone="accent"
             />
-            <StatChip icon="IconFlask" label="Science target" value={s.scienceTarget} unit="pts" />
+            <StatChip compact className="w-full" icon="IconFlask" label="Science target" value={s.scienceTarget} unit="pts" />
           </div>
           {s.bonusObjectives.length > 0 && (
-            <ul className="mt-4 flex flex-col gap-1 text-sm">
+            <ul className="mt-2 flex flex-col gap-0.5 text-sm">
               {s.bonusObjectives.map((b) => (
                 <li key={b.id} className="flex items-center gap-2 text-muted">
                   <Icon name="IconCircleCheck" size={16} className="text-success" />

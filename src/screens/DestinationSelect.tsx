@@ -30,7 +30,7 @@ export default function DestinationSelect() {
       nextDisabled={!selected}
       nextHint={selected ? undefined : 'Pick a destination to continue.'}
     >
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-4">
         {destinations.map((d) => (
           <DestinationCard
             key={d.id}
