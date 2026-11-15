@@ -39,7 +39,8 @@ export function MenuRocket() {
   }, [])
 
   const bgScale = Math.max(box.w / BG_W, box.h / BG_H)
-  const scale = Math.max(1, Math.floor(bgScale))
+  // Whole-number scale, rounded up so the rocket matches the size of the pad and gantry.
+  const scale = Math.max(1, Math.ceil(bgScale - 0.01))
   const baseX = box.w - BG_W * bgScale + PAD.x * bgScale
   const baseY = (box.h - BG_H * bgScale) / 2 + PAD.y * bgScale
 
