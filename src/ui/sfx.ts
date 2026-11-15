@@ -36,14 +36,22 @@ export const SOUND_IDS = [
   'signal-beep',
   'valve-hiss',
   'alert-beep',
+  'ui-blip',
+  'announce',
+  'recycler',
+  'creak',
+  'dust-tick',
+  'footstep-metal',
+  'ping',
 ] as const
 export type SoundId = (typeof SOUND_IDS)[number]
 
 const SOUNDS: Record<SoundId, number[]> = {
   click: [0.35, 0, 520, 0, 0.012, 0.04, 1, 1.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2400],
   hover: [0.1, 0, 760, 0, 0.006, 0.025, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2000],
-  door: [0.3, 0, 180, 0.08, 0.12, 0.32, 4, 1, 3, 0, 0, 0, 0, 0.6, 0, 0, 0, 0.7, 0.05, 0, 900],
-  footstep: [0.09, 0, 90, 0, 0.012, 0.045, 4, 1, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 1, 0, 0, 600],
+  // Doorway: a short pneumatic hiss.
+  door: [0.16, 0, 900, 0.01, 0.08, 0.22, 4, 1, -4, 0, 0, 0, 0, 2, 0, 0, 0, 0.6, 0, 0, 1600],
+  footstep: [0.06, 0, 90, 0, 0.012, 0.045, 4, 1, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 1, 0, 0, 600],
   'popup-open': [
     0.28, 0, 330, 0.01, 0.05, 0.1, 1, 1, 0, 0, 165, 0.05, 0, 0, 0, 0, 0, 1, 0, 0, 2200,
   ],
@@ -79,10 +87,27 @@ const SOUNDS: Record<SoundId, number[]> = {
   'valve-hiss': [0.07, 0, 400, 0.02, 0.1, 0.1, 4, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0.5, 0, 0, 1200],
   // Pending problem: a soft two-tone beep every few seconds (alert layer).
   'alert-beep': [0.12, 0, 740, 0, 0.05, 0.06, 0, 1, 0, 0, -120, 0.06, 0, 0, 0, 0, 0, 1, 0, 0, 2400],
+  // Ambience details (very quiet): console blip, far-off chime, recycler whoosh, metal creak,
+  // a dust tick on the window. Habitat footsteps ring a little metallic. Notification ping.
+  'ui-blip': [0.05, 0, 1200, 0, 0.01, 0.03, 0, 1, 0, 0, 300, 0.02, 0, 0, 0, 0, 0, 1, 0, 0, 2600],
+  announce: [0.05, 0, 392, 0.05, 0.25, 0.6, 0, 1, 0, 0, 196, 0.3, 0, 0, 0, 0, 0.2, 0.6, 0, 0, 1600],
+  recycler: [0.06, 0, 220, 0.4, 0.6, 0.8, 4, 1, 0, 0, 0, 0, 0, 0.8, 0, 0, 0, 0.5, 0, 0.2, 700],
+  creak: [0.05, 0, 90, 0.05, 0.12, 0.2, 2, 2, -0.5, 0, 0, 0, 0, 0.3, 0, 0, 0, 0.6, 0, 0, 500],
+  'dust-tick': [0.03, 0, 3000, 0, 0.002, 0.01, 4, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2400],
+  'footstep-metal': [
+    0.08, 0, 180, 0, 0.012, 0.06, 1, 1, 0, 0, 0, 0, 0, 0.2, 0, 0, 0, 0.8, 0, 0, 1500,
+  ],
+  ping: [0.12, 0, 1046, 0, 0.03, 0.18, 0, 1, 0, 0, 523, 0.03, 0, 0, 0, 0, 0, 1, 0, 0, 3000],
 }
 
 /** How much a sound's pitch may wander per play (0 = never); the rest play the same each time. */
-const PITCH_JITTER: Partial<Record<SoundId, number>> = { footstep: 0.12, 'nova-beep': 0.25 }
+const PITCH_JITTER: Partial<Record<SoundId, number>> = {
+  footstep: 0.12,
+  'footstep-metal': 0.12,
+  'nova-beep': 0.25,
+  'ui-blip': 0.3,
+  creak: 0.2,
+}
 /** The alarm repeats this many times, this far apart (ms). */
 const ALARM_REPEATS = 3
 const ALARM_GAP_MS = 260

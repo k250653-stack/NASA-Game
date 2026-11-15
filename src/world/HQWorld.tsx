@@ -18,6 +18,7 @@ import { gateLockReason } from './steps'
 import { useReleaseFocus } from './useReleaseFocus'
 import { WorldCanvas } from './WorldCanvas'
 import { closePopup, openStep, savePlayerPos, useWorld } from './worldStore'
+import { setAmbience, setStationHum } from '@/ui/ambience'
 
 /** A finished mission waits at the Briefing meeting table until the player redesigns. */
 function debriefReady(): boolean {
@@ -87,6 +88,14 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
   useReleaseFocus(busy)
   const tutorial = useHqTutorial(locks, busy)
   const live = useRef({ paused: false, locks, marker: null as string | null })
+  // HQ room tone, hum and console blips while the HQ is on screen.
+  useEffect(() => {
+    void setAmbience('hq')
+    return () => {
+      void setAmbience(null)
+      setStationHum(0)
+    }
+  }, [])
   useEffect(() => {
     live.current = { paused: busy, locks, marker: tutorial.marker }
   }, [busy, locks, tutorial.marker])

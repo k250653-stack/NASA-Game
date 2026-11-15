@@ -6,7 +6,7 @@
  */
 import { Howl } from 'howler'
 import { getAsset, type AudioAssetKind } from './assets'
-import { startDrone, type Drone } from './drone'
+import { startDrone, startPad, type Drone } from './drone'
 import { isSoundId, loadAudio, playSfx } from './sfx'
 
 /** Crossfade between music tracks, seconds. */
@@ -16,6 +16,15 @@ let muted = false
 let musicMuted = false
 let soundVolume = 0.8
 let musicVolume = 0.5
+/** Music level multiplier: lowered while the alert layer plays (duckMusic). */
+let duck = 1
+const DUCK_LEVEL = 0.35
+
+/** The alert layer is on: music drops to DUCK_LEVEL, then comes back. */
+export function duckMusic(on: boolean): void {
+  duck = on ? DUCK_LEVEL : 1
+  playing?.setVolume(musicVolume * duck)
+}
 let unlocked = false
 
 // ---- files ---------------------------------------------------------------------------------
@@ -102,7 +111,11 @@ async function applyMusic(): Promise<void> {
     const zz = await loadAudio()
     if (my !== token || !zz) return
     try {
-      const drone: Drone = startDrone(zz.audioContext, next, musicVolume, FADE_S)
+      // HQ and habitat get the calm pad; other scenes the drone.
+      const drone: Drone =
+        next === 'hq' || next === 'mission'
+          ? startPad(zz.audioContext, musicVolume * duck, FADE_S)
+          : startDrone(zz.audioContext, next, musicVolume * duck, FADE_S)
       playing = { track: next, ...drone }
     } catch {
       playing = null
@@ -154,7 +167,7 @@ export function setSoundVolume(value: number): void {
 
 export function setMusicVolume(value: number): void {
   musicVolume = Math.max(0, Math.min(1, value))
-  playing?.setVolume(musicVolume)
+  playing?.setVolume(musicVolume * duck)
   void applyMusic()
 }
 

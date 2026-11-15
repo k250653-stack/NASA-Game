@@ -15,6 +15,8 @@ interface SettingsState {
   reducedMotion: boolean
   /** NOVA tutorial and lesson pop-ups. null = by difficulty (on for Cadet/Engineer). */
   hints: boolean | null
+  /** 0-1, multiplies sound and music. */
+  masterVolume: number
   /** 0-1 */
   soundVolume: number
   /** 0-1 */
@@ -27,6 +29,7 @@ interface SettingsState {
   setMusicOn: (on: boolean) => void
   setReducedMotion: (on: boolean) => void
   setHints: (on: boolean | null) => void
+  setMasterVolume: (v: number) => void
   setSoundVolume: (v: number) => void
   setMusicVolume: (v: number) => void
   setCrt: (on: boolean) => void
@@ -40,6 +43,7 @@ export const useSettings = create<SettingsState>()(
       musicOn: true,
       reducedMotion: false,
       hints: null,
+      masterVolume: 0.8,
       soundVolume: 0.8,
       musicVolume: 0.5,
       crt: false,
@@ -48,6 +52,7 @@ export const useSettings = create<SettingsState>()(
       setMusicOn: (musicOn) => set({ musicOn }),
       setReducedMotion: (reducedMotion) => set({ reducedMotion }),
       setHints: (hints) => set({ hints }),
+      setMasterVolume: (masterVolume) => set({ masterVolume }),
       setSoundVolume: (soundVolume) => set({ soundVolume }),
       setMusicVolume: (musicVolume) => set({ musicVolume }),
       setCrt: (crt) => set({ crt }),
@@ -61,6 +66,7 @@ export const useSettings = create<SettingsState>()(
         musicOn: s.musicOn,
         reducedMotion: s.reducedMotion,
         hints: s.hints,
+        masterVolume: s.masterVolume,
         soundVolume: s.soundVolume,
         musicVolume: s.musicVolume,
         crt: s.crt,
@@ -74,8 +80,9 @@ export const useSettings = create<SettingsState>()(
 function syncAudio(s: SettingsState): void {
   setMuted(!s.soundOn)
   setMusicMuted(!s.musicOn)
-  setSoundVolume(s.soundVolume ?? 0.8)
-  setMusicVolume(s.musicVolume ?? 0.5)
+  const master = s.masterVolume ?? 0.8
+  setSoundVolume((s.soundVolume ?? 0.8) * master)
+  setMusicVolume((s.musicVolume ?? 0.5) * master)
 }
 syncAudio(useSettings.getState())
 useSettings.subscribe(syncAudio)

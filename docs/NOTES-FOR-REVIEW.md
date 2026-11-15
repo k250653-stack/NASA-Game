@@ -268,3 +268,17 @@ Unsure:
   - The entries are rebuilt from the saved mission state (`problemLog` in `src/world/mission/problems.ts`), so they persist with the mission without a second store.
   - The debrief shows them as "Mission Log".
 - **Unsure:** "who handled it" is read from the log line prefix: You / approved / standing order / not handled by you. Resource changes are the raw engine change records, for example "batteryWh −1,200", not percentages.
+
+### Task 4: soundscape
+Everything is generated (Web Audio + ZzFX), with no files. If an mp3 exists, it still wins.
+- **One manager:** `src/ui/sound.ts` handles effects and music. There's a new **Master volume** setting: master × sound and master × music. The alert layer ducks the music to 35%.
+- **Music:** `startPad` in `src/ui/drone.ts` is a calm pad, three slow chords (Am–F–G) with a soft arpeggio. It plays for the HQ and the habitat. The menu, debrief and tension keep the drone.
+- **Ambient beds (`src/ui/ambience.ts`):** detail timing comes from the seeded generator.
+  - HQ: room tone, computer hum, console blips, and a distant chime every 45–80 s.
+  - Moon: life-support hum, radio static, the recycler whoosh every 18–24 s, and creaks.
+  - Mars: the Moon bed plus wind gusts and dust ticks.
+  - Launch: a rumble that settles into a space drone.
+  - Levels are capped low and follow the sound volume and mute settings.
+- **Positional sound:** stations hum louder as the player gets closer (within 160 px). In the HQ, stepping into a doorway plays a pneumatic hiss. Footsteps ring slightly metallic in the habitat and softer in the HQ. They come faster when sprinting, because the footfall interval follows the speed.
+- **UI:** buttons tick on hover, and toasts ping. Popup open/close, NOVA typing blips and the alert beep already existed.
+- **Unsure:** the levels were set by ear with no audition, since there was no browser this session. Try **Settings → Sound test** (dev builds) and the master slider first.

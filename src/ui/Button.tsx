@@ -61,6 +61,7 @@ export function Button({
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       onClick={handleClick}
+      onMouseEnter={silent || disabled ? undefined : () => playSound('hover')}
       className={`${BASE} ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...rest}
     >

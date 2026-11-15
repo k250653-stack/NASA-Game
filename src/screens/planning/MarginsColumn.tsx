@@ -50,7 +50,9 @@ export function MarginsColumn({
                 value={g.value}
                 max={g.max}
                 unit={g.unit === '$M' ? undefined : g.unit}
-                format={g.unit === '$M' ? compactMoneyM : g.unit === 'GB/day' ? undefined : compactNumber}
+                format={
+                  g.unit === '$M' ? compactMoneyM : g.unit === 'GB/day' ? undefined : compactNumber
+                }
                 status={g.status}
                 decimals={g.unit === 'GB/day' ? 1 : 0}
               />
@@ -78,7 +80,9 @@ export function MarginsColumn({
                       Apply
                     </Button>
                   ) : (
-                    <p className="mt-0.5 text-xs text-subtle">Ask {ownerName(h.owner)} in a trade.</p>
+                    <p className="mt-0.5 text-xs text-subtle">
+                      Ask {ownerName(h.owner)} in a trade.
+                    </p>
                   )}
                 </li>
               ))}

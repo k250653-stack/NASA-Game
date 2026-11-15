@@ -35,12 +35,20 @@ function Slider({
 
 /** Sound and music volume. */
 export function VolumeSliders() {
+  const masterVolume = useSettings((s) => s.masterVolume)
+  const setMasterVolume = useSettings((s) => s.setMasterVolume)
   const soundVolume = useSettings((s) => s.soundVolume)
   const musicVolume = useSettings((s) => s.musicVolume)
   const setSoundVolume = useSettings((s) => s.setSoundVolume)
   const setMusicVolume = useSettings((s) => s.setMusicVolume)
   return (
     <>
+      <Slider
+        id="master-volume"
+        label="Master volume"
+        value={masterVolume}
+        onChange={setMasterVolume}
+      />
       <Slider
         id="sound-volume"
         label="Sound volume"

@@ -98,7 +98,9 @@ export function PartsCatalog({ design, seat, content, ownerName, onEdit }: Parts
       tabs={ordered.map((r) => {
         const mine = r.id === seat
         const list = content.parts.filter((p) => r.owns.categories.includes(p.category))
-        const owner = ownerName(ownerOfCategory(list[0]?.category ?? r.owns.categories[0]!, content))
+        const owner = ownerName(
+          ownerOfCategory(list[0]?.category ?? r.owns.categories[0]!, content),
+        )
         return {
           id: r.id,
           label: mine ? `${TAB_NAME[r.id as Role]} ★` : TAB_NAME[r.id as Role],

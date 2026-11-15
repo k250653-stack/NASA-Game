@@ -9,6 +9,7 @@
 import Phaser from 'phaser'
 import { getAsset } from '@/ui/assets'
 import { reportLoading } from '@/ui/loadingStore'
+import { setStationHum } from '@/ui/ambience'
 import { playSound } from '@/ui/sound'
 import {
   animKey,
@@ -47,6 +48,8 @@ import { PlayerActor } from './player/PlayerActor'
 
 /** Camera smoothing time constant (re-centres on a new room in ~0.6 s). */
 const CAMERA_TAU_MS = 200
+/** Station hum is heard within this distance (world px). */
+const HUM_RANGE = 160
 /** How much the camera follows the player inside a room (0 = room centre, 1 = player). */
 const ROOM_FOLLOW = 0.55
 /** World area the zoom aims to show; the zoom is a whole number when the screen allows. */
@@ -112,6 +115,7 @@ export class HQScene extends Phaser.Scene {
   private walkable: Polygon[] = []
   /** Open doorway areas (blockers are ignored inside them). */
   private openings: Polygon[] = []
+  private wasInDoor = false
   /** Last spot the feet fitted: the player snaps back here if they ever end up off the floor. */
   private lastValid: Point = [0, 0]
   private locked = new Map<string, boolean>()
@@ -219,6 +223,7 @@ export class HQScene extends Phaser.Scene {
       () => playSound('footstep'),
     )
     this.keepOnFloor()
+    this.updateSoundscape()
     this.player.setDepth(footDepth(this.player.y))
     this.room = this.roomAt([this.player.x, this.player.y]) ?? this.room
     this.updateTarget()
@@ -393,6 +398,16 @@ export class HQScene extends Phaser.Scene {
     kb.enabled = true
     kb.manager.enabled = true
     kb.enableGlobalCapture()
+  }
+
+  /** Door hiss when stepping into a doorway; open stations hum louder up close. */
+  private updateSoundscape() {
+    const p: Point = [this.player.x, this.player.y]
+    const inDoor = this.openings.some((o) => pointInPolygon(p, o))
+    if (inDoor && !this.wasInDoor) playSound('door')
+    this.wasInDoor = inDoor
+    const near = Math.min(Infinity, ...this.openStations().map((s) => distanceToPolygon(p, s.area)))
+    setStationHum(1 - near / HUM_RANGE)
   }
 
   /** Unstuck safety: remember the last fitting spot, snap back to it if the feet are ever off. */

@@ -7,7 +7,7 @@ import { getContent } from '@/content/load'
 import { createRng } from '@/engine/rng'
 import { useSettings } from './settingsStore'
 import { loadAudio } from './sfx'
-import { playSound } from './sound'
+import { duckMusic, playSound } from './sound'
 
 export type AlertCategory = 'power' | 'comms' | 'crew' | 'environment'
 
@@ -38,7 +38,7 @@ export function onAlertChange(fn: (on: boolean) => void): () => void {
 
 function level(): number {
   const s = useSettings.getState()
-  return s.soundOn ? getContent().constants.alert.level * s.soundVolume : 0
+  return s.soundOn ? getContent().constants.alert.level * s.soundVolume * (s.masterVolume ?? 1) : 0
 }
 
 function build(ctx: AudioContext, category: AlertCategory): Layer {
@@ -149,6 +149,7 @@ export async function setAlert(category: AlertCategory | null): Promise<void> {
   layer?.stop(fade)
   layer = null
   listeners.forEach((l) => l(category !== null))
+  duckMusic(category !== null)
   if (!category) return
   const zz = await loadAudio()
   if (my !== token || !zz || wanted !== category) return

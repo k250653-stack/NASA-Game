@@ -8,6 +8,7 @@ import { runKey, TASK_LABEL, useCrewTask, useTaskStats } from './mission/crewTas
 import { ProblemButtons, ProblemLogPanel } from './mission/ProblemLog'
 import { problemLog, reopenProblem, useProblems } from './mission/problems'
 import { alertCategory, setAlert } from '@/ui/alertLayer'
+import { setAmbience, setStationHum } from '@/ui/ambience'
 import { Button } from '@/ui/Button'
 import { Modal } from '@/ui/Modal'
 import { TaskList, TaskPanel } from './mission/TaskPanel'
@@ -140,6 +141,15 @@ export default function HabitatWorld() {
   const room = getRoom(p.destination?.id === 'mars' ? 'mars-habitat' : 'moon-habitat')
   const stationLabels = Object.fromEntries(room.workstations.map((w) => [w.kind, w.label]))
   const stationLabel = (k: string) => stationLabels[k] ?? k
+  // Habitat bed: life-support hum, recycler, creaks (Mars adds wind and dust ticks).
+  const bedKind = p.destination?.id === 'mars' ? 'mars' : 'moon'
+  useEffect(() => {
+    void setAmbience(bedKind)
+    return () => {
+      void setAmbience(null)
+      setStationHum(0)
+    }
+  }, [bedKind])
   // Alert layer: plays while anything is pending, in the first problem's category.
   const firstPending = m.run?.pendingEvents[0]?.eventId ?? null
   useEffect(() => {

@@ -5,6 +5,7 @@
  */
 import Phaser from 'phaser'
 import { getAsset } from '@/ui/assets'
+import { setStationHum } from '@/ui/ambience'
 import { playSound } from '@/ui/sound'
 import { reportLoading } from '@/ui/loadingStore'
 import {
@@ -35,6 +36,8 @@ const IDLE_EVERY_MS = 3500
 const IDLE_TURN_MS = 1800
 const FACINGS: readonly Facing[] = ['S', 'SE', 'E', 'NE', 'N', 'NW', 'W', 'SW']
 const NPC_SPEED = 110
+/** Station hum is heard within this distance (room px). */
+const HUM_RANGE = 160
 const CAMERA_TAU_MS = 200
 const ROOM_FOLLOW = 0.3
 const VIEW_W = 1270
@@ -197,9 +200,16 @@ export class HabitatScene extends Phaser.Scene {
       deltaMs,
       input,
       (mx, my) => this.move(mx, my),
-      () => playSound('footstep'),
+      () => playSound('footstep-metal'),
     )
     this.keepOnFloor()
+    // Stations hum louder as the player gets close.
+    const near = Math.min(
+      ...this.room.workstations.map((w) =>
+        distanceToPolygon([this.player.x, this.player.y], w.area),
+      ),
+    )
+    setStationHum(1 - near / HUM_RANGE)
     const alerted = this.cb().crewAlerts?.() ?? []
     for (const npc of this.npcs.values()) {
       npc.bubble

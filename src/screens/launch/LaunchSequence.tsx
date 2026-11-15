@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { createRng } from '@/engine/rng'
 import type { Destination, Rocket } from '@/schemas'
 import { Button } from '@/ui/Button'
+import { setAmbience } from '@/ui/ambience'
 import { shakeScreen } from '@/ui/feel'
 import { playSound } from '@/ui/sound'
 import { RocketArt } from '@/ui/RocketArt'
@@ -76,6 +77,7 @@ export function LaunchSequence({ rocket, destination, onDone }: LaunchSequencePr
     timers.push(
       setTimeout(() => {
         setStage('liftoff')
+        void setAmbience('launch')
         playSound('launch')
         shakeScreen()
       }, liftoffAt),

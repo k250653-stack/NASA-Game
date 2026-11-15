@@ -36,7 +36,13 @@ export function ScenarioCard({ scenario: s, difficulty, selected, onSelect }: Sc
           <h2 className="font-display text-xl font-bold text-primary">{s.name}</h2>
           <p className="mt-1 text-sm text-muted">{s.objective}</p>
           <div className="mt-2 grid grid-cols-4 gap-1.5">
-            <StatChip compact className="w-full" label="Duration" value={s.durationDays} unit="days" />
+            <StatChip
+              compact
+              className="w-full"
+              label="Duration"
+              value={s.durationDays}
+              unit="days"
+            />
             <StatChip compact className="w-full" icon="IconUsers" label="Crew" value={s.crewSize} />
             <StatChip
               compact
@@ -47,7 +53,14 @@ export function ScenarioCard({ scenario: s, difficulty, selected, onSelect }: Sc
               unit="M"
               tone="accent"
             />
-            <StatChip compact className="w-full" icon="IconFlask" label="Science target" value={s.scienceTarget} unit="pts" />
+            <StatChip
+              compact
+              className="w-full"
+              icon="IconFlask"
+              label="Science target"
+              value={s.scienceTarget}
+              unit="pts"
+            />
           </div>
           {s.bonusObjectives.length > 0 && (
             <ul className="mt-2 flex flex-col gap-0.5 text-sm">

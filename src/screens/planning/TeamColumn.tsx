@@ -40,7 +40,8 @@ export function TeamColumn({
   playerUsage,
   onOpen,
 }: TeamColumnProps) {
-  const card = 'relative flex min-w-0 flex-col items-center gap-1 border-2 bg-panel p-1.5 text-center'
+  const card =
+    'relative flex min-w-0 flex-col items-center gap-1 border-2 bg-panel p-1.5 text-center'
   return (
     <ul className="grid min-w-0 shrink-0 grid-cols-4 gap-2" aria-label="Mission team">
       <li
@@ -68,7 +69,9 @@ export function TeamColumn({
               label={m.name}
               className={`size-14 shrink-0 border-2 ${c.border}`}
             />
-            <p className="label-caps w-full truncate text-xs text-primary">{m.name.split(' ')[0]}</p>
+            <p className="label-caps w-full truncate text-xs text-primary">
+              {m.name.split(' ')[0]}
+            </p>
             <p className={`label-caps w-full truncate text-xs ${c.text}`}>{SHORT_ROLE[m.role]}</p>
             {onOpen && (
               <button

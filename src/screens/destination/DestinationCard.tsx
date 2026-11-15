@@ -43,10 +43,34 @@ export function DestinationCard({ destination: d, selected, onSelect }: Destinat
         </div>
         <p className="mt-1 text-sm text-muted">{d.pitch}</p>
         <div className="mt-2 grid grid-cols-3 gap-1">
-          <StatChip compact className="w-full" icon="IconRocket" label="Transit" value={facts.transit} />
-          <StatChip compact className="w-full" icon="IconAntenna" label="Signal delay" value={facts.signalDelay} />
-          <StatChip compact className="w-full" icon="IconSolarPanel" label="Avg sunlight" value={facts.sunlight} />
-          <StatChip compact className="w-full" icon="IconWeight" label="Gravity" value={facts.gravity} />
+          <StatChip
+            compact
+            className="w-full"
+            icon="IconRocket"
+            label="Transit"
+            value={facts.transit}
+          />
+          <StatChip
+            compact
+            className="w-full"
+            icon="IconAntenna"
+            label="Signal delay"
+            value={facts.signalDelay}
+          />
+          <StatChip
+            compact
+            className="w-full"
+            icon="IconSolarPanel"
+            label="Avg sunlight"
+            value={facts.sunlight}
+          />
+          <StatChip
+            compact
+            className="w-full"
+            icon="IconWeight"
+            label="Gravity"
+            value={facts.gravity}
+          />
           <StatChip
             compact
             className="w-full"
@@ -55,7 +79,13 @@ export function DestinationCard({ destination: d, selected, onSelect }: Destinat
             value={facts.resupply}
             tone={d.resupplyPossible ? 'success' : 'alert'}
           />
-          <StatChip compact className="w-full" label="Mission length" value={facts.missionLength} tone="accent" />
+          <StatChip
+            compact
+            className="w-full"
+            label="Mission length"
+            value={facts.missionLength}
+            tone="accent"
+          />
         </div>
       </div>
     </Card>

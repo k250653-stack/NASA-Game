@@ -3,6 +3,7 @@
  * Read with selectors only: useUi((s) => s.toasts).
  */
 import { create } from 'zustand'
+import { playSound } from './sound'
 
 export type ToastKind = 'info' | 'warning' | 'danger' | 'success'
 
@@ -39,6 +40,7 @@ export const useUi = create<UiState>()((set) => ({
   setFocusPanel: (focusPanel) => set({ focusPanel }),
   pushToast: (toast) => {
     const id = nextToastId++
+    playSound('ping')
     set((s) => ({ toasts: [...s.toasts, { ...toast, id }].slice(-MAX_TOASTS) }))
     return id
   },

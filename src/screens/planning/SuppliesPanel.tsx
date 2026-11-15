@@ -58,7 +58,9 @@ export function SuppliesPanel({ design, seat, content, ownerName, onEdit }: Supp
         return (
           <label key={row.key} className="flex min-w-0 flex-col gap-1">
             <span className="flex min-w-0 items-baseline justify-between gap-2 text-sm">
-              <span className={`truncate ${limiting ? 'font-semibold text-alert' : 'text-primary'}`}>
+              <span
+                className={`truncate ${limiting ? 'font-semibold text-alert' : 'text-primary'}`}
+              >
                 {row.label}
                 {limiting && ' · first'}
               </span>
