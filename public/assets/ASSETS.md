@@ -7,21 +7,21 @@ Rules: WebP for images, MP3 for audio, each image **< 300 KB**, whole folder **<
 Record author, source and license for every file in the `License` column here **and** in
 `/CREDITS.md` before committing it.
 
-## Portraits — `portraits/` — 512 × 512 WebP
+## Portraits — `portraits/` — 128 × 128 PNG (transparent background)
 
 | File | For | License |
 | --- | --- | --- |
-| `crew-ayesha.webp` | Ayesha Khan (science) | |
-| `crew-maya.webp` | Maya Torres (science) | |
-| `crew-bilal.webp` | Bilal Ahmed (power_life) | |
-| `crew-lin.webp` | Lin Wei (comms_nav) | |
-| `crew-sana.webp` | Sana Rahimi (power_life) | |
-| `crew-kofi.webp` | Kofi Mensah (launch_budget) | |
-| `crew-omar.webp` | Omar Haddad (comms_nav) | |
-| `crew-zara.webp` | Zara Okonkwo (launch_budget) | |
-| `crew-player.webp` | The player (every seat) | |
+| `crew-ayesha.png` | Ayesha Khan (science) | |
+| `crew-maya.png` | Maya Torres (science) | |
+| `crew-bilal.png` | Bilal Ahmed (power_life) | |
+| `crew-lin.png` | Lin Wei (comms_nav) | |
+| `crew-sana.png` | Sana Rahimi (power_life) | |
+| `crew-kofi.png` | Kofi Mensah (launch_budget) | |
+| `crew-omar.png` | Omar Haddad (comms_nav) | |
+| `crew-zara.png` | Zara Okonkwo (launch_budget) | |
+| `crew-player.png` | The player (every seat) | |
 
-Convention: `crew-<crew id>.webp`, matching the `portrait` field in `src/content/crew.json`.
+Convention: `crew-<crew id>.png`, matching the `portrait` field in `src/content/crew.json`.
 
 ## Backgrounds — `backgrounds/` — 1920 × 1080 WebP
 
@@ -67,3 +67,11 @@ Optional. Not referenced by the sample content yet.
 | File | For | License |
 | ---- | --- | ------- |
 |      |     |         |
+
+## Generated art (PNG)
+
+- `sprites/nova.png` 96 × 96, `sprites/rocket-light|medium|heavy.png` height 192
+- `sprites/base-moon.png`, `sprites/base-mars.png` 480 × 270 (planning board; slots in `src/content/baseSlots.json`)
+- `events/event-<event id>.png` 480 × 240 (event popup)
+- `backgrounds/outcome-success|partial|failed.png` 480 × 240 (end card, debrief)
+- `/icon.png` 512 × 512, `/favicon.png` 32 × 32

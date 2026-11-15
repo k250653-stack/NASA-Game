@@ -24,8 +24,8 @@ export function AboutModal({ open, onClose }: { open: boolean; onClose: () => vo
         <Section title="The challenge">
           <p>
             Made for the NASA Space Apps Challenge 2026, &ldquo;Space Mission Design Game&rdquo;:
-            build a game where players design a space mission and learn that every decision
-            affects the other systems.
+            build a game where players design a space mission and learn that every decision affects
+            the other systems.
           </p>
           <p>
             In Mission Control you plan a crewed trip to the Moon or Mars, share mass, power and
@@ -35,9 +35,9 @@ export function AboutModal({ open, onClose }: { open: boolean; onClose: () => vo
         </Section>
         <Section title="AI disclosure">
           <p>
-            AI coding assistants helped write the code for this project. The game itself uses no
-            AI while you play: the crew and NOVA follow fixed rules, and every number comes from
-            the game&rsquo;s data files.
+            AI coding assistants helped write the code for this project. The game itself uses no AI
+            while you play: the crew and NOVA follow fixed rules, and every number comes from the
+            game&rsquo;s data files.
           </p>
           <p>Any AI-generated image in the game carries a visible watermark.</p>
         </Section>

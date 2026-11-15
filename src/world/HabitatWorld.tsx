@@ -6,6 +6,7 @@ import { NovaCompanion } from '@/nova/NovaCompanion'
 import { skipTutorial, useNova } from '@/nova/novaStore'
 import { useHabitatTutorial } from '@/nova/tutorial'
 import { emitConcept } from '@/store/concepts'
+import { computeScore } from '@/engine/score'
 import { returnToEarth } from './debrief/debrief'
 import { HabitatCanvas } from './HabitatCanvas'
 import type { HabitatCallbacks, HabitatScene, HabitatTarget, NpcSpec } from './HabitatScene'
@@ -234,7 +235,12 @@ export default function HabitatWorld() {
           onClose={() => setPopup(null)}
         />
       )}
-      {ending && <MissionEndCard run={run} />}
+      {ending && (
+        <MissionEndCard
+          run={run}
+          outcome={computeScore(run, p.design, p.content, { tradesCount: trades }).outcome}
+        />
+      )}
       <PauseMenu
         state={menu}
         onChange={setMenu}

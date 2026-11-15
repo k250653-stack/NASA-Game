@@ -53,7 +53,7 @@ export function PollPanel({ lines, call, crew, callsign }: PollPanelProps) {
                       kind="portraits"
                       id={member?.portrait ?? 'crew-player'}
                       label={member?.name ?? (callsign || 'You')}
-                      className="block size-20"
+                      className="block size-16"
                     />
                   </span>
                   <span className="label-caps truncate text-sm text-primary">

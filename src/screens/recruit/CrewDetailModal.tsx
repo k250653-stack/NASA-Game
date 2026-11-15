@@ -51,7 +51,7 @@ export function CrewDetailPanel({
           kind="portraits"
           id={member.portrait}
           label={member.name}
-          className="size-24 shrink-0 border-2 border-border-strong"
+          className="size-32 shrink-0 border-2 border-border-strong"
         />
         <div className="min-w-0 space-y-1.5">
           <p className="label-caps text-sm text-muted">{ROLE_LABEL[member.role]}</p>

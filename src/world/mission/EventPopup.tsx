@@ -26,13 +26,13 @@ export function EventPopup({ event, run, design, content, onChoose }: EventPopup
   return (
     <PopupPanel section="Event" title={event.title}>
       <div className="mx-auto max-w-4xl px-6 py-6" data-testid="event-popup" data-event={event.id}>
+        <AssetImage
+          kind="events"
+          id={`event-${event.id}`}
+          label={event.title}
+          className="mx-auto mb-4 block h-[240px] w-[480px] border-2 border-border-strong"
+        />
         <div className="flex gap-6">
-          <AssetImage
-            kind="events"
-            id={`event-${event.id}`}
-            label={event.title}
-            className="size-40 shrink-0 border-2 border-border-strong [image-rendering:pixelated]"
-          />
           <div className="min-w-0">
             <p className="font-title text-xs tracking-widest text-alert uppercase">
               {ROLE_LABEL[event.role]} · {event.urgency}

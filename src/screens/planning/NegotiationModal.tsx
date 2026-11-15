@@ -117,7 +117,7 @@ function NegotiationBody({
           id={expression ? `${teammate.portrait}-${expression}` : teammate.portrait}
           fallbackId={teammate.portrait}
           label={teammate.name}
-          className="size-40 rounded-lg"
+          className="size-32"
         />
         <p className="text-xs text-muted">{ROLE_LABEL[teammate.role]}</p>
         <PrioritiesBar priorities={teammate.priorities} />

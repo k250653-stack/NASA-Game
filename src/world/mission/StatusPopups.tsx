@@ -7,7 +7,6 @@ import { PopupPanel } from '../PopupPanel'
 import { StationShell } from './StationShell'
 import { dailyUse, type Gauge } from './missionRun'
 
-
 function Bar({ label, value }: { label: string; value: number }) {
   const v = Math.max(0, Math.min(100, Math.round(value)))
   const tone = v <= 25 ? 'bg-danger' : v <= 50 ? 'bg-alert' : 'bg-accent'

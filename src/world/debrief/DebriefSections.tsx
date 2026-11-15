@@ -83,7 +83,7 @@ export function CrewReactions({
               kind="portraits"
               id={m.portrait}
               label={m.name}
-              className="size-12 shrink-0"
+              className="size-16 shrink-0"
             />
             <div className="min-w-0">
               <p className="font-title tracking-wide text-primary uppercase">

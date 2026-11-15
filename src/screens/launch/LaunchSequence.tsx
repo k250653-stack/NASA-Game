@@ -5,6 +5,7 @@ import type { Destination, Rocket } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
 import { Button } from '@/ui/Button'
 import { playSound } from '@/ui/sound'
+import { rocketSprite } from '@/ui/rocketSprite'
 import { TransitMap } from './TransitMap'
 
 /** Timing of the sequence, in ms. Kept short: it plays every launch. */
@@ -21,12 +22,6 @@ interface LaunchSequenceProps {
   rocket: Rocket
   destination: Destination
   onDone: () => void
-}
-
-/** "rocket-light" / "rocket-medium" / "rocket-heavy" sprite for a launcher (super heavy uses heavy). */
-function spriteFor(rocket: Rocket): string {
-  const size = ['light', 'medium', 'heavy'].find((s) => rocket.id.startsWith(s)) ?? 'heavy'
-  return `rocket-${size}`
 }
 
 /** Countdown, lift-off, stage separation, then the transit map. Skippable; reduced motion skips. */
@@ -139,9 +134,9 @@ export function LaunchSequence({ rocket, destination, onDone }: LaunchSequencePr
           >
             <AssetImage
               kind="sprites"
-              id={spriteFor(rocket)}
+              id={rocketSprite(rocket)}
               label={rocket.name}
-              className="h-56 w-24 object-contain"
+              className="h-48 w-auto"
             />
             {hasStages && (
               <motion.div

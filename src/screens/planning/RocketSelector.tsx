@@ -1,4 +1,6 @@
 import { canEdit, type DesignChange } from '@/engine/planning'
+import { AssetImage } from '@/ui/AssetImage'
+import { rocketSprite } from '@/ui/rocketSprite'
 import { rocketFits } from '@/engine/planningOptions'
 import type { Design, EngineContent } from '@/engine/types'
 import type { RoleChoice } from '@/schemas'
@@ -40,7 +42,15 @@ export function RocketSelector({ design, seat, content, ownerName, onEdit }: Roc
               onSelect={() => onEdit({ kind: 'rocket', rocketId: f.rocketId })}
               label={rocket.name}
             >
-              <p className="font-display text-sm font-semibold text-primary">{rocket.name}</p>
+              <div className="flex items-end gap-3">
+                <AssetImage
+                  kind="sprites"
+                  id={rocketSprite(rocket)}
+                  label={rocket.name}
+                  className="h-24 w-auto shrink-0"
+                />
+                <p className="label-caps text-sm text-primary">{rocket.name}</p>
+              </div>
               <div className="mt-2 flex flex-col gap-1.5">
                 <StatChip icon="IconCoin" label="Cost" value={`$${rocket.costM}`} unit="M" />
                 <StatChip label="Reliability" value={`${Math.round(rocket.reliability * 100)}%`} />

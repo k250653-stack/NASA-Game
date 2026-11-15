@@ -10,8 +10,8 @@ export type AudioAssetKind = (typeof AUDIO_KINDS)[number]
 export type AssetKind = ImageAssetKind | AudioAssetKind
 
 const EXTENSION: Record<AssetKind, string> = {
-  portraits: 'webp',
-  sprites: 'webp',
+  portraits: 'png',
+  sprites: 'png',
   backgrounds: 'webp',
   events: 'png',
   sounds: 'mp3',

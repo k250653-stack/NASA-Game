@@ -27,12 +27,12 @@ export function CrewCard({ member, selected, onSelect, disabled, recruited }: Cr
       label={onSelect ? `${member.name}, ${ROLE_LABEL[member.role]}` : undefined}
     >
       <div className={`border-t-4 ${role.topBorder}`}>
-        <div className="relative">
+        <div className="relative bg-surface py-2">
           <AssetImage
             kind="portraits"
             id={member.portrait}
             label={member.name}
-            className="aspect-square w-full object-cover [image-rendering:pixelated]"
+            className="mx-auto block size-32"
           />
           {recruited && (
             <span className="label-caps absolute top-1.5 left-1.5 bg-success px-1.5 text-xs text-bg">

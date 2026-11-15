@@ -62,7 +62,7 @@ export function TeamSidebar(p: TeamSidebarProps) {
                     kind="portraits"
                     id={seat.member.portrait}
                     label={seat.member.name}
-                    className="size-7 rounded-sm"
+                    className="size-8"
                   />
                   <span className="text-sm text-primary">{seat.member.name}</span>
                   <span className="ml-auto text-xs text-muted">{seat.label}</span>

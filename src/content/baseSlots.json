@@ -1,5 +1,5 @@
 {
-  "_note": "Placeholder slot positions (percent of the base image). Replace with the artist coordinates. Extra parts beyond the slots of a category are listed but not drawn.",
+  "_note": "Slot positions in percent of the 480x270 base picture (public/assets/sprites/base-<destination>.png); each slot sits on its object in the picture. Extra parts beyond the slots of a category are listed but not drawn.",
   "items": [
     {
       "id": "base-moon",
@@ -8,128 +8,128 @@
         {
           "slotId": "habitat-1",
           "category": "habitat",
-          "x": 48,
-          "y": 52
+          "x": 47,
+          "y": 40
         },
         {
           "slotId": "habitat-2",
           "category": "habitat",
-          "x": 62,
-          "y": 50
+          "x": 52,
+          "y": 20
         },
         {
           "slotId": "life-support-1",
           "category": "life_support",
           "x": 40,
-          "y": 60
+          "y": 26
         },
         {
           "slotId": "life-support-2",
           "category": "life_support",
-          "x": 34,
-          "y": 64
+          "x": 46,
+          "y": 23
         },
         {
           "slotId": "power-1",
           "category": "power",
-          "x": 18,
-          "y": 30
-        },
-        {
-          "slotId": "power-2",
-          "category": "power",
-          "x": 28,
-          "y": 26
-        },
-        {
-          "slotId": "power-3",
-          "category": "power",
-          "x": 38,
-          "y": 24
-        },
-        {
-          "slotId": "battery-1",
-          "category": "battery",
           "x": 24,
           "y": 50
         },
         {
+          "slotId": "power-2",
+          "category": "power",
+          "x": 30,
+          "y": 42
+        },
+        {
+          "slotId": "power-3",
+          "category": "power",
+          "x": 33,
+          "y": 30
+        },
+        {
+          "slotId": "battery-1",
+          "category": "battery",
+          "x": 34,
+          "y": 58
+        },
+        {
           "slotId": "battery-2",
           "category": "battery",
-          "x": 18,
-          "y": 56
+          "x": 26,
+          "y": 62
         },
         {
           "slotId": "battery-3",
           "category": "battery",
-          "x": 12,
-          "y": 62
+          "x": 18,
+          "y": 52
         },
         {
           "slotId": "comms-1",
           "category": "comms",
-          "x": 72,
-          "y": 22
+          "x": 62,
+          "y": 13
         },
         {
           "slotId": "comms-2",
           "category": "comms",
-          "x": 80,
+          "x": 62,
           "y": 28
         },
         {
           "slotId": "instrument-1",
           "category": "instrument",
-          "x": 70,
-          "y": 66
+          "x": 72,
+          "y": 38
         },
         {
           "slotId": "instrument-2",
           "category": "instrument",
-          "x": 78,
-          "y": 70
+          "x": 69,
+          "y": 48
         },
         {
           "slotId": "instrument-3",
           "category": "instrument",
-          "x": 86,
-          "y": 64
+          "x": 76,
+          "y": 52
         },
         {
           "slotId": "rover-1",
           "category": "rover",
-          "x": 84,
-          "y": 82
+          "x": 57,
+          "y": 64
         },
         {
           "slotId": "rover-2",
           "category": "rover",
-          "x": 70,
-          "y": 84
+          "x": 66,
+          "y": 68
         },
         {
           "slotId": "suit-1",
           "category": "suit",
-          "x": 56,
-          "y": 70
+          "x": 53,
+          "y": 51
         },
         {
           "slotId": "suit-2",
           "category": "suit",
-          "x": 64,
-          "y": 72
+          "x": 59,
+          "y": 47
         },
         {
           "slotId": "spares-1",
           "category": "spares",
-          "x": 44,
-          "y": 76
+          "x": 42,
+          "y": 72
         },
         {
           "slotId": "spares-2",
           "category": "spares",
-          "x": 38,
-          "y": 80
+          "x": 48,
+          "y": 73
         }
       ]
     },
@@ -140,128 +140,128 @@
         {
           "slotId": "habitat-1",
           "category": "habitat",
-          "x": 48,
-          "y": 52
+          "x": 47,
+          "y": 40
         },
         {
           "slotId": "habitat-2",
           "category": "habitat",
-          "x": 62,
-          "y": 50
+          "x": 52,
+          "y": 20
         },
         {
           "slotId": "life-support-1",
           "category": "life_support",
           "x": 40,
-          "y": 60
+          "y": 26
         },
         {
           "slotId": "life-support-2",
           "category": "life_support",
-          "x": 34,
-          "y": 64
+          "x": 46,
+          "y": 23
         },
         {
           "slotId": "power-1",
           "category": "power",
-          "x": 18,
-          "y": 30
+          "x": 22,
+          "y": 50
         },
         {
           "slotId": "power-2",
           "category": "power",
           "x": 28,
-          "y": 26
+          "y": 42
         },
         {
           "slotId": "power-3",
           "category": "power",
-          "x": 38,
-          "y": 24
+          "x": 20,
+          "y": 40
         },
         {
           "slotId": "battery-1",
           "category": "battery",
-          "x": 24,
-          "y": 50
+          "x": 34,
+          "y": 58
         },
         {
           "slotId": "battery-2",
           "category": "battery",
-          "x": 18,
-          "y": 56
+          "x": 26,
+          "y": 62
         },
         {
           "slotId": "battery-3",
           "category": "battery",
-          "x": 12,
-          "y": 62
+          "x": 35,
+          "y": 42
         },
         {
           "slotId": "comms-1",
           "category": "comms",
-          "x": 72,
-          "y": 22
+          "x": 62,
+          "y": 13
         },
         {
           "slotId": "comms-2",
           "category": "comms",
-          "x": 80,
+          "x": 62,
           "y": 28
         },
         {
           "slotId": "instrument-1",
           "category": "instrument",
-          "x": 70,
-          "y": 66
+          "x": 72,
+          "y": 38
         },
         {
           "slotId": "instrument-2",
           "category": "instrument",
-          "x": 78,
-          "y": 70
+          "x": 69,
+          "y": 48
         },
         {
           "slotId": "instrument-3",
           "category": "instrument",
-          "x": 86,
-          "y": 64
+          "x": 76,
+          "y": 52
         },
         {
           "slotId": "rover-1",
           "category": "rover",
-          "x": 84,
-          "y": 82
+          "x": 57,
+          "y": 64
         },
         {
           "slotId": "rover-2",
           "category": "rover",
-          "x": 70,
-          "y": 84
+          "x": 66,
+          "y": 68
         },
         {
           "slotId": "suit-1",
           "category": "suit",
-          "x": 56,
-          "y": 70
+          "x": 53,
+          "y": 51
         },
         {
           "slotId": "suit-2",
           "category": "suit",
-          "x": 64,
-          "y": 72
+          "x": 59,
+          "y": 47
         },
         {
           "slotId": "spares-1",
           "category": "spares",
-          "x": 44,
-          "y": 76
+          "x": 42,
+          "y": 72
         },
         {
           "slotId": "spares-2",
           "category": "spares",
-          "x": 38,
-          "y": 80
+          "x": 48,
+          "y": 73
         }
       ]
     }

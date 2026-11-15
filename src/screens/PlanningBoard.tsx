@@ -154,7 +154,7 @@ export default function PlanningBoard() {
         />
       }
     >
-      <div className="grid grid-cols-[22rem_minmax(0,1fr)] gap-5" data-testid="planning-board">
+      <div className="grid grid-cols-[18rem_minmax(0,1fr)] gap-5" data-testid="planning-board">
         <Panel
           id="panel-catalog"
           testId="catalog-panel"

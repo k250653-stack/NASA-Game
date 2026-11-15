@@ -42,7 +42,7 @@ export function PartsCatalog({ design, seat, content, ownerName, onEdit }: Parts
             {count > 0 && <span className="ml-1 font-mono text-accent">×{count}</span>}
           </span>
         </Tooltip>
-        <span className="w-28 shrink-0 text-right font-mono text-xs text-muted tabular-nums">
+        <span className="w-24 shrink-0 text-right font-mono text-xs leading-tight text-muted tabular-nums">
           {part.massKg}kg · {power}W · ${part.costM}M
         </span>
         {editable ? (

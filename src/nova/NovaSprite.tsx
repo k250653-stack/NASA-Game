@@ -11,7 +11,7 @@ const BOB_PX = 4
  * NOVA: a small hovering survey drone with a rounded hexagonal hull, one wide cyan visor and a
  * stub antenna. Uses public/assets/sprites/nova.png when present, else this pixel drawing.
  */
-export function NovaSprite({ talking = false, size = 72 }: { talking?: boolean; size?: number }) {
+export function NovaSprite({ talking = false, size = 96 }: { talking?: boolean; size?: number }) {
   const reduced = useReducedMotion()
   const [usePng, setUsePng] = useState(true)
   const [blink, setBlink] = useState(false)
@@ -34,11 +34,20 @@ export function NovaSprite({ talking = false, size = 72 }: { talking?: boolean; 
       data-talking={talking}
     >
       {usePng ? (
-        <img
+        <motion.img
           src={getAsset('sprites', 'nova', 'png')}
           alt="NOVA"
           className="size-full [image-rendering:pixelated]"
           onError={() => setUsePng(false)}
+          // Blink = a quick dim; talking = the visor glow pulses.
+          animate={
+            blink
+              ? { filter: 'brightness(0.55)' }
+              : talking && !reduced
+                ? { filter: ['brightness(1)', 'brightness(1.35)', 'brightness(1)'] }
+                : { filter: 'brightness(1)' }
+          }
+          transition={talking && !blink ? { duration: 0.35, repeat: Infinity } : { duration: 0.08 }}
         />
       ) : (
         <svg

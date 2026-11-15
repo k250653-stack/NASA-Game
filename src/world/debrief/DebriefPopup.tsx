@@ -5,6 +5,7 @@ import { computeScore } from '@/engine/score'
 import { usePlanning } from '@/screens/planning/usePlanning'
 import { useStore } from '@/store'
 import { latestRuns, useRunHistory } from '@/store/runHistory'
+import { AssetImage } from '@/ui/AssetImage'
 import { Button } from '@/ui/Button'
 import { PopupPanel } from '../PopupPanel'
 import { CauseList } from './CauseList'
@@ -55,7 +56,14 @@ export function DebriefPopup({ onClose }: { onClose: () => void }) {
   return (
     <PopupPanel onClose={onClose} section="Briefing" title="Mission debrief">
       <div className="p-6" data-testid="debrief" data-outcome={score.outcome}>
-        <header className="flex flex-wrap items-end gap-x-6 gap-y-2 border-b border-border pb-4">
+        <header className="flex flex-wrap items-end gap-x-6 gap-y-2 border-b-2 border-border pb-4">
+          <AssetImage
+            kind="backgrounds"
+            id={`outcome-${score.outcome}`}
+            ext="png"
+            label={outcome.label}
+            className="h-[120px] w-[240px] shrink-0 border-2 border-border-strong"
+          />
           <div>
             <p className="font-title text-sm tracking-widest text-subtle uppercase">
               Mission debrief · {p.destination?.name}

@@ -30,7 +30,7 @@ export function StationShell({ title, testId, talk, onClose, children }: Station
               kind="portraits"
               id={talk.member.portrait}
               label={talk.member.name}
-              className="size-10 shrink-0"
+              className="size-16 shrink-0"
             />
             <p className="text-sm text-muted">
               <span className="font-title tracking-wide text-accent uppercase">
@@ -64,9 +64,7 @@ export function Row({
 }
 
 export function MeterBar({ share, tone }: { share: number; tone: string }) {
-  return (
-    <SegmentBar share={share} fill={tone} />
-  )
+  return <SegmentBar share={share} fill={tone} />
 }
 
 export const gb = (v: number) => `${v.toLocaleString('en-US', { maximumFractionDigits: 1 })} GB`

@@ -43,7 +43,7 @@ export function AssetImage({
       key={src}
       src={src}
       alt={alt ?? text}
-      className={className}
+      className={`[image-rendering:pixelated] ${className ?? ''}`}
       onError={() => setFailed((f) => [...f, src])}
       {...rest}
     />

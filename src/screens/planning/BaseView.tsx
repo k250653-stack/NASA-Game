@@ -28,12 +28,12 @@ export function BaseView({ design, seat, content }: BaseViewProps) {
   })
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden border-2 border-border-strong bg-surface">
+    <div className="relative mx-auto h-[270px] w-[480px] shrink-0 overflow-hidden border-2 border-border-strong bg-surface 2xl:h-[540px] 2xl:w-[960px]">
       <AssetImage
-        kind="backgrounds"
+        kind="sprites"
         id={`base-${design.destinationId}`}
         label={`${design.destinationId} base`}
-        className="absolute inset-0 h-full w-full object-cover [image-rendering:pixelated]"
+        className="absolute inset-0 h-full w-full"
       />
       {markers.map(({ slot, part, mine }) => (
         <div
