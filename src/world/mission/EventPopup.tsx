@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { playSound } from '@/ui/sound'
 import {
   availableOptions,
   eligibleCrew,
@@ -23,6 +24,9 @@ interface EventPopupProps {
 /** An event for the player's seat: what happened, and every option with who, cost and odds. */
 export function EventPopup({ event, run, design, content, onChoose }: EventPopupProps) {
   const options = availableOptions(run, event, design, content)
+  // Urgent events sound the alarm; routine ones come in over the radio.
+  const urgent = event.urgency === 'urgent'
+  useEffect(() => playSound(urgent ? 'alarm' : 'radio'), [event.id, urgent])
   return (
     <PopupPanel section="Event" title={event.title}>
       <div className="mx-auto max-w-4xl px-6 py-6" data-testid="event-popup" data-event={event.id}>

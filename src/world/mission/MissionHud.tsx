@@ -1,16 +1,10 @@
 import { AnimatePresence, motion } from 'motion/react'
 import type { LogEntry } from '@/engine/types'
-import { Icon } from '@/ui/Icon'
-import { SegmentBar } from '@/ui/SegmentBar'
+import { GaugeItem } from './GaugeItem'
 import type { DayInfo, Gauge } from './missionRun'
 import type { Toast } from './useMissionRun'
 
 const PIXEL_BOX = 'border border-border-strong bg-bg/90'
-const BAR: Record<Gauge['status'], string> = {
-  ok: 'bg-accent',
-  low: 'bg-alert',
-  critical: 'bg-danger',
-}
 /** Log lines shown, newest last; older ones get dimmer text tokens. */
 const LOG_LINES = 4
 const LOG_TONES = ['text-subtle', 'text-subtle', 'text-muted', 'text-primary']
@@ -42,25 +36,7 @@ export function GaugeStrip({ gauges }: { gauges: Gauge[] }) {
       data-testid="mission-gauges"
     >
       {gauges.map((g) => (
-        <li
-          key={g.id}
-          title={`${g.label}: ${g.value}`}
-          className="flex items-center gap-2"
-          data-testid={`gauge-${g.id}`}
-          data-status={g.status}
-        >
-          <Icon
-            name={g.icon}
-            size={14}
-            className={
-              g.status === 'ok' ? 'text-muted' : g.status === 'low' ? 'text-alert' : 'text-danger'
-            }
-          />
-          <span className="w-14 font-title text-xs tracking-wide text-muted uppercase">
-            {g.label}
-          </span>
-          <SegmentBar share={g.share} fill={BAR[g.status]} segments={10} className="w-24" />
-        </li>
+        <GaugeItem key={g.id} g={g} />
       ))}
     </ul>
   )

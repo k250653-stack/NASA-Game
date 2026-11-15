@@ -57,6 +57,27 @@ export function VolumeSliders() {
   )
 }
 
+/** Subtle CRT scanlines over the whole game (off by default). */
+export function CrtToggle() {
+  const crt = useSettings((s) => s.crt)
+  const setCrt = useSettings((s) => s.setCrt)
+  return (
+    <label className="flex items-center justify-between gap-6 py-3">
+      <span>
+        <span className="block text-primary">CRT scanlines</span>
+        <span className="block text-sm text-muted">A faint retro screen effect.</span>
+      </span>
+      <input
+        type="checkbox"
+        checked={crt}
+        onChange={(e) => setCrt(e.target.checked)}
+        className="size-5 accent-alert"
+        data-testid="setting-crt"
+      />
+    </label>
+  )
+}
+
 /** Dev builds only: one button per sound effect, to hear and judge them. */
 export function SoundTest() {
   if (!import.meta.env.DEV) return null

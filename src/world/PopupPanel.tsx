@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
+import { playSound } from '@/ui/sound'
 import { useStore } from '@/store'
 import { Icon } from '@/ui/Icon'
 import { PopupContext } from '@/ui/popupContext'
@@ -26,6 +27,10 @@ interface PopupPanelProps {
  */
 export function PopupPanel({ children, onClose, title, section, label }: PopupPanelProps) {
   const phase = useStore((s) => s.game.phase)
+  useEffect(() => {
+    playSound('popup-open')
+    return () => playSound('popup-close')
+  }, [])
   return (
     <div
       className="fixed inset-0 z-40 flex items-center justify-center bg-bg/70"

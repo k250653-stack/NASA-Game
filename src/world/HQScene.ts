@@ -6,6 +6,7 @@
  */
 import Phaser from 'phaser'
 import { getAsset } from '@/ui/assets'
+import { reportLoading } from '@/ui/loadingStore'
 import { playSound } from '@/ui/sound'
 import {
   animKey,
@@ -30,7 +31,7 @@ import {
   type Point,
   type Polygon,
 } from './geometry'
-import { drawPadlock, roomLight, tokenColor, type RoomLight } from './hqArt'
+import { drawPadlock, popOutline, roomLight, tokenColor, type RoomLight } from './hqArt'
 import {
   gatedRooms,
   getHqMap,
@@ -44,6 +45,9 @@ import { addCutOutTexture } from './roomTexture'
 
 const WALK_SPEED = 90
 const RUN_SPEED = 170
+/** Footstep sound interval while walking / running, ms. */
+const WALK_STEP_MS = 300
+const RUN_STEP_MS = 220
 /** Camera smoothing time constants: following inside a room, and the portal pan (~0.5 s). */
 const CAMERA_TAU_MS = 200
 const PAN_TAU_MS = 110
@@ -111,6 +115,7 @@ export class HQScene extends Phaser.Scene {
   private debug: Phaser.GameObjects.Graphics | null = null
   private marker: Phaser.GameObjects.Graphics | null = null
   private cam = { x: 0, y: 0 }
+  private stepMs = 0
   private saved = { at: 0, x: 0, y: 0 }
 
   /** Crew standing in the HQ (the debrief in the Briefing room); idle, no collision. */
@@ -129,6 +134,8 @@ export class HQScene extends Phaser.Scene {
   }
 
   preload() {
+    reportLoading(0)
+    this.load.on('progress', (p: number) => reportLoading(p))
     for (const { room } of this.map.rooms) {
       this.load.image(`room-${room.id}`, getAsset(room.image.kind, room.image.id, room.image.ext))
     }
@@ -142,6 +149,7 @@ export class HQScene extends Phaser.Scene {
   }
 
   create() {
+    reportLoading(null)
     for (const placed of this.map.rooms) {
       const key = `room-${placed.room.id}`
       if (!this.textures.exists(key)) continue
@@ -214,6 +222,11 @@ export class HQScene extends Phaser.Scene {
       const running = k.shift.isDown
       const step = ((running ? RUN_SPEED : WALK_SPEED) * deltaMs) / 1000 / Math.hypot(dx, dy)
       this.move(dx * step, dy * step)
+      this.stepMs += deltaMs
+      if (this.stepMs >= (running ? RUN_STEP_MS : WALK_STEP_MS)) {
+        this.stepMs = 0
+        playSound('footstep')
+      }
       this.facing = facingFrom(dx, dy)
       this.playAnim(running ? 'run' : 'walk')
     } else {
@@ -253,6 +266,7 @@ export class HQScene extends Phaser.Scene {
   private onUse() {
     if (this.transit) return
     if (this.target?.kind === 'station') {
+      this.popStation(this.target.key)
       this.cb().onInteract(this.target)
       return
     }
@@ -266,6 +280,7 @@ export class HQScene extends Phaser.Scene {
     const dest = to && this.map.rooms.find((r) => r.room.id === to.roomId)
     if (!to || !dest) return
     this.transit = dest
+    playSound('door')
     this.tweens.add({ targets: this.player, alpha: 0, duration: FADE_MS })
     this.time.delayedCall(PAN_MS, () => {
       this.player.setPosition(to.arrival[0], to.arrival[1])
@@ -412,6 +427,11 @@ export class HQScene extends Phaser.Scene {
     return door ? centroid(door.area) : null
   }
 
+  private popStation(key: string) {
+    const station = this.openStations().find((st) => st.key === key)
+    if (station) popOutline(this, this.glow, centroid(station.area))
+  }
+
   private drawGlow() {
     this.glow?.destroy()
     this.glow = null
@@ -480,7 +500,10 @@ export class HQScene extends Phaser.Scene {
     }
     if (this.paused || this.transit) return
     const s = this.stationAt(p)
-    if (s) this.cb().onInteract({ kind: 'station', key: s.key, label: s.label, opens: s.opens })
+    if (s) {
+      this.popStation(s.key)
+      this.cb().onInteract({ kind: 'station', key: s.key, label: s.label, opens: s.opens })
+    }
   }
 
   private createAnims() {

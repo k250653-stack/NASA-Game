@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
+import { playSound } from '@/ui/sound'
 import { NovaSprite } from './NovaSprite'
 import { openCodex } from './novaStore'
 
 /** Typewriter speed. */
 const CHAR_MS = 22
+/** NOVA blips once per this many letters. */
+const BEEP_EVERY = 3
 
 interface NovaCompanionProps {
   /** Lines to say, one bubble each; null or empty = NOVA just hovers. */
@@ -42,7 +45,11 @@ export function NovaCompanion({
 
   useEffect(() => {
     if (line === null || full) return
-    const t = setTimeout(() => setShown((s) => s + 1), CHAR_MS)
+    const t = setTimeout(() => {
+      // A short blip every few letters while NOVA talks.
+      if (shown % BEEP_EVERY === 0) playSound('nova-beep')
+      setShown((s) => s + 1)
+    }, CHAR_MS)
     return () => clearTimeout(t)
   }, [line, full, shown])
 

@@ -49,3 +49,20 @@ export function roomLight(image: Phaser.GameObjects.Image): RoomLight {
     },
   }
 }
+
+/** Tiny scale-pop of a station outline when it is used (scaled about its own centre). */
+export function popOutline(
+  scene: Phaser.Scene,
+  g: Phaser.GameObjects.Graphics | null,
+  [cx, cy]: Point,
+): void {
+  if (!g) return
+  const state = { s: 1.08 }
+  scene.tweens.add({
+    targets: state,
+    s: 1,
+    duration: 140,
+    ease: 'Back.Out',
+    onUpdate: () => g.setScale(state.s).setPosition(cx * (1 - state.s), cy * (1 - state.s)),
+  })
+}

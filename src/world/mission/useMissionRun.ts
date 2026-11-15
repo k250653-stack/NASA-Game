@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { resolveEvent } from '@/engine/events'
+import { isEvaOption, resolveEvent } from '@/engine/events'
+import { shakeScreen } from '@/ui/feel'
+import { playSound } from '@/ui/sound'
 import { advanceTurn, isMissionOver } from '@/engine/mission'
 import type { Design, EngineContent, MissionState } from '@/engine/types'
 import type { GameEvent } from '@/schemas'
@@ -110,7 +112,10 @@ export function useMissionRun(
       setRun(state)
       if (crewId) await actRef.current(crewId, actionPost(event, optionId))
       setActing(false)
-      const label = event.options.find((o) => o.id === optionId)?.label ?? 'Done'
+      const option = event.options.find((o) => o.id === optionId)
+      const label = option?.label ?? 'Done'
+      playSound(result.success ? 'success' : 'fail')
+      if (!result.success && option && isEvaOption(option)) shakeScreen()
       const detail = result.effectsApplied.filter(Boolean).join(', ')
       setToast({
         id: Date.now(),

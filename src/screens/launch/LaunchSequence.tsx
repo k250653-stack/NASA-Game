@@ -4,6 +4,7 @@ import { createRng } from '@/engine/rng'
 import type { Destination, Rocket } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
 import { Button } from '@/ui/Button'
+import { shakeScreen } from '@/ui/feel'
 import { playSound } from '@/ui/sound'
 import { rocketSprite } from '@/ui/rocketSprite'
 import { TransitMap } from './TransitMap'
@@ -65,9 +66,20 @@ export function LaunchSequence({ rocket, destination, onDone }: LaunchSequencePr
     }
     const timers: Array<ReturnType<typeof setTimeout>> = []
     for (let i = 1; i <= COUNTDOWN_FROM; i++)
-      timers.push(setTimeout(() => setCount(COUNTDOWN_FROM - i), i * TICK_MS))
+      timers.push(
+        setTimeout(() => {
+          setCount(COUNTDOWN_FROM - i)
+          playSound('countdown-beep')
+        }, i * TICK_MS),
+      )
     const liftoffAt = COUNTDOWN_FROM * TICK_MS
-    timers.push(setTimeout(() => (setStage('liftoff'), playSound('launch')), liftoffAt))
+    timers.push(
+      setTimeout(() => {
+        setStage('liftoff')
+        playSound('launch')
+        shakeScreen()
+      }, liftoffAt),
+    )
     const transitAt = liftoffAt + LIFTOFF_MS
     timers.push(setTimeout(() => setStage('transit'), transitAt))
     const steps = 50

@@ -5,6 +5,8 @@
  */
 import Phaser from 'phaser'
 import { getAsset } from '@/ui/assets'
+import { playSound } from '@/ui/sound'
+import { reportLoading } from '@/ui/loadingStore'
 import {
   animKey,
   facingFrom,
@@ -21,12 +23,21 @@ import {
   type Motion,
 } from './character'
 import { canStand, centroid, distanceToPolygon, type Point, type Polygon } from './geometry'
-import { tokenColor, tokenCss } from './hqArt'
+import { popOutline, tokenColor, tokenCss } from './hqArt'
+import { createRng } from '@/engine/rng'
+import { reducedMotion } from '@/ui/feel'
 import type { Room, Workstation, WorkstationKind } from './rooms/room'
 import { addCutOutTexture } from './roomTexture'
 
 const WALK_SPEED = 90
 const RUN_SPEED = 170
+/** Idle fidgets: how often one crew member moves, and how long a turn-round lasts, ms. */
+const IDLE_EVERY_MS = 3500
+const IDLE_TURN_MS = 1800
+const FACINGS: readonly Facing[] = ['S', 'SE', 'E', 'NE', 'N', 'NW', 'W', 'SW']
+/** Footstep sound interval while walking / running, ms. */
+const WALK_STEP_MS = 300
+const RUN_STEP_MS = 220
 const NPC_SPEED = 110
 const CAMERA_TAU_MS = 200
 const ROOM_FOLLOW = 0.3
@@ -59,6 +70,8 @@ export interface HabitatCallbacks {
   isPaused: () => boolean
   /** Stations that need attention: a pulsing "!" floats above each. */
   alerts?: () => readonly WorkstationKind[]
+  /** Crew whose event it is right now: a "!" bubble floats over them. */
+  crewAlerts?: () => readonly string[]
 }
 
 interface Npc {
@@ -70,6 +83,9 @@ interface Npc {
   motion: Motion
   /** Queue of walks so overlapping actions play one after another. */
   busy: Promise<void>
+  /** Walking to or working at a station (no idle fidgets). */
+  acting: boolean
+  bubble: Phaser.GameObjects.Text
 }
 
 type Keys = Record<
@@ -91,6 +107,10 @@ export class HabitatScene extends Phaser.Scene {
   private glow: Phaser.GameObjects.Graphics | null = null
   private debug: Phaser.GameObjects.Graphics | null = null
   private cam = { x: 0, y: 0 }
+  private stepMs = 0
+  private dimmer: Phaser.GameObjects.Rectangle | null = null
+  /** Seeded, so idle fidgets never use Math.random (CLAUDE.md rule 7). */
+  private idleRng = createRng(31)
   private alertMarks = new Map<WorkstationKind, Phaser.GameObjects.Text>()
 
   constructor(room: Room, crew: NpcSpec[], callbacks: () => HabitatCallbacks) {
@@ -102,6 +122,8 @@ export class HabitatScene extends Phaser.Scene {
   }
 
   preload() {
+    reportLoading(0)
+    this.load.on('progress', (p: number) => reportLoading(p))
     const { image } = this.room
     this.load.image('habitat', getAsset(image.kind, image.id, image.ext))
     for (const motion of MOTIONS) {
@@ -114,6 +136,7 @@ export class HabitatScene extends Phaser.Scene {
   }
 
   create() {
+    reportLoading(null)
     if (this.textures.exists('habitat')) {
       addCutOutTexture(this, 'habitat', 'habitat-cut')
       this.add.image(0, 0, 'habitat-cut').setOrigin(0).setDepth(1)
@@ -121,6 +144,12 @@ export class HabitatScene extends Phaser.Scene {
     this.createAnims()
     this.player = this.makeSprite(this.center)
     this.specs.forEach((spec, i) => this.addNpc(spec, i))
+    this.time.addEvent({ delay: IDLE_EVERY_MS, loop: true, callback: () => this.fidget() })
+    this.dimmer = this.add
+      .rectangle(0, 0, this.room.size[0], this.room.size[1], tokenColor('bg'))
+      .setOrigin(0)
+      .setDepth(7)
+      .setAlpha(0)
 
     const kb = this.input.keyboard!
     const K = Phaser.Input.Keyboard.KeyCodes
@@ -135,7 +164,13 @@ export class HabitatScene extends Phaser.Scene {
       d: K.D,
       shift: K.SHIFT,
     }) as Keys
-    kb.on('keydown-E', () => this.target && !this.paused && this.cb().onInteract(this.target))
+    kb.on('keydown-E', () => {
+      if (!this.target || this.paused) return
+      const t = this.target
+      const station = t.kind === 'station' ? this.station(t.key) : undefined
+      if (station) popOutline(this, this.glow, centroid(station.area))
+      this.cb().onInteract(t)
+    })
     kb.addCapture(K.F2)
     kb.on('keydown-F2', () => this.toggleDebug())
     this.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
@@ -158,12 +193,21 @@ export class HabitatScene extends Phaser.Scene {
       const running = k.shift.isDown
       const step = ((running ? RUN_SPEED : WALK_SPEED) * deltaMs) / 1000 / Math.hypot(dx, dy)
       this.move(dx * step, dy * step)
+      this.stepMs += deltaMs
+      if (this.stepMs >= (running ? RUN_STEP_MS : WALK_STEP_MS)) {
+        this.stepMs = 0
+        playSound('footstep')
+      }
       this.facing = facingFrom(dx, dy)
       this.play(this.player, running ? 'run' : 'walk', this.facing)
     } else {
       this.play(this.player, 'idle', this.facing)
     }
+    const alerted = this.cb().crewAlerts?.() ?? []
     for (const npc of this.npcs.values()) {
+      npc.bubble
+        .setVisible((npc.acting || alerted.includes(npc.spec.id)) && npc.sprite.alpha > 0.5)
+        .setPosition(npc.sprite.x, this.headY(npc.sprite) - 22 + Math.sin(_time / 180) * 2)
       const near =
         Math.hypot(npc.sprite.x - this.player.x, npc.sprite.y - this.player.y) < NAME_RANGE
       npc.label
@@ -207,6 +251,37 @@ export class HabitatScene extends Phaser.Scene {
     }
   }
 
+  /** Room lights flicker briefly (power events). Skipped with reduced motion. */
+  flicker() {
+    if (!this.dimmer || reducedMotion()) return
+    this.tweens.chain({
+      targets: this.dimmer,
+      tweens: [
+        { alpha: 0.55, duration: 60 },
+        { alpha: 0.1, duration: 80 },
+        { alpha: 0.45, duration: 50 },
+        { alpha: 0, duration: 160 },
+      ],
+    })
+  }
+
+  /** Now and then an idle crew member turns round or does a small bounce. */
+  private fidget() {
+    const idle = [...this.npcs.values()].filter((n) => !n.acting && n.sprite.alpha > 0.5)
+    if (idle.length === 0) return
+    const npc = idle[this.idleRng.int(0, idle.length - 1)]!
+    if (this.idleRng.chance(0.5)) {
+      npc.facing = FACINGS[this.idleRng.int(0, FACINGS.length - 1)]!
+      this.play(npc.sprite, 'idle', npc.facing)
+      this.time.delayedCall(IDLE_TURN_MS, () => {
+        const post = this.station(npc.spec.post)
+        if (post && !npc.acting) this.faceStation(npc, post)
+      })
+    } else if (!reducedMotion()) {
+      this.tweens.add({ targets: npc.sprite, y: npc.sprite.y - 4, duration: 120, yoyo: true })
+    }
+  }
+
   // ---- crew actions (called from React) --------------------------------------------------------
 
   /** Walks a crew member to a workstation, works there (or goes out of the airlock), and returns. */
@@ -215,6 +290,7 @@ export class HabitatScene extends Phaser.Scene {
     const station = this.station(kind)
     if (!npc || !station) return Promise.resolve()
     npc.busy = npc.busy.then(async () => {
+      npc.acting = true
       await this.walk(npc, station.stand)
       this.faceStation(npc, station)
       if (kind === 'airlock') {
@@ -227,6 +303,7 @@ export class HabitatScene extends Phaser.Scene {
       await this.walk(npc, npc.home)
       const post = this.station(npc.spec.post)
       if (post) this.faceStation(npc, post)
+      npc.acting = false
     })
     return npc.busy
   }
@@ -263,6 +340,19 @@ export class HabitatScene extends Phaser.Scene {
       facing: 'N',
       motion: 'idle',
       busy: Promise.resolve(),
+      acting: false,
+      bubble: this.add
+        .text(home[0], home[1], '!', {
+          fontFamily: 'Barlow Condensed, Arial Narrow, sans-serif',
+          fontSize: '22px',
+          color: tokenCss('bg'),
+          backgroundColor: tokenCss('alert'),
+          padding: { x: 6, y: 0 },
+        })
+        .setOrigin(0.5, 1)
+        .setDepth(9)
+        .setResolution(2)
+        .setVisible(false),
     }
     this.npcs.set(spec.id, npc)
     if (station) this.faceStation(npc, station)

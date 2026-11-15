@@ -7,6 +7,8 @@ import { skipTutorial, useNova } from '@/nova/novaStore'
 import { useHabitatTutorial } from '@/nova/tutorial'
 import { emitConcept } from '@/store/concepts'
 import { computeScore } from '@/engine/score'
+import { shakeScreen } from '@/ui/feel'
+import { setTension } from '@/ui/sound'
 import { returnToEarth } from './debrief/debrief'
 import { HabitatCanvas } from './HabitatCanvas'
 import type { HabitatCallbacks, HabitatScene, HabitatTarget, NpcSpec } from './HabitatScene'
@@ -25,6 +27,8 @@ import { getRoom, type WorkstationKind } from './rooms/room'
 /** After the mission ends: a beat in the room, then the title card, then the debrief. */
 const END_PAUSE_MS = 1200
 const END_CARD_MS = 2800
+/** Event that shakes the screen when it hits. */
+const IMPACT_EVENT = 'micrometeoroid-hit'
 
 type Popup = { kind: 'crew'; id: string } | { kind: 'station'; key: WorkstationKind } | null
 
@@ -74,6 +78,27 @@ export default function HabitatWorld() {
     [m.run, p.design, p.content, scienceTarget],
   )
   const alertsRef = useRef(alerts)
+  // "!" over the crew member whose role the open event belongs to (Mission Director games).
+  const pendingRole = m.pending?.role
+  const crewAlertRef = useRef<string[]>([])
+  useEffect(() => {
+    crewAlertRef.current = p.team.filter((c) => c.role === pendingRole).map((c) => c.id)
+  }, [p.team, pendingRole])
+  // Tension music while an urgent event is open, then back to the mission track.
+  const urgentOpen = m.pending?.urgency === 'urgent'
+  useEffect(() => {
+    setTension(urgentOpen)
+    return () => setTension(false)
+  }, [urgentOpen])
+  // Feel: impacts shake the screen; power events make the lights flicker.
+  const turns = m.run?.turnHistory.length ?? 0
+  useEffect(() => {
+    const last = useStore.getState().mission.run?.turnHistory.at(-1)
+    if (!last || turns === 0) return
+    const fired = last.eventIds.map((id) => p.content.events.find((e) => e.id === id))
+    if (fired.some((e) => e?.id === IMPACT_EVENT)) shakeScreen()
+    if (fired.some((e) => e?.role === 'power_life')) sceneRef.current?.flicker()
+  }, [turns, p.content])
   useEffect(() => {
     alertsRef.current = alerts
   }, [alerts])
@@ -98,6 +123,7 @@ export default function HabitatWorld() {
       },
       isPaused: () => live.current,
       alerts: () => alertsRef.current,
+      crewAlerts: () => crewAlertRef.current,
       onPlayerScreen: (x, y) => {
         anchor.current = { x, y }
         if (promptRef.current) promptRef.current.style.transform = promptTransform(x, y)

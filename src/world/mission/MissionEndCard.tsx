@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { motion } from 'motion/react'
+import { playSound } from '@/ui/sound'
 import type { MissionScore } from '@/engine/score'
 import type { MissionState } from '@/engine/types'
 import { AssetImage } from '@/ui/AssetImage'
@@ -18,6 +20,7 @@ export function MissionEndCard({
   outcome: MissionScore['outcome']
 }) {
   const t = TITLE[outcome]
+  useEffect(() => playSound(outcome === 'failed' ? 'fail' : 'success'), [outcome])
   return (
     <motion.div
       initial={{ opacity: 0 }}

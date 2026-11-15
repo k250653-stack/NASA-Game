@@ -18,7 +18,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const BASE =
   'inline-flex select-none items-center justify-center gap-2 border-2 font-display uppercase ' +
   'tracking-[0.12em] transition-[background-color,border-color,color,transform] duration-100 ' +
-  'enabled:hover:-translate-y-px enabled:active:translate-y-px ' +
+  'enabled:hover:-translate-y-px enabled:active:translate-y-px enabled:active:scale-[0.97] ' +
   'disabled:cursor-not-allowed disabled:opacity-40'
 
 /** Amber = primary action, steel = secondary, red only for danger. */

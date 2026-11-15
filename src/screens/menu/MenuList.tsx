@@ -1,4 +1,5 @@
 import { useEffect, useRef, type KeyboardEvent } from 'react'
+import { playSound } from '@/ui/sound'
 
 export interface MenuItem {
   id: string
@@ -44,8 +45,14 @@ export function MenuList({ items }: { items: MenuItem[] }) {
           data-testid={item.id}
           disabled={item.disabled}
           title={item.hint}
-          onClick={item.onSelect}
-          onMouseEnter={(e) => e.currentTarget.focus()}
+          onClick={() => {
+            playSound('click')
+            item.onSelect()
+          }}
+          onMouseEnter={(e) => {
+            if (document.activeElement !== e.currentTarget) playSound('hover')
+            e.currentTarget.focus()
+          }}
           className="group flex items-center gap-3 py-2 font-title text-base tracking-[0.35em] text-muted uppercase transition-colors duration-200 outline-none focus:text-primary focus-visible:outline-none disabled:cursor-not-allowed disabled:text-subtle/50"
         >
           <span

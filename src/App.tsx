@@ -5,6 +5,7 @@ import { Starfield } from '@/ui/Starfield'
 import { Toaster } from '@/ui/Toaster'
 import { NovaLayer } from '@/nova/NovaLayer'
 import { setMusicTrack } from '@/ui/sound'
+import { LoadingScreen } from '@/ui/LoadingScreen'
 import { useSettings } from '@/ui/settingsStore'
 import Title from '@/screens/Title'
 import DestinationSelect from '@/screens/DestinationSelect'
@@ -44,6 +45,7 @@ export default function App() {
   const phase = useStore((s) => s.game.phase)
   const Screen = SCREENS[phase] ?? Title
   const reducedMotion = useSettings((s) => s.reducedMotion)
+  const crt = useSettings((s) => s.crt)
   // A station popup shows the phase's screen inside the HQ world instead of full screen.
   const popup = useWorld((s) => s.popup)
   // The debrief (phase review) is a popup over the HQ Briefing room.
@@ -68,7 +70,7 @@ export default function App() {
     // Motion skips transform animations when the OS asks for less motion, or Settings does.
     <MotionConfig reducedMotion={reducedMotion ? 'always' : 'user'}>
       <Starfield />
-      <Suspense fallback={null}>
+      <Suspense fallback={<LoadingScreen progress={0} />}>
         {inWorld ? (
           <HQWorld popup={phase !== 'hq' && phase !== 'review' ? <Screen /> : null} />
         ) : (
@@ -76,6 +78,8 @@ export default function App() {
         )}
       </Suspense>
       <NovaLayer />
+      <LoadingScreen />
+      {crt && <div className="crt-overlay pointer-events-none fixed inset-0 z-[95]" aria-hidden />}
       <Toaster />
     </MotionConfig>
   )
