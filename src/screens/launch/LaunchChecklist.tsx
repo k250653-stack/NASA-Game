@@ -1,17 +1,17 @@
 import { POLL_AREAS } from '@/engine/launchPoll'
 import type { Check, CheckId, CheckStatus } from '@/engine/types'
-import { FIX_TARGET } from './fixTargets'
 import { ROLES, type Role } from '@/schemas'
-import { Badge } from '@/ui/Badge'
 import { Button } from '@/ui/Button'
+import { InfoTip } from '@/ui/InfoTip'
 import { ROLE_LABEL } from '@/ui/labels'
 import { Panel } from '@/ui/Panel'
 import { roleClasses } from '@/ui/roleColors'
+import { FIX_TARGET } from './fixTargets'
 
-const BADGE: Record<CheckStatus, 'success' | 'warning' | 'danger'> = {
-  ok: 'success',
-  warn: 'warning',
-  fail: 'danger',
+const MARK: Record<CheckStatus, { sign: string; className: string }> = {
+  ok: { sign: '✓', className: 'border-success text-success' },
+  warn: { sign: '!', className: 'border-alert text-alert' },
+  fail: { sign: '✗', className: 'border-danger text-danger' },
 }
 
 interface LaunchChecklistProps {
@@ -19,55 +19,50 @@ interface LaunchChecklistProps {
   onFix: (id: CheckId) => void
 }
 
-/** The launch checks grouped by the seat that answers for them. */
+/** Simple rows (✓ / ! / ✗) grouped by seat; each explanation sits behind an "i". */
 export function LaunchChecklist({ checks, onFix }: LaunchChecklistProps) {
   const groups = ROLES.map((role: Role) => ({
     role,
     items: checks.filter((c) => POLL_AREAS[role].includes(c.id)),
   })).filter((g) => g.items.length > 0)
   return (
-    <Panel
-      title="Launch checklist"
-      subtitle="Fails block launch; warnings need your confirmation"
-      padded={false}
-    >
-      {groups.map(({ role, items }) => (
-        <section key={role} className="border-b border-border last:border-b-0">
-          <h3
-            className={`px-4 pt-3 text-xs font-semibold tracking-wide uppercase ${roleClasses(role).text}`}
-          >
-            {ROLE_LABEL[role]}
-          </h3>
-          <ul>
-            {items.map((c) => (
-              <li
-                key={c.id}
-                className="flex items-start gap-3 px-4 py-2.5"
-                data-testid={`check-${c.id}`}
-                data-status={c.status}
-              >
-                <Badge variant={BADGE[c.status]} className="mt-0.5 w-12 shrink-0 justify-center">
-                  {c.status}
-                </Badge>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-primary">{c.label}</p>
-                  <p className="text-sm text-muted">{c.explanation}</p>
-                </div>
-                {c.status !== 'ok' && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => onFix(c.id)}
-                    data-testid={`fix-${c.id}`}
+    <Panel title="Launch checklist" subtitle="Fails block launch; warnings need your confirmation">
+      <div className="flex flex-col gap-4">
+        {groups.map(({ role, items }) => (
+          <section key={role}>
+            <h3 className={`label-caps text-sm ${roleClasses(role).text}`}>{ROLE_LABEL[role]}</h3>
+            <ul className="mt-1">
+              {items.map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center gap-3 py-1"
+                  data-testid={`check-${c.id}`}
+                  data-status={c.status}
+                >
+                  <span
+                    className={`flex size-6 shrink-0 items-center justify-center border-2 font-mono text-sm ${MARK[c.status].className}`}
+                    aria-label={c.status}
                   >
-                    Fix in {FIX_TARGET[c.id].phase === 'recruit' ? 'Recruit' : 'Planning'}
-                  </Button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+                    {MARK[c.status].sign}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-sm text-primary">{c.label}</span>
+                  <InfoTip label={`${c.label}: details`}>{c.explanation}</InfoTip>
+                  {c.status !== 'ok' && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => onFix(c.id)}
+                      data-testid={`fix-${c.id}`}
+                    >
+                      Fix in {FIX_TARGET[c.id].phase === 'recruit' ? 'Recruit' : 'Planning'}
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
     </Panel>
   )
 }

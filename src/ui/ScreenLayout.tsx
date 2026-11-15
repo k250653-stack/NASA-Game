@@ -3,6 +3,7 @@ import { useStore } from '@/store'
 import { Icon } from './Icon'
 import { ProgressSteps } from './ProgressSteps'
 import { SoundToggle } from './SoundToggle'
+import { usePopup } from './popupContext'
 
 interface ScreenLayoutProps {
   children: ReactNode
@@ -26,29 +27,33 @@ export function ScreenLayout({
 }: ScreenLayoutProps) {
   const phase = useStore((s) => s.game.phase)
   const setPhase = useStore((s) => s.setPhase)
+  // Inside a world popup the popup frame is the chrome: no top bar.
+  const inPopup = usePopup() !== null
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="sticky top-0 z-30 h-topbar shrink-0 border-b border-border bg-surface/85 backdrop-blur">
-        <div className="mx-auto flex h-full max-w-content items-center gap-6 px-6">
-          <button
-            type="button"
-            onClick={() => setPhase('title')}
-            className="flex shrink-0 items-center gap-2 rounded-md font-display text-sm font-bold tracking-[0.2em] text-primary uppercase"
-          >
-            <Icon name="IconRocket" size={20} className="text-accent" />
-            Mission Control
-          </button>
-          <nav className="flex min-w-0 flex-1 justify-center">
-            {showSteps && <ProgressSteps current={phase} compact={topBarExtra !== undefined} />}
-          </nav>
-          {topBarExtra}
-          <SoundToggle />
-        </div>
-      </header>
+      {!inPopup && (
+        <header className="sticky top-0 z-30 h-topbar shrink-0 border-b-2 border-border bg-surface">
+          <div className="mx-auto flex h-full max-w-content items-center gap-6 px-6">
+            <button
+              type="button"
+              onClick={() => setPhase('title')}
+              className="label-caps flex shrink-0 items-center gap-2 text-base text-primary"
+            >
+              <Icon name="IconRocket" size={20} className="text-accent" />
+              Mission Control
+            </button>
+            <nav className="flex min-w-0 flex-1 justify-center">
+              {showSteps && <ProgressSteps current={phase} compact={topBarExtra !== undefined} />}
+            </nav>
+            {topBarExtra}
+            <SoundToggle />
+          </div>
+        </header>
+      )}
 
       <div
-        className={`mx-auto grid w-full max-w-content flex-1 gap-6 px-6 py-6 ${
+        className={`mx-auto grid w-full max-w-content flex-1 gap-6 px-6 ${inPopup ? 'py-4' : 'py-6'} ${
           sidebar ? 'grid-cols-[minmax(0,1fr)_var(--spacing-sidebar)]' : 'grid-cols-1'
         }`}
       >

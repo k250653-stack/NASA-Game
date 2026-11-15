@@ -9,16 +9,13 @@ interface SkillBarProps {
 export function SkillBar({ label, level }: SkillBarProps) {
   return (
     <div className="min-w-0" title={`${label} ${level}/${SKILL_MAX}`}>
-      <div className="mb-1 flex items-baseline justify-between font-mono text-[10px] text-muted">
+      <div className="mb-1 flex items-baseline justify-between font-mono text-xs text-muted">
         <span>{label}</span>
         <span className="text-accent tabular-nums">{level}</span>
       </div>
-      <div className="flex gap-0.5" aria-label={`${label} ${level} of ${SKILL_MAX}`} role="img">
+      <div className="flex gap-[2px]" aria-label={`${label} ${level} of ${SKILL_MAX}`} role="img">
         {Array.from({ length: SKILL_MAX }, (_, i) => (
-          <span
-            key={i}
-            className={`h-1.5 flex-1 rounded-[1px] ${i < level ? 'bg-accent' : 'bg-border'}`}
-          />
+          <span key={i} className={`h-2 flex-1 ${i < level ? 'bg-accent' : 'bg-surface'}`} />
         ))}
       </div>
     </div>

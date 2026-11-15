@@ -34,7 +34,7 @@ export function VizFrame({
   caption: ReactNode
 }) {
   return (
-    <figure className="border border-border-strong bg-surface p-3" data-testid="nova-viz">
+    <figure className="border-2 border-border-strong bg-surface p-3" data-testid="nova-viz">
       <div className="[image-rendering:pixelated]">{children}</div>
       <label className="mt-2 flex items-center gap-3 font-mono text-xs text-muted">
         <span className="w-32 font-title text-sm tracking-wide uppercase">{slider.label}</span>

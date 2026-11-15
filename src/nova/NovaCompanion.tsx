@@ -91,7 +91,7 @@ export function NovaCompanion({
             <span aria-hidden>{reduced ? line : line.slice(0, shown)}</span>
             <span className="sr-only">{line}</span>
           </button>
-          <p className="mt-1 flex justify-between gap-4 font-mono text-[11px] text-subtle">
+          <p className="mt-1 flex justify-between gap-4 font-mono text-xs text-subtle">
             <span>
               {full
                 ? lines && index < lines.length - 1

@@ -32,7 +32,7 @@ interface BadgeProps {
 export function Badge({ variant = 'neutral', children, className = '' }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[11px] font-medium tracking-wide uppercase ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center border px-1.5 py-0.5 font-display text-xs tracking-[0.12em] uppercase ${VARIANTS[variant]} ${className}`}
     >
       {children ?? DEFAULT_TEXT[variant] ?? variant}
     </span>

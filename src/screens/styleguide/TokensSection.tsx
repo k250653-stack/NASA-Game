@@ -30,7 +30,7 @@ export function TokensSection() {
               className="h-12 rounded-md border border-border-strong"
               style={{ background: `var(--color-${name})` }}
             />
-            <p className="mt-1 truncate font-mono text-[11px] text-muted">{name}</p>
+            <p className="mt-1 truncate font-mono text-xs text-muted">{name}</p>
           </div>
         ))}
       </div>
@@ -52,16 +52,16 @@ export function TokensSection() {
         {(['rounded-sm', 'rounded-md', 'rounded-lg', 'rounded-xl'] as const).map((r) => (
           <div key={r} className="text-center">
             <div className={`size-14 border border-accent bg-accent/10 ${r}`} />
-            <p className="mt-1 font-mono text-[11px] text-muted">{r}</p>
+            <p className="mt-1 font-mono text-xs text-muted">{r}</p>
           </div>
         ))}
         <div className="text-center">
           <div className="size-14 rounded-lg bg-panel shadow-panel" />
-          <p className="mt-1 font-mono text-[11px] text-muted">shadow-panel</p>
+          <p className="mt-1 font-mono text-xs text-muted">shadow-panel</p>
         </div>
         <div className="text-center">
           <div className="size-14 rounded-lg bg-panel shadow-glow" />
-          <p className="mt-1 font-mono text-[11px] text-muted">shadow-glow</p>
+          <p className="mt-1 font-mono text-xs text-muted">shadow-glow</p>
         </div>
       </div>
     </Panel>

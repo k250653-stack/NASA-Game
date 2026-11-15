@@ -24,23 +24,20 @@ interface EventPopupProps {
 export function EventPopup({ event, run, design, content, onChoose }: EventPopupProps) {
   const options = availableOptions(run, event, design, content)
   return (
-    <PopupPanel size="compact" label={event.title}>
-      <div className="p-5" data-testid="event-popup" data-event={event.id}>
-        <div className="flex gap-4">
+    <PopupPanel section="Event" title={event.title}>
+      <div className="mx-auto max-w-4xl px-6 py-6" data-testid="event-popup" data-event={event.id}>
+        <div className="flex gap-6">
           <AssetImage
             kind="events"
             id={`event-${event.id}`}
             label={event.title}
-            className="size-24 shrink-0 [image-rendering:pixelated]"
+            className="size-40 shrink-0 border-2 border-border-strong [image-rendering:pixelated]"
           />
           <div className="min-w-0">
             <p className="font-title text-xs tracking-widest text-alert uppercase">
               {ROLE_LABEL[event.role]} · {event.urgency}
             </p>
-            <h2 className="font-title text-2xl tracking-wide text-primary uppercase">
-              {event.title}
-            </h2>
-            <p className="mt-1 text-sm text-muted">{event.description}</p>
+            <p className="mt-2 text-base text-primary">{event.description}</p>
           </div>
         </div>
         <ul className="mt-4 space-y-2">

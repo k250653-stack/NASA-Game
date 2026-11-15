@@ -17,12 +17,12 @@
   /* Surfaces, darkest to lightest */
   --color-bg: #060a13; /* page background */
   --color-surface: #0b111d; /* top bar, wells, inputs, bar tracks */
-  --color-panel: #101827; /* panels and cards */
-  --color-panel-raised: #172135; /* hover, secondary buttons, modals */
+  --color-panel: #0b1020; /* panels and popups: dark navy */
+  --color-panel-raised: #141c30; /* hover, secondary buttons */
 
   /* Lines */
-  --color-border: #1f2b40;
-  --color-border-strong: #33435f;
+  --color-border: #263147;
+  --color-border-strong: #5b6880; /* steel-grey pixel borders */
 
   /* Text */
   --color-primary: #e6edf7; /* main text */
@@ -33,6 +33,8 @@
   --color-accent: #22d3ee; /* primary accent: cyan */
   --color-accent-strong: #67e8f9; /* accent hover */
   --color-on-accent: #04121a; /* text on accent fills */
+  --color-alert-strong: #ffbd4a; /* primary button hover */
+  --color-on-alert: #1a1003; /* text on amber fills */
   --color-alert: #f5a524; /* alert accent: amber, warnings */
   --color-danger: #f05252;
   --color-success: #34d399;
@@ -55,17 +57,23 @@
   --color-blueprint: #22d3ee0f; /* HQ world backdrop grid */
 
   /* Fonts (self-hosted via @fontsource, imported in main.tsx) */
-  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  /* Headings, labels and buttons: Barlow Condensed, uppercase and letter-spaced. */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
   --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Mono', ui-monospace, monospace;
   /* Main menu title and items (public/assets/fonts) */
   --font-title: 'Barlow Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
 
   /* Radii */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* Pixel theme: square corners everywhere (rounded-full stays round for dots). */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+
+  /* Text never below 13px. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.15rem;
 
   /* Spacing: base unit plus named layout sizes (h-topbar, w-sidebar, ...) */
   --spacing: 0.25rem;
@@ -76,11 +84,10 @@
   --container-content: 96rem;
 
   /* Shadows */
-  --shadow-panel: inset 0 1px 0 0 #ffffff08, 0 10px 30px -18px #000000cc;
-  --shadow-glow:
-    0 0 0 1px var(--color-accent),
-    0 0 22px -6px color-mix(in oklab, var(--color-accent) 55%, transparent);
-  --shadow-modal: 0 24px 64px -12px #000000e6;
+  /* Pixel theme: no shadows or glow; selection is a solid 2px outline instead. */
+  --shadow-panel: none;
+  --shadow-glow: 0 0 0 2px var(--color-accent);
+  --shadow-modal: none;
 }
 
 @font-face {
@@ -136,4 +143,43 @@ body {
     linear-gradient(var(--color-blueprint) 1px, transparent 1px),
     linear-gradient(90deg, var(--color-blueprint) 1px, transparent 1px);
   background-size: 32px 32px;
+}
+
+/*
+ * Pixel panel: 2px steel border with two stepped notches (top-left, bottom-right). Drawn with
+ * corner squares, not clip-path, so tooltips and focus rings inside are never cut off.
+ * Set --notch-bg to the colour behind the panel when it is not the page background.
+ */
+@utility pixel-panel {
+  position: relative;
+  border: 2px solid var(--color-border-strong);
+  background-color: var(--color-panel);
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--notch-bg, var(--color-bg));
+    pointer-events: none;
+  }
+  &::before {
+    top: -2px;
+    left: -2px;
+    border-right: 2px solid var(--color-border-strong);
+    border-bottom: 2px solid var(--color-border-strong);
+  }
+  &::after {
+    right: -2px;
+    bottom: -2px;
+    border-left: 2px solid var(--color-border-strong);
+    border-top: 2px solid var(--color-border-strong);
+  }
+}
+
+/* Headings and labels: condensed, uppercase, letter-spaced. */
+@utility label-caps {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }

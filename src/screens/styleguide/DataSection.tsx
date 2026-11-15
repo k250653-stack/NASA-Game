@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Button } from '@/ui/Button'
 import { Panel } from '@/ui/Panel'
+import { InfoTip } from '@/ui/InfoTip'
 import { ResourceBar } from '@/ui/ResourceBar'
+import { SegmentBar } from '@/ui/SegmentBar'
 
 /** Demo values for the UI kit only; real values come from the engine and content. */
 const DEMO = { max: 20000, warnAt: 6000, dangerAt: 3000, step: 2500, start: 14000 }
@@ -82,6 +84,13 @@ export function DataSection() {
           mode="filling"
         />
         <ResourceBar label="Science" icon="IconFlask" value={64} max={100} unit="pts" />
+        <div className="flex items-center gap-3">
+          <span className="label-caps text-sm text-muted">SegmentBar</span>
+          <SegmentBar share={0.6} fill="bg-accent" className="flex-1" />
+          <SegmentBar share={0.25} fill="bg-alert" className="flex-1" />
+          <SegmentBar share={0.1} fill="bg-danger" className="flex-1" />
+          <InfoTip>InfoTip: secondary details live behind this “i”.</InfoTip>
+        </div>
       </div>
     </Panel>
   )

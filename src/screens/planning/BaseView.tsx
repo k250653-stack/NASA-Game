@@ -28,12 +28,12 @@ export function BaseView({ design, seat, content }: BaseViewProps) {
   })
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-surface">
+    <div className="relative aspect-video w-full overflow-hidden border-2 border-border-strong bg-surface">
       <AssetImage
         kind="backgrounds"
         id={`base-${design.destinationId}`}
         label={`${design.destinationId} base`}
-        className="absolute inset-0 h-full w-full object-cover opacity-80"
+        className="absolute inset-0 h-full w-full object-cover [image-rendering:pixelated]"
       />
       {markers.map(({ slot, part, mine }) => (
         <div

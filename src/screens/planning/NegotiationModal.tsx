@@ -121,7 +121,7 @@ function NegotiationBody({
         />
         <p className="text-xs text-muted">{ROLE_LABEL[teammate.role]}</p>
         <PrioritiesBar priorities={teammate.priorities} />
-        <p className="font-mono text-[11px] text-muted">
+        <p className="font-mono text-xs text-muted">
           Uses {Math.round(usage.massKg).toLocaleString('en-US')} kg · {Math.round(usage.powerW)} W
           · ${Math.round(usage.costM)}M
         </p>

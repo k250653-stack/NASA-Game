@@ -26,10 +26,10 @@ export function StatChip({
   return (
     <div
       data-testid={testId}
-      className={`inline-flex items-center gap-2 rounded-md border border-border bg-surface px-2.5 py-1.5 ${className}`}
+      className={`inline-flex items-center gap-2 border-2 border-border bg-surface px-2.5 py-1 ${className}`}
     >
       {icon && <Icon name={icon} size={16} className="text-muted" />}
-      <span className="text-xs text-muted">{label}</span>
+      <span className="label-caps text-xs text-muted">{label}</span>
       <span className={`font-mono text-sm tabular-nums ${TONE_TEXT[tone]}`}>
         {value}
         {unit && <span className="ml-0.5 text-subtle">{unit}</span>}

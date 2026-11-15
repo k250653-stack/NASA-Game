@@ -1,9 +1,7 @@
 import { canEdit, ownerOfCategory, type DesignChange } from '@/engine/planning'
 import type { Design, EngineContent } from '@/engine/types'
 import type { Part, Role, RoleChoice } from '@/schemas'
-import { Button } from '@/ui/Button'
 import { Icon } from '@/ui/Icon'
-import { PartCard } from '@/ui/PartCard'
 import { Tabs } from '@/ui/Tabs'
 import { Tooltip } from '@/ui/Tooltip'
 
@@ -15,65 +13,79 @@ interface PartsCatalogProps {
   onEdit: (change: DesignChange) => void
 }
 
-/** Parts grouped by the seat that owns them; the player's tab first, others view-only. */
+const ACT =
+  'flex size-7 items-center justify-center border-2 border-border-strong font-mono text-sm text-primary hover:border-accent hover:text-accent'
+
+/** Parts grouped by the seat that owns them, as a compact list: icon, name, mass/power/cost. */
 export function PartsCatalog({ design, seat, content, ownerName, onEdit }: PartsCatalogProps) {
   const roles = content.roles.filter((r) => r.id !== 'director' && r.owns.categories.length > 0)
   const ordered = [...roles].sort((a, b) => Number(b.id === seat) - Number(a.id === seat))
 
-  const actions = (part: Part) => {
+  const row = (part: Part) => {
     const count = design.partIds.filter((id) => id === part.id).length
     const sameCategory = design.partIds.find(
       (id) => id !== part.id && content.parts.find((p) => p.id === id)?.category === part.category,
     )
     const add: DesignChange = { kind: 'addPart', partId: part.id }
-    if (!canEdit(seat, add, content)) {
-      const owner = ownerName(ownerOfCategory(part.category, content))
-      return (
-        <div className="flex items-center gap-2 text-xs text-subtle">
-          {count > 0 && <span className="font-mono text-primary">×{count} on board</span>}
-          <Tooltip content={`Owned by ${owner}: ask them in a trade.`}>
+    const editable = canEdit(seat, add, content)
+    const owner = ownerName(ownerOfCategory(part.category, content))
+    const power = part.powerW > 0 ? `+${part.powerW}` : `${part.powerW}`
+    return (
+      <li
+        key={part.id}
+        className={`flex items-center gap-2 border-l-2 py-1.5 pr-1 pl-2 ${count > 0 ? 'border-accent bg-accent/5' : 'border-transparent'}`}
+      >
+        <Icon name={part.icon} size={18} className={count > 0 ? 'text-accent' : 'text-muted'} />
+        <Tooltip content={part.description}>
+          <span tabIndex={0} className="min-w-0 flex-1 truncate text-sm text-primary">
+            {part.name}
+            {count > 0 && <span className="ml-1 font-mono text-accent">×{count}</span>}
+          </span>
+        </Tooltip>
+        <span className="w-28 shrink-0 text-right font-mono text-xs text-muted tabular-nums">
+          {part.massKg}kg · {power}W · ${part.costM}M
+        </span>
+        {editable ? (
+          <span className="flex shrink-0 gap-1">
+            {count === 0 && sameCategory ? (
+              <button
+                type="button"
+                className={ACT}
+                aria-label={`Swap in ${part.name}`}
+                title="Swap in"
+                onClick={() => onEdit({ kind: 'swapPart', fromId: sameCategory, toId: part.id })}
+              >
+                ⇄
+              </button>
+            ) : null}
+            {count > 0 && (
+              <button
+                type="button"
+                className={ACT}
+                aria-label={`Remove ${part.name}`}
+                onClick={() => onEdit({ kind: 'removePart', partId: part.id })}
+              >
+                −
+              </button>
+            )}
             <button
               type="button"
-              aria-disabled="true"
-              className="ml-auto flex items-center gap-1 rounded-sm px-1 py-0.5 text-subtle"
+              className={ACT}
+              aria-label={`Add ${part.name}`}
+              onClick={() => onEdit(add)}
+              data-testid={`add-${part.id}`}
             >
-              <Icon name="IconAlertOctagon" size={14} />
-              Owned by {owner}
+              +
             </button>
+          </span>
+        ) : (
+          <Tooltip content={`Owned by ${owner}: ask them in a trade.`}>
+            <span tabIndex={0} className="shrink-0 text-subtle" aria-label={`Owned by ${owner}`}>
+              <Icon name="IconAlertOctagon" size={16} />
+            </span>
           </Tooltip>
-        </div>
-      )
-    }
-    return (
-      <div className="flex flex-wrap items-center gap-2">
-        {count > 0 && <span className="font-mono text-xs text-primary">×{count} on board</span>}
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => onEdit(add)}
-          data-testid={`add-${part.id}`}
-        >
-          {count > 0 ? 'Add another' : 'Add'}
-        </Button>
-        {count === 0 && sameCategory && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onEdit({ kind: 'swapPart', fromId: sameCategory, toId: part.id })}
-          >
-            Swap in
-          </Button>
         )}
-        {count > 0 && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onEdit({ kind: 'removePart', partId: part.id })}
-          >
-            Remove
-          </Button>
-        )}
-      </div>
+      </li>
     )
   }
 
@@ -81,21 +93,11 @@ export function PartsCatalog({ design, seat, content, ownerName, onEdit }: Parts
     <Tabs
       tabs={ordered.map((r) => ({
         id: r.id,
-        label:
-          r.id === seat || seat === 'director'
-            ? `${r.name}${r.id === seat ? ' (you)' : ''}`
-            : `${r.name} · ${ownerName(r.id as Role)}`,
+        label: r.id === seat ? `${r.name} (you)` : r.name,
         content: (
-          <div className="grid grid-cols-2 gap-3">
-            {content.parts
-              .filter((p) => r.owns.categories.includes(p.category))
-              .map((p) => (
-                <div key={p.id} className="flex flex-col gap-2">
-                  <PartCard part={p} selected={design.partIds.includes(p.id)} />
-                  {actions(p)}
-                </div>
-              ))}
-          </div>
+          <ul className="flex flex-col">
+            {content.parts.filter((p) => r.owns.categories.includes(p.category)).map(row)}
+          </ul>
         ),
       }))}
     />

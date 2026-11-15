@@ -14,7 +14,7 @@ import { CrewCard } from '@/ui/CrewCard'
 import { Panel } from '@/ui/Panel'
 import { PhaseShell } from '@/ui/PhaseShell'
 import { toast } from '@/ui/uiStore'
-import { CrewDetailModal } from './recruit/CrewDetailModal'
+import { CrewDetailPanel } from './recruit/CrewDetailModal'
 import { TeamSidebar } from './recruit/TeamSidebar'
 
 export default function Recruit() {
@@ -77,52 +77,57 @@ export default function Recruit() {
     <PhaseShell
       title="Recruit Your Crew"
       description="Click a candidate to read their file. Cover every role except yours, keep the team balanced, and stay inside the budget."
-      nextLabel="Continue to Planning"
+      nextLabel="Confirm crew"
       nextDisabled={!validation.valid}
       nextHint={validation.reasons[0]}
       sidebar={
-        <TeamSidebar
-          roleChoice={roleChoice}
-          callsign={callsign}
-          seatName={seatName}
-          team={team}
-          validation={validation}
-          analysis={analysis}
-          onOpen={setOpenId}
-          canSuggest={suggestion !== null}
-          onSuggest={() => {
-            if (!suggestion) return
-            setRecruited(suggestion)
-            toast.success(
-              'Suggested team recruited',
-              'Balanced, every role covered, within budget.',
-            )
-          }}
-        />
+        <>
+          {open && (
+            <CrewDetailPanel
+              member={open}
+              recruited={recruitedIds.includes(open.id)}
+              blockedReason={preview?.refused}
+              replaces={replaces}
+              onRecruit={recruit}
+              onRemove={() => {
+                dismiss(open.id)
+                setOpenId(null)
+              }}
+              onClose={() => setOpenId(null)}
+            />
+          )}
+          <TeamSidebar
+            roleChoice={roleChoice}
+            callsign={callsign}
+            seatName={seatName}
+            team={team}
+            validation={validation}
+            analysis={analysis}
+            onOpen={setOpenId}
+            canSuggest={suggestion !== null}
+            onSuggest={() => {
+              if (!suggestion) return
+              setRecruited(suggestion)
+              toast.success(
+                'Suggested team recruited',
+                'Balanced, every role covered, within budget.',
+              )
+            }}
+          />
+        </>
       }
     >
-      <div className="grid grid-cols-2 gap-4 2xl:grid-cols-3">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-4">
         {pool.map((m) => (
           <CrewCard
             key={m.id}
             member={m}
-            selected={recruitedIds.includes(m.id)}
+            selected={openId === m.id}
+            recruited={recruitedIds.includes(m.id)}
             onSelect={() => setOpenId(m.id)}
           />
         ))}
       </div>
-      <CrewDetailModal
-        member={open}
-        recruited={open ? recruitedIds.includes(open.id) : false}
-        blockedReason={preview?.refused}
-        replaces={replaces}
-        onRecruit={recruit}
-        onRemove={() => {
-          if (open) dismiss(open.id)
-          setOpenId(null)
-        }}
-        onClose={() => setOpenId(null)}
-      />
     </PhaseShell>
   )
 }

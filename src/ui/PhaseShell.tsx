@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { PHASES, phaseIndex, useStore } from '@/store'
 import { Button } from './Button'
+import { InfoTip } from './InfoTip'
+import { usePopup } from './popupContext'
 import { Panel } from './Panel'
 import { ScreenLayout } from './ScreenLayout'
 
@@ -41,12 +43,13 @@ export function PhaseShell({
   const nextPhase = useStore((s) => s.nextPhase)
   const prevPhase = useStore((s) => s.prevPhase)
   const setPhase = useStore((s) => s.setPhase)
+  const popup = usePopup()
 
   const index = phaseIndex(phase)
   const isLast = index === PHASES.length - 1
 
   const footer = (
-    <div className="flex items-start justify-between gap-6 border-t border-border pt-4">
+    <div className="flex items-start justify-between gap-6 border-t-2 border-border pt-4">
       <Button variant="secondary" onClick={prevPhase} data-testid="back-button">
         ← {backLabel}
       </Button>
@@ -76,15 +79,18 @@ export function PhaseShell({
 
   return (
     <ScreenLayout sidebar={sidebar} footer={footer} topBarExtra={topBarExtra}>
-      <div className="flex items-start justify-between gap-6">
-        <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-accent uppercase">
-            Phase {index + 1} / {PHASES.length} · {phase}
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-primary">
+      {/* Title bar: "PERSONNEL · RECRUIT CREW" in a popup, "PHASE 4 / 10 · RECRUIT" on its own. */}
+      <div
+        className={`flex items-center justify-between gap-4 border-b-2 border-border pb-3 ${popup ? 'pr-10' : ''}`}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <h1 className="label-caps truncate text-2xl text-primary">
+            <span className="text-accent">
+              {popup?.section ?? `Phase ${index + 1} / ${PHASES.length}`} ·{' '}
+            </span>
             {title}
           </h1>
-          <p className="mt-2 max-w-3xl text-base text-muted">{description}</p>
+          <InfoTip label={`About ${title}`}>{description}</InfoTip>
         </div>
         {headerAside}
       </div>

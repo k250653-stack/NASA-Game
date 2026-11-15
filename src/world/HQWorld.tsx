@@ -13,6 +13,7 @@ import { PopupPanel } from './PopupPanel'
 import { NovaCompanion } from '@/nova/NovaCompanion'
 import { skipTutorial, useNova } from '@/nova/novaStore'
 import { useHqTutorial } from '@/nova/tutorial'
+import type { Step } from './rooms/room'
 import { doorLockReason } from './steps'
 import { WorldCanvas } from './WorldCanvas'
 import { closePopup, openStep, savePlayerPos, useWorld } from './worldStore'
@@ -27,6 +28,14 @@ function interact(target: Target): void {
   if (target.kind !== 'station') return
   if (target.opens === 'briefing' && debriefReady()) useStore.getState().setPhase('review')
   else openStep(target.opens)
+}
+
+/** Popup title-bar section for each station step. */
+const STEP_SECTION: Record<Step, string> = {
+  planning: 'Mission Planning',
+  personnel: 'Personnel',
+  briefing: 'Briefing',
+  launch: 'Launch Control',
 }
 
 /** Opens the debrief this long after returning to Earth. */
@@ -148,7 +157,11 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
       <p className="pointer-events-none absolute bottom-4 left-4 font-mono text-xs text-subtle">
         WASD / arrows move · Shift run · E use · Esc pause · F2 debug
       </p>
-      {popupStep && popup && <PopupPanel onClose={closePopup}>{popup}</PopupPanel>}
+      {popupStep && popup && (
+        <PopupPanel onClose={closePopup} section={STEP_SECTION[popupStep]}>
+          {popup}
+        </PopupPanel>
+      )}
       {debriefOpen && <DebriefPopup onClose={() => setPhase('hq')} />}
       <PauseMenu
         state={menu}

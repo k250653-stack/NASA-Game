@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { CrewMember } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
+import { SegmentBar } from '@/ui/SegmentBar'
 import { PopupPanel } from '../PopupPanel'
 
 export const SECTION = 'font-title text-sm tracking-widest text-alert uppercase'
@@ -17,13 +18,12 @@ interface StationShellProps {
 /** Same compact pixel popup for every habitat station: title, read-only info, a crew comment. */
 export function StationShell({ title, testId, talk, onClose, children }: StationShellProps) {
   return (
-    <PopupPanel size="compact" label={title} onClose={onClose}>
-      <div className="space-y-4 p-5" data-testid={testId}>
-        <h2 className="font-title text-2xl tracking-wide text-primary uppercase">{title}</h2>
+    <PopupPanel section="Habitat" title={title} onClose={onClose}>
+      <div className="mx-auto max-w-3xl space-y-5 px-6 py-6" data-testid={testId}>
         {children}
         {talk && (
           <div
-            className="flex items-center gap-3 border-t border-border pt-3"
+            className="flex items-center gap-3 border-t-2 border-border pt-4"
             data-testid="station-talk"
           >
             <AssetImage
@@ -56,8 +56,8 @@ export function Row({
   tone?: string
 }) {
   return (
-    <div className="flex justify-between gap-4 border-t border-border pt-1 text-sm">
-      <span className="font-title tracking-wide text-muted uppercase">{label}</span>
+    <div className="flex justify-between gap-4 py-0.5 text-sm">
+      <span className="label-caps text-muted">{label}</span>
       <span className={`font-mono tabular-nums ${tone}`}>{value}</span>
     </div>
   )
@@ -65,12 +65,7 @@ export function Row({
 
 export function MeterBar({ share, tone }: { share: number; tone: string }) {
   return (
-    <span className="block h-2.5 w-full bg-surface">
-      <span
-        className={`block h-full ${tone}`}
-        style={{ width: `${Math.round(Math.max(0, Math.min(1, share)) * 100)}%` }}
-      />
-    </span>
+    <SegmentBar share={share} fill={tone} />
   )
 }
 

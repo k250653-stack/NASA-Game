@@ -29,7 +29,7 @@ export function MissionLog({ log }: { log: readonly LogEntry[] }) {
           </span>
           <span className={KIND_CLASS[entry.kind]}>
             {entry.handledBy && (
-              <span className="mr-1 font-mono text-[10px] text-subtle uppercase">
+              <span className="mr-1 font-mono text-xs text-subtle uppercase">
                 [{HANDLED[entry.handledBy]}]
               </span>
             )}

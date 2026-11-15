@@ -154,24 +154,15 @@ export default function PlanningBoard() {
         />
       }
     >
-      <div className="grid grid-cols-[15rem_minmax(0,1fr)] gap-5" data-testid="planning-board">
-        <TeamColumn
-          seat={seat}
-          seatName={seatName}
-          callsign={p.callsign}
-          team={team}
-          usage={(role) => roleUsage(design, role, content)}
-          playerUsage={playerUsage}
-          onOpen={playerRole ? setTalkTo : null}
-        />
-        <div className="flex min-w-0 flex-col gap-5">
-          <BaseView design={design} seat={seat} content={content} />
-          <Panel
-            id="panel-catalog"
-            testId="catalog-panel"
-            title="Parts catalog"
-            subtitle="Add, swap or remove parts in your seat; ask teammates for theirs."
-          >
+      <div className="grid grid-cols-[22rem_minmax(0,1fr)] gap-5" data-testid="planning-board">
+        <Panel
+          id="panel-catalog"
+          testId="catalog-panel"
+          title="Parts"
+          subtitle="Add (+), remove (−) or swap (⇄) parts in your seat. Parts owned by a teammate need a trade: click their portrait."
+          padded={false}
+        >
+          <div className="px-3 pb-3">
             <PartsCatalog
               design={design}
               seat={seat}
@@ -179,23 +170,37 @@ export default function PlanningBoard() {
               ownerName={ownerName}
               onEdit={p.edit}
             />
-          </Panel>
-          <SuppliesPanel
-            design={design}
+          </div>
+        </Panel>
+        <div className="flex min-w-0 flex-col gap-5">
+          <TeamColumn
             seat={seat}
-            content={content}
-            ownerName={ownerName(
-              ownerOfChange({ kind: 'supply', resource: 'waterKg', deltaKg: 0 }, content),
-            )}
-            onEdit={p.edit}
+            seatName={seatName}
+            callsign={p.callsign}
+            team={team}
+            usage={(role) => roleUsage(design, role, content)}
+            playerUsage={playerUsage}
+            onOpen={playerRole ? setTalkTo : null}
           />
-          <RocketSelector
-            design={design}
-            seat={seat}
-            content={content}
-            ownerName={ownerName(ownerOfChange({ kind: 'rocket', rocketId: '' }, content))}
-            onEdit={p.edit}
-          />
+          <BaseView design={design} seat={seat} content={content} />
+          <div className="grid grid-cols-2 items-start gap-5">
+            <SuppliesPanel
+              design={design}
+              seat={seat}
+              content={content}
+              ownerName={ownerName(
+                ownerOfChange({ kind: 'supply', resource: 'waterKg', deltaKg: 0 }, content),
+              )}
+              onEdit={p.edit}
+            />
+            <RocketSelector
+              design={design}
+              seat={seat}
+              content={content}
+              ownerName={ownerName(ownerOfChange({ kind: 'rocket', rocketId: '' }, content))}
+              onEdit={p.edit}
+            />
+          </div>
           {isMars && (
             <StandingOrdersPanel orders={design.standingOrders} onChange={setStandingOrders} />
           )}

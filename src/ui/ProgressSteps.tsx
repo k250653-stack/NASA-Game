@@ -33,7 +33,7 @@ export function ProgressSteps({
               className="flex items-center gap-1.5"
             >
               <span
-                className={`flex size-5 items-center justify-center rounded-full border font-mono text-[10px] ${
+                className={`flex size-5 items-center justify-center rounded-full border font-mono text-xs ${
                   state === 'current'
                     ? 'border-accent bg-accent text-on-accent'
                     : state === 'done'

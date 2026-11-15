@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
+import { InfoTip } from './InfoTip'
 
 interface PanelProps {
   title?: ReactNode
+  /** Secondary detail: shown behind an "i" tip next to the title, not as a second line. */
   subtitle?: ReactNode
   /** Buttons or controls shown on the right of the header. */
   actions?: ReactNode
@@ -14,7 +16,7 @@ interface PanelProps {
   testId?: string
 }
 
-/** Flat titled container: the basic building block of every screen. */
+/** Pixel panel: dark navy, 2px steel border, notched corners, condensed caps title. */
 export function Panel({
   title,
   subtitle,
@@ -31,17 +33,15 @@ export function Panel({
       id={id}
       data-testid={testId}
       tabIndex={id ? -1 : undefined}
-      className={`rounded-lg border border-border bg-panel shadow-panel ${className}`}
+      className={`pixel-panel ${className}`}
     >
       {hasHeader && (
-        <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <div className="min-w-0">
+        <header className="flex items-center justify-between gap-3 border-b-2 border-border px-4 py-2.5">
+          <div className="flex min-w-0 items-center gap-2">
             {title !== undefined && (
-              <h2 className="font-display text-sm font-semibold tracking-[0.14em] text-primary uppercase">
-                {title}
-              </h2>
+              <h2 className="label-caps truncate text-base text-primary">{title}</h2>
             )}
-            {subtitle !== undefined && <p className="mt-0.5 text-xs text-muted">{subtitle}</p>}
+            {subtitle !== undefined && <InfoTip>{subtitle}</InfoTip>}
           </div>
           {actions !== undefined && (
             <div className="flex shrink-0 items-center gap-2">{actions}</div>

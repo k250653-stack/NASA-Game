@@ -1,68 +1,57 @@
-import { SKILL_KEYS, type CrewMember } from '@/schemas'
+import type { CrewMember } from '@/schemas'
 import { AssetImage } from './AssetImage'
 import { Badge } from './Badge'
 import { Card } from './Card'
-import { Icon } from './Icon'
-import { SkillBar } from './SkillBar'
-import { ROLE_LABEL, SKILL_LABEL } from './labels'
+import { ROLE_LABEL } from './labels'
+import { roleClasses } from './roleColors'
 
 interface CrewCardProps {
   member: CrewMember
   selected?: boolean
   onSelect?: () => void
   disabled?: boolean
+  /** Small marker for crew already on the team. */
+  recruited?: boolean
 }
 
-export function CrewCard({ member, selected, onSelect, disabled }: CrewCardProps) {
+/** Portrait-first crew card: big portrait, role stripe, name, two trait tags, salary. */
+export function CrewCard({ member, selected, onSelect, disabled, recruited }: CrewCardProps) {
+  const role = roleClasses(member.role)
   return (
     <Card
       testId={`crew-card-${member.id}`}
       selected={selected}
       onSelect={onSelect}
       disabled={disabled}
+      padded={false}
       label={onSelect ? `${member.name}, ${ROLE_LABEL[member.role]}` : undefined}
     >
-      <div className="flex gap-3">
-        <AssetImage
-          kind="portraits"
-          id={member.portrait}
-          label={member.name}
-          className="size-16 shrink-0 rounded-md"
-        />
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate font-display text-base font-semibold text-primary">
-            {member.name}
-          </h3>
-          <p className="text-xs text-muted">{ROLE_LABEL[member.role]}</p>
-          <div className="mt-1.5 flex flex-wrap gap-1">
-            {member.traits.map((t) => (
+      <div className={`border-t-4 ${role.topBorder}`}>
+        <div className="relative">
+          <AssetImage
+            kind="portraits"
+            id={member.portrait}
+            label={member.name}
+            className="aspect-square w-full object-cover [image-rendering:pixelated]"
+          />
+          {recruited && (
+            <span className="label-caps absolute top-1.5 left-1.5 bg-success px-1.5 text-xs text-bg">
+              On team
+            </span>
+          )}
+        </div>
+        <div className="space-y-1.5 px-3 py-2.5">
+          <h3 className="label-caps truncate text-base text-primary">{member.name}</h3>
+          <p className={`label-caps text-xs ${role.text}`}>{ROLE_LABEL[member.role]}</p>
+          <div className="flex items-center gap-1">
+            {member.traits.slice(0, 2).map((t) => (
               <Badge key={t} variant={t} />
             ))}
+            <span className="ml-auto font-mono text-sm text-primary tabular-nums">
+              ${member.salaryM.toFixed(1)}M
+            </span>
           </div>
         </div>
-        <div className="shrink-0 text-right">
-          <div className="text-[10px] tracking-wider text-subtle uppercase">Salary</div>
-          <div className="font-mono text-sm text-primary tabular-nums">
-            ${member.salaryM.toFixed(1)}M
-          </div>
-        </div>
-      </div>
-
-      <ul className="mt-3 space-y-1 text-sm">
-        <li className="flex gap-2 text-primary">
-          <Icon name="IconPlus" size={16} className="mt-0.5 shrink-0 text-success" />
-          <span>{member.strength.text}</span>
-        </li>
-        <li className="flex gap-2 text-muted">
-          <Icon name="IconMinus" size={16} className="mt-0.5 shrink-0 text-danger" />
-          <span>{member.weakness.text}</span>
-        </li>
-      </ul>
-
-      <div className="mt-3 grid grid-cols-5 gap-x-4 border-t border-border pt-3">
-        {SKILL_KEYS.map((k) => (
-          <SkillBar key={k} label={SKILL_LABEL[k]} level={member.skills[k]} />
-        ))}
       </div>
     </Card>
   )

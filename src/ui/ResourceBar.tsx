@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Icon } from './Icon'
+import { SegmentBar } from './SegmentBar'
 import { TONE_FILL, TONE_TEXT, type Tone } from './tones'
 
 interface ResourceBarProps {
@@ -79,7 +80,7 @@ export function ResourceBar({
     t !== undefined && max > 0 ? (
       <span
         aria-hidden
-        className="absolute top-0 h-full w-px bg-border-strong"
+        className="absolute -top-0.5 h-3.5 w-0.5 bg-primary"
         style={{ left: `${Math.min(100, (t / max) * 100)}%` }}
       />
     ) : null
@@ -94,7 +95,7 @@ export function ResourceBar({
             className={TONE_TEXT[status === 'accent' ? 'neutral' : status]}
           />
         )}
-        <span id={id} className="text-xs font-medium tracking-wide text-muted uppercase">
+        <span id={id} className="label-caps text-sm text-muted">
           {label}
         </span>
         <span className="relative ml-auto font-mono text-sm tabular-nums">
@@ -127,14 +128,9 @@ export function ResourceBar({
         aria-valuemax={max}
         aria-valuenow={value}
         aria-valuetext={`${fmt(value)} of ${fmt(max)}${unit ? ` ${unit}` : ''}`}
-        className="relative h-2 overflow-hidden rounded-full border border-border bg-surface"
+        className="relative"
       >
-        <motion.div
-          className={`h-full rounded-full ${TONE_FILL[status]}`}
-          initial={false}
-          animate={{ width: `${pct}%` }}
-          transition={{ type: 'spring', stiffness: 140, damping: 22 }}
-        />
+        <SegmentBar share={pct / 100} fill={TONE_FILL[status]} />
         {tick(warnAt)}
         {tick(dangerAt)}
       </div>

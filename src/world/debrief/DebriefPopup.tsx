@@ -5,6 +5,7 @@ import { computeScore } from '@/engine/score'
 import { usePlanning } from '@/screens/planning/usePlanning'
 import { useStore } from '@/store'
 import { latestRuns, useRunHistory } from '@/store/runHistory'
+import { Button } from '@/ui/Button'
 import { PopupPanel } from '../PopupPanel'
 import { CauseList } from './CauseList'
 import { changeLines, graphSeries, newMission, redesignAndRetry } from './debrief'
@@ -17,8 +18,6 @@ const OUTCOME = {
   failed: { label: 'Failed', text: 'text-danger' },
 } as const
 const MAX_STARS = 3
-const BTN =
-  'border px-4 py-2 font-title text-lg tracking-widest uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
 
 /** The mission debrief over the Briefing room: score, causes, graph, crew, replay buttons. */
 export function DebriefPopup({ onClose }: { onClose: () => void }) {
@@ -54,7 +53,7 @@ export function DebriefPopup({ onClose }: { onClose: () => void }) {
   const outcome = OUTCOME[score.outcome]
 
   return (
-    <PopupPanel onClose={onClose} label="Mission debrief">
+    <PopupPanel onClose={onClose} section="Briefing" title="Mission debrief">
       <div className="p-6" data-testid="debrief" data-outcome={score.outcome}>
         <header className="flex flex-wrap items-end gap-x-6 gap-y-2 border-b border-border pb-4">
           <div>
@@ -114,66 +113,46 @@ export function DebriefPopup({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <footer className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-4">
-          <button
-            type="button"
-            className={`${BTN} border-accent text-accent hover:bg-accent/10`}
-            onClick={() => redesignAndRetry(newEvents)}
-            data-testid="redesign-retry"
+        <footer className="mt-6 flex flex-wrap items-center gap-3 border-t-2 border-border pt-4">
+          <Button
+            variant="secondary"
+            onClick={() => setPhase('title')}
+            data-testid="debrief-main-menu"
           >
-            Redesign &amp; retry
-          </button>
-          <label className="flex items-center gap-2 font-mono text-xs text-muted">
+            Main menu
+          </Button>
+          {confirmNew ? (
+            <>
+              <span className="text-sm text-alert">Start over? This plan is lost.</span>
+              <Button variant="danger" onClick={newMission} data-testid="confirm-new-mission">
+                Yes, new mission
+              </Button>
+              <Button variant="ghost" onClick={() => setConfirmNew(false)}>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="secondary"
+              onClick={() => setConfirmNew(true)}
+              data-testid="new-mission"
+            >
+              New mission
+            </Button>
+          )}
+          <label className="ml-auto flex items-center gap-2 text-sm text-muted">
             <input
               type="checkbox"
               checked={newEvents}
               onChange={(e) => setNewEvents(e.target.checked)}
-              className="accent-alert"
+              className="size-4 accent-alert"
               data-testid="new-random-events"
             />
             New random events
           </label>
-          <span className="ml-auto flex gap-3">
-            {confirmNew ? (
-              <>
-                <span className="self-center text-sm text-alert">
-                  Start over? This plan is lost.
-                </span>
-                <button
-                  type="button"
-                  className={`${BTN} border-danger text-danger hover:bg-danger/10`}
-                  onClick={newMission}
-                  data-testid="confirm-new-mission"
-                >
-                  Yes, new mission
-                </button>
-                <button
-                  type="button"
-                  className={`${BTN} border-border-strong text-muted hover:text-primary`}
-                  onClick={() => setConfirmNew(false)}
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                className={`${BTN} border-alert text-alert hover:bg-alert/10`}
-                onClick={() => setConfirmNew(true)}
-                data-testid="new-mission"
-              >
-                New mission
-              </button>
-            )}
-            <button
-              type="button"
-              className={`${BTN} border-border-strong text-muted hover:text-primary`}
-              onClick={() => setPhase('title')}
-              data-testid="debrief-main-menu"
-            >
-              Main menu
-            </button>
-          </span>
+          <Button onClick={() => redesignAndRetry(newEvents)} data-testid="redesign-retry">
+            Redesign &amp; retry
+          </Button>
         </footer>
       </div>
     </PopupPanel>

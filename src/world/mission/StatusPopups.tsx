@@ -2,11 +2,11 @@ import type { Design, EngineContent, MissionState } from '@/engine/types'
 import type { CrewMember } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
 import { ROLE_LABEL } from '@/ui/labels'
+import { SegmentBar } from '@/ui/SegmentBar'
 import { PopupPanel } from '../PopupPanel'
 import { StationShell } from './StationShell'
 import { dailyUse, type Gauge } from './missionRun'
 
-const TITLE = 'font-title text-2xl tracking-wide text-primary uppercase'
 
 function Bar({ label, value }: { label: string; value: number }) {
   const v = Math.max(0, Math.min(100, Math.round(value)))
@@ -14,9 +14,7 @@ function Bar({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-center gap-2" data-testid={`crew-${label.toLowerCase()}`}>
       <span className="w-16 font-title text-sm tracking-wide text-muted uppercase">{label}</span>
-      <span className="h-2 flex-1 bg-surface">
-        <span className={`block h-full ${tone}`} style={{ width: `${v}%` }} />
-      </span>
+      <SegmentBar share={v / 100} fill={tone} className="flex-1" />
       <span className="w-8 text-right font-mono text-xs text-primary tabular-nums">{v}</span>
     </div>
   )
@@ -44,16 +42,15 @@ export function CrewStatusPopup({ member, run, content, post, onClose }: CrewSta
         ? `Busy with "${lastEvent?.title ?? 'a task'}" (${c.busyTurns} more turn${c.busyTurns > 1 ? 's' : ''})`
         : `Standing by at the ${post}`
   return (
-    <PopupPanel size="compact" label={member.name} onClose={onClose}>
-      <div className="flex gap-4 p-5" data-testid="crew-status">
+    <PopupPanel section="Crew" title={member.name} onClose={onClose}>
+      <div className="mx-auto flex max-w-3xl gap-6 px-6 py-6" data-testid="crew-status">
         <AssetImage
           kind="portraits"
           id={member.portrait}
           label={member.name}
-          className="size-24 shrink-0"
+          className="size-32 shrink-0 border-2 border-border-strong"
         />
-        <div className="min-w-0 flex-1 space-y-1.5">
-          <h2 className={TITLE}>{member.name}</h2>
+        <div className="min-w-0 flex-1 space-y-2">
           <p className="font-title text-sm tracking-widest text-alert uppercase">
             {ROLE_LABEL[member.role]}
           </p>

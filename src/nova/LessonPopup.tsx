@@ -74,7 +74,7 @@ function LessonBody({ lesson }: { lesson: Lesson }) {
         role="dialog"
         aria-modal="true"
         aria-label={lesson.title}
-        className="relative max-h-[90vh] w-[min(46rem,94vw)] overflow-y-auto border border-border-strong bg-bg p-5 shadow-modal"
+        className="pixel-panel h-[92vh] w-[92vw] overflow-y-auto px-[max(1.5rem,calc((92vw-52rem)/2))] py-6"
       >
         <header className="flex items-center gap-3">
           <NovaSprite size={48} talking={guess === null} />

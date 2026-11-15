@@ -1,9 +1,7 @@
 import type { RoleUsage } from '@/engine/planningHints'
 import type { CrewMember, RoleChoice } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
-import { Badge } from '@/ui/Badge'
 import { ROLE_LABEL } from '@/ui/labels'
-import { Panel } from '@/ui/Panel'
 import { roleClasses } from '@/ui/roleColors'
 
 interface TeamColumnProps {
@@ -18,16 +16,13 @@ interface TeamColumnProps {
   onOpen: ((member: CrewMember) => void) | null
 }
 
-function UsageLine({ u }: { u: RoleUsage }) {
-  return (
-    <p className="mt-1 font-mono text-[11px] text-muted tabular-nums">
-      {Math.round(u.massKg).toLocaleString('en-US')} kg ·{' '}
-      {Math.round(u.powerW).toLocaleString('en-US')} W · ${Math.round(u.costM)}M
-    </p>
-  )
+function usageText(u: RoleUsage): string {
+  const kg = Math.round(u.massKg).toLocaleString('en-US')
+  const w = Math.round(u.powerW).toLocaleString('en-US')
+  return `${kg} kg · ${w} W · $${Math.round(u.costM)}M`
 }
 
-/** "Mission Team": the player and the AI teammates with what each is using. */
+/** The mission team as a row of portraits; click a teammate to negotiate. Usage on hover. */
 export function TeamColumn({
   seat,
   seatName,
@@ -38,68 +33,58 @@ export function TeamColumn({
   onOpen,
 }: TeamColumnProps) {
   return (
-    <Panel title="Mission team" padded={false}>
-      <ul className="flex flex-col">
-        <li className={`border-b border-border border-l-4 px-3 py-2.5 ${roleClasses(seat).border}`}>
-          <div className="flex items-center gap-2">
+    <ul className="flex flex-wrap items-end gap-4" aria-label="Mission team">
+      <li
+        title={`${seatName}: ${usageText(playerUsage)}`}
+        className="flex flex-col items-center gap-1"
+      >
+        <AssetImage
+          kind="portraits"
+          id="crew-player"
+          label={callsign || 'You'}
+          className={`size-16 border-2 ${roleClasses(seat).border}`}
+        />
+        <span className="label-caps text-xs text-primary">{callsign || 'You'}</span>
+        <span className={`label-caps text-xs ${roleClasses(seat).text}`}>{seatName}</span>
+      </li>
+      {team.map((m) => {
+        const c = roleClasses(m.role)
+        const tip = `${m.name}, ${ROLE_LABEL[m.role]}: ${usageText(usage(m.role))}${onOpen ? '. Click to negotiate.' : ''}`
+        const body = (
+          <>
             <AssetImage
               kind="portraits"
-              id="crew-player"
-              label={callsign || 'You'}
-              className="size-9 rounded-md"
+              id={m.portrait}
+              label={m.name}
+              className={`size-16 border-2 ${c.border}`}
             />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-primary">{callsign || 'You'}</p>
-              <p className={`text-xs ${roleClasses(seat).text}`}>{seatName}</p>
-            </div>
-          </div>
-          <UsageLine u={playerUsage} />
-        </li>
-        {team.map((m) => {
-          const c = roleClasses(m.role)
-          const body = (
-            <>
-              <div className="flex items-center gap-2">
-                <AssetImage
-                  kind="portraits"
-                  id={m.portrait}
-                  label={m.name}
-                  className="size-9 rounded-md"
-                />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-primary">{m.name}</p>
-                  <p className={`text-xs ${c.text}`}>{ROLE_LABEL[m.role]}</p>
-                </div>
-                {onOpen && (
-                  <Badge variant="info" className="ml-auto">
-                    Talk
-                  </Badge>
-                )}
+            <span className="label-caps text-xs text-primary">{m.name.split(' ')[0]}</span>
+            <span className={`label-caps text-xs ${c.text}`}>{ROLE_LABEL[m.role]}</span>
+          </>
+        )
+        return (
+          <li key={m.id}>
+            {onOpen ? (
+              <button
+                type="button"
+                title={tip}
+                data-testid={`teammate-card-${m.id}`}
+                onClick={() => onOpen(m)}
+                className="flex flex-col items-center gap-1 transition-transform hover:-translate-y-px"
+              >
+                {body}
+              </button>
+            ) : (
+              <div title={tip} className="flex flex-col items-center gap-1">
+                {body}
               </div>
-              <UsageLine u={usage(m.role)} />
-            </>
-          )
-          return (
-            <li
-              key={m.id}
-              className={`border-b border-border border-l-4 last:border-b-0 ${c.border}`}
-            >
-              {onOpen ? (
-                <button
-                  type="button"
-                  data-testid={`teammate-card-${m.id}`}
-                  onClick={() => onOpen(m)}
-                  className="w-full px-3 py-2.5 text-left hover:bg-panel-raised"
-                >
-                  {body}
-                </button>
-              ) : (
-                <div className="px-3 py-2.5">{body}</div>
-              )}
-            </li>
-          )
-        })}
-      </ul>
-    </Panel>
+            )}
+          </li>
+        )
+      })}
+      {onOpen && (
+        <li className="label-caps self-center text-xs text-subtle">Click a teammate to trade</li>
+      )}
+    </ul>
   )
 }

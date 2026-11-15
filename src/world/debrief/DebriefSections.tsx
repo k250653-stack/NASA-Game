@@ -3,6 +3,8 @@ import type { MissionScore } from '@/engine/score'
 import type { MissionState } from '@/engine/types'
 import type { CrewMember } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
+import { InfoTip } from '@/ui/InfoTip'
+import { SegmentBar } from '@/ui/SegmentBar'
 import { ROLE_LABEL } from '@/ui/labels'
 import { reactionLine, scoreTone } from './debrief'
 
@@ -30,14 +32,12 @@ export function ScoreBreakdown({ score }: { score: MissionScore }) {
                 <span className="w-28 font-title tracking-wide text-primary uppercase">
                   {label}
                 </span>
-                <span className="h-2.5 flex-1 bg-surface">
-                  <span className={`block h-full ${scoreTone(v)}`} style={{ width: `${v}%` }} />
-                </span>
+                <SegmentBar share={v / 100} fill={scoreTone(v)} height="h-3" className="flex-1" />
                 <span className="w-8 text-right font-mono text-sm text-primary tabular-nums">
                   {v}
                 </span>
+                <InfoTip label={`${label}: how it was scored`}>{part.explanation}</InfoTip>
               </div>
-              <p className="mt-0.5 text-xs text-muted">{part.explanation}</p>
             </li>
           )
         })}

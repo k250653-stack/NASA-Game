@@ -78,7 +78,7 @@ export function NovaCodex() {
         role="dialog"
         aria-modal="true"
         aria-label="NOVA's notes"
-        className="max-h-[86vh] w-[min(34rem,92vw)] overflow-y-auto border border-border-strong bg-bg p-5"
+        className="pixel-panel h-[92vh] w-[92vw] overflow-y-auto px-[max(1.5rem,calc((92vw-40rem)/2))] py-6"
       >
         <header className="flex items-baseline justify-between">
           <h2 className="font-title text-2xl tracking-wide text-primary uppercase">

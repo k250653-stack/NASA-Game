@@ -30,48 +30,43 @@ export function MarginsColumn({
   const [hints, setHints] = useState<Suggestion[] | null>(null)
 
   return (
-    <>
-      <Panel id="panel-margins" title="Margins" subtitle="Hover or focus a bar for the details">
-        <div className="flex flex-col gap-4" data-testid="margins">
-          {gauges.map((g) => (
-            <Tooltip key={g.id} content={g.explanation} side="bottom">
-              <div
-                tabIndex={0}
-                className="rounded-sm"
-                data-testid={`gauge-${g.id}`}
-                data-status={g.status}
-              >
-                <ResourceBar
-                  label={g.label}
-                  icon={g.icon}
-                  value={g.value}
-                  max={g.max}
-                  unit={g.unit}
-                  status={g.status}
-                  decimals={g.unit === 'GB/day' ? 1 : 0}
-                />
-              </div>
-            </Tooltip>
-          ))}
-        </div>
-      </Panel>
-      {hintsEnabled && (
-        <Panel
-          title="Hint"
-          actions={
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => setHints(suggestFixes(design, content))}
-              data-testid="hint-button"
-            >
-              Suggest fixes
-            </Button>
-          }
-        >
-          {hints === null ? (
-            <p className="text-sm text-muted">Over a limit? Ask for up to three concrete fixes.</p>
-          ) : hints.length === 0 ? (
+    <Panel
+      id="panel-margins"
+      title="Resources"
+      subtitle="Hover or focus a bar for the details."
+      actions={
+        hintsEnabled ? (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setHints(suggestFixes(design, content))}
+            data-testid="hint-button"
+          >
+            Fixes
+          </Button>
+        ) : undefined
+      }
+    >
+      <div className="flex flex-col gap-4" data-testid="margins">
+        {gauges.map((g) => (
+          <Tooltip key={g.id} content={g.explanation} side="bottom">
+            <div tabIndex={0} data-testid={`gauge-${g.id}`} data-status={g.status}>
+              <ResourceBar
+                label={g.label}
+                icon={g.icon}
+                value={g.value}
+                max={g.max}
+                unit={g.unit}
+                status={g.status}
+                decimals={g.unit === 'GB/day' ? 1 : 0}
+              />
+            </div>
+          </Tooltip>
+        ))}
+      </div>
+      {hints !== null && (
+        <div className="mt-4 border-t-2 border-border pt-3">
+          {hints.length === 0 ? (
             <p className="text-sm text-success">Within mass and budget limits: nothing to fix.</p>
           ) : (
             <ul className="flex flex-col gap-3">
@@ -81,7 +76,7 @@ export function MarginsColumn({
                   {canApply(h) ? (
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="secondary"
                       className="mt-1"
                       onClick={() => {
                         onApply(h)
@@ -97,8 +92,8 @@ export function MarginsColumn({
               ))}
             </ul>
           )}
-        </Panel>
+        </div>
       )}
-    </>
+    </Panel>
   )
 }

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import type { LogEntry } from '@/engine/types'
 import { Icon } from '@/ui/Icon'
+import { SegmentBar } from '@/ui/SegmentBar'
 import type { DayInfo, Gauge } from './missionRun'
 import type { Toast } from './useMissionRun'
 
@@ -58,12 +59,7 @@ export function GaugeStrip({ gauges }: { gauges: Gauge[] }) {
           <span className="w-14 font-title text-xs tracking-wide text-muted uppercase">
             {g.label}
           </span>
-          <span className="h-2 w-20 bg-surface">
-            <span
-              className={`block h-full ${BAR[g.status]}`}
-              style={{ width: `${Math.round(g.share * 100)}%` }}
-            />
-          </span>
+          <SegmentBar share={g.share} fill={BAR[g.status]} segments={10} className="w-24" />
         </li>
       ))}
     </ul>

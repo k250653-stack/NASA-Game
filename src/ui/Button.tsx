@@ -16,22 +16,25 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const BASE =
-  'inline-flex select-none items-center justify-center gap-2 rounded-md font-display font-semibold ' +
-  'uppercase tracking-wider transition-colors duration-150 ' +
+  'inline-flex select-none items-center justify-center gap-2 border-2 font-display uppercase ' +
+  'tracking-[0.12em] transition-[background-color,border-color,color,transform] duration-100 ' +
+  'enabled:hover:-translate-y-px enabled:active:translate-y-px ' +
   'disabled:cursor-not-allowed disabled:opacity-40'
 
+/** Amber = primary action, steel = secondary, red only for danger. */
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-on-accent hover:bg-accent-strong disabled:hover:bg-accent',
+  primary:
+    'border-alert bg-alert text-on-alert enabled:hover:border-alert-strong enabled:hover:bg-alert-strong',
   secondary:
-    'border border-border-strong bg-panel-raised text-primary hover:border-accent hover:text-accent',
-  ghost: 'text-muted hover:bg-panel-raised hover:text-primary',
-  danger: 'border border-danger/50 bg-danger/15 text-danger hover:bg-danger/25',
+    'border-border-strong bg-panel text-primary enabled:hover:border-accent enabled:hover:text-accent',
+  ghost: 'border-transparent text-muted enabled:hover:border-border enabled:hover:text-primary',
+  danger: 'border-danger bg-panel text-danger enabled:hover:bg-danger/15',
 }
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-xs',
-  md: 'h-10 px-4 text-sm',
-  lg: 'h-12 px-6 text-base',
+  sm: 'h-8 px-3 text-sm',
+  md: 'h-10 px-4 text-base',
+  lg: 'h-12 px-6 text-lg',
 }
 
 export function Button({

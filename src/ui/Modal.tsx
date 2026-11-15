@@ -71,7 +71,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
           <motion.div
-            className="absolute inset-0 bg-bg/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-bg/80"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -84,28 +84,28 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
             aria-modal="true"
             aria-labelledby={titleId}
             tabIndex={-1}
-            className={`relative w-full ${SIZES[size]} rounded-xl border border-border-strong bg-panel-raised shadow-modal`}
+            className={`pixel-panel w-full ${SIZES[size]}`}
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
           >
-            <header className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
-              <h2 id={titleId} className="font-display text-lg font-semibold text-primary">
+            <header className="flex items-center justify-between gap-4 border-b-2 border-border px-5 py-3">
+              <h2 id={titleId} className="label-caps text-xl text-primary">
                 {title}
               </h2>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close dialog"
-                className="rounded-md p-1 text-muted hover:bg-panel hover:text-primary"
+                className="border-2 border-transparent p-0.5 text-muted hover:border-border-strong hover:text-primary"
               >
                 <Icon name="IconX" size={20} />
               </button>
             </header>
             <div className="max-h-[70vh] overflow-y-auto px-5 py-4 text-primary">{children}</div>
             {footer && (
-              <footer className="flex justify-end gap-2 border-t border-border px-5 py-3">
+              <footer className="flex justify-end gap-2 border-t-2 border-border px-5 py-3">
                 {footer}
               </footer>
             )}

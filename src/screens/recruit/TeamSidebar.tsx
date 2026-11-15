@@ -44,7 +44,7 @@ export function TeamSidebar(p: TeamSidebarProps) {
       <Panel title="Your team" subtitle={`${p.team.length + 1} of ${v.slots + 1} seats`}>
         <ul className="flex flex-col gap-2">
           <li
-            className={`flex items-center gap-2 rounded-md border px-2 py-1.5 ${roleClasses(p.roleChoice).border} ${roleClasses(p.roleChoice).bg}`}
+            className={`flex items-center gap-2 border-2 px-2 py-1.5 ${roleClasses(p.roleChoice).border} ${roleClasses(p.roleChoice).bg}`}
           >
             <Icon name="IconUser" size={18} className={roleClasses(p.roleChoice).text} />
             <span className="text-sm font-medium text-primary">{p.callsign || 'You'}</span>
@@ -56,7 +56,7 @@ export function TeamSidebar(p: TeamSidebarProps) {
                 <button
                   type="button"
                   onClick={() => p.onOpen(seat.member!.id)}
-                  className="flex w-full items-center gap-2 rounded-md border border-border bg-surface px-2 py-1.5 text-left hover:border-border-strong"
+                  className="flex w-full items-center gap-2 border-2 border-border px-2 py-1.5 text-left hover:border-border-strong"
                 >
                   <AssetImage
                     kind="portraits"
@@ -68,7 +68,7 @@ export function TeamSidebar(p: TeamSidebarProps) {
                   <span className="ml-auto text-xs text-muted">{seat.label}</span>
                 </button>
               ) : (
-                <div className="flex items-center gap-2 rounded-md border border-dashed border-border-strong px-2 py-2 text-sm text-subtle">
+                <div className="flex items-center gap-2 border-2 border-dashed border-border px-2 py-2 text-sm text-subtle">
                   Empty: {seat.label}
                 </div>
               )}
@@ -85,10 +85,9 @@ export function TeamSidebar(p: TeamSidebarProps) {
         >
           Suggested team
         </Button>
-      </Panel>
 
-      <Panel title="Budget">
-        <div className="flex flex-col gap-3">
+        <h3 className="label-caps mt-4 border-t-2 border-border pt-3 text-sm text-muted">Budget</h3>
+        <div className="mt-2 flex flex-col gap-3">
           <StatChip
             testId="salaries"
             icon="IconCoin"
@@ -105,10 +104,11 @@ export function TeamSidebar(p: TeamSidebarProps) {
             unit="$M"
           />
         </div>
-      </Panel>
 
-      <Panel title="Team balance">
-        <div className="flex flex-wrap gap-1.5">
+        <h3 className="label-caps mt-4 border-t-2 border-border pt-3 text-sm text-muted">
+          Team balance
+        </h3>
+        <div className="mt-2 flex flex-wrap gap-1.5">
           <Badge variant={p.analysis.hasThinker ? 'thinker' : 'neutral'}>
             {p.analysis.hasThinker ? 'Thinker ✓' : 'No Thinker'}
           </Badge>
