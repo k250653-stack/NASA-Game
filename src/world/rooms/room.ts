@@ -1,6 +1,7 @@
 /**
- * Walkable room layouts: every src/world/rooms/*.json, validated with Zod on first use.
- * All coordinates are room-image pixels; press F2 in a room to see and measure them.
+ * Walkable room layouts for the mission habitats (src/world/rooms/*.json except hq-map.json,
+ * which is the single HQ map, see hqMap.ts), validated with Zod on first use. Coordinates are
+ * room-image pixels; press F2 in a room to see and measure them.
  */
 import { z } from 'zod'
 import { IMAGE_KINDS } from '@/ui/assets'
@@ -18,7 +19,7 @@ const doorSchema = z.object({
   /** Theme colour token name (index.css), e.g. "role-comms", "success". */
   color: z.string(),
   area: polygon,
-  /** Room id this door leads to (rooms outside the HQ map). */
+  /** Where this door leads (not used as a portal yet). */
   to: z.string(),
   /** Door id in that room to arrive in front of (centre of the floor if missing). */
   arrive: z.string().optional(),
@@ -74,8 +75,6 @@ export type Door = z.infer<typeof doorSchema>
 export type Station = z.infer<typeof stationSchema>
 export type Workstation = z.infer<typeof workstationSchema>
 
-export const LOBBY_ID = 'hq-lobby'
-
 const files = import.meta.glob<unknown>(['./*.json', '!./hq-map.json'], {
   eager: true,
   import: 'default',
@@ -89,17 +88,13 @@ function loadRooms(): Map<string, Room> {
     if (!result.success) throw new Error(`Room ${path}: ${result.error.message}`)
     map.set(result.data.id, result.data)
   }
-  for (const room of map.values()) {
-    for (const door of room.doors) {
-      if (!map.has(door.to))
-        throw new Error(`Room ${room.id}: door "${door.id}" leads to unknown room "${door.to}"`)
-    }
-  }
   return map
 }
 
-/** The room with this id, or the lobby if it is unknown (e.g. an old save). */
+/** The room with this id (a habitat). */
 export function getRoom(id: string): Room {
   rooms ??= loadRooms()
-  return rooms.get(id) ?? rooms.get(LOBBY_ID)!
+  const room = rooms.get(id)
+  if (!room) throw new Error(`Unknown room "${id}"`)
+  return room
 }

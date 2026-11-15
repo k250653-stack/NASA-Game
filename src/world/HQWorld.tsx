@@ -14,7 +14,8 @@ import { NovaCompanion } from '@/nova/NovaCompanion'
 import { skipTutorial, useNova } from '@/nova/novaStore'
 import { useHqTutorial } from '@/nova/tutorial'
 import type { Step } from './rooms/room'
-import { doorLockReason } from './steps'
+import { HqInfoModal } from './HqInfoModal'
+import { gateLockReason } from './steps'
 import { WorldCanvas } from './WorldCanvas'
 import { closePopup, openStep, savePlayerPos, useWorld } from './worldStore'
 
@@ -24,9 +25,11 @@ function debriefReady(): boolean {
   return run !== null && isMissionOver(run)
 }
 
-function interact(target: Target): void {
+/** A station was used: open its step's popup, the debrief, or the lobby's HQ info. */
+function interact(target: Target, openInfo: () => void): void {
   if (target.kind !== 'station') return
-  if (target.opens === 'briefing' && debriefReady()) useStore.getState().setPhase('review')
+  if (target.opens === 'info') openInfo()
+  else if (target.opens === 'briefing' && debriefReady()) useStore.getState().setPhase('review')
   else openStep(target.opens)
 }
 
@@ -50,9 +53,9 @@ function useRoomLocks(): Record<string, string | null> {
   const recruitedIds = useStore((s) => s.crew.recruitedIds)
   const launched = useStore((s) => s.mission.run !== null)
   return useMemo(() => {
-    void [scenarioId, roleChoice, difficulty, recruitedIds, launched] // inputs of doorLockReason
+    void [scenarioId, roleChoice, difficulty, recruitedIds, launched] // inputs of gateLockReason
     const locks: Record<string, string | null> = {}
-    for (const g of gatedRooms(getHqMap())) locks[g.roomId] = doorLockReason(g.door, planningDone)
+    for (const g of gatedRooms(getHqMap())) locks[g.roomId] = gateLockReason(g.gate, planningDone)
     return locks
   }, [planningDone, scenarioId, roleChoice, difficulty, recruitedIds, launched])
 }
@@ -77,10 +80,11 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
   const locks = useRoomLocks()
   const [target, setTarget] = useState<Target | null>(null)
   const [menu, setMenu] = useState<PauseState>(null)
+  const [infoOpen, setInfoOpen] = useState(false)
   const promptRef = useRef<HTMLDivElement>(null)
   const anchor = useRef({ x: 0, y: 0 })
   const novaOpen = useNova((s) => s.openLessonId !== null || s.codexOpen)
-  const busy = popupStep !== null || menu !== null || debriefOpen || novaOpen
+  const busy = popupStep !== null || menu !== null || debriefOpen || novaOpen || infoOpen
   const tutorial = useHqTutorial(locks, busy)
   const live = useRef({ paused: false, locks, marker: null as string | null })
   useEffect(() => {
@@ -100,7 +104,7 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
   const callbacks = useMemo<SceneCallbacks>(
     () => ({
       onTarget: setTarget,
-      onInteract: interact,
+      onInteract: (t) => interact(t, () => setInfoOpen(true)),
       onPlayerMoved: savePlayerPos,
       isPaused: () => live.current.paused,
       locks: () => live.current.locks,
@@ -125,7 +129,7 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const showPrompt = target && !popupStep && !menu && !debriefOpen
+  const showPrompt = target && !popupStep && !menu && !debriefOpen && !infoOpen
   const debriefStation =
     target?.kind === 'station' && target.opens === 'briefing' && debriefAvailable
 
@@ -163,6 +167,7 @@ export default function HQWorld({ popup }: { popup?: ReactNode }) {
         </PopupPanel>
       )}
       {debriefOpen && <DebriefPopup onClose={() => setPhase('hq')} />}
+      <HqInfoModal open={infoOpen} onClose={() => setInfoOpen(false)} locks={locks} />
       <PauseMenu
         state={menu}
         onChange={setMenu}

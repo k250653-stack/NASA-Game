@@ -10,24 +10,27 @@ import { hintsOn, useNova } from './novaStore'
 export const INTRO_LINES = [
   "Hi, I'm NOVA, your mission guide. I hover, I calculate, I don't do stairs.",
   'Your job: plan a crewed mission to the Moon or Mars, launch it, and bring everyone home.',
-  'Each room in this HQ is one step. Follow my marker, and press E to use what glows.',
+  'Each room off the lobby is one step. Walk through the doorway I mark, then press E on what glows.',
 ] as const
 
 /** One room per step, in order, with what NOVA says when it becomes the next step. */
 export const HQ_STEPS = [
   {
     roomId: 'mission-planning',
-    line: 'Mission Planning first: pick where you are going and which scenario to fly.',
+    line: 'Mission Planning first, through the blue doorway: pick where you are going and which scenario to fly.',
   },
   {
     roomId: 'personnel',
-    line: 'Personnel: choose your seat on the team and recruit the crew who fill the others.',
+    line: 'Personnel, through the green doorway: choose your seat and recruit the crew who fill the others.',
   },
   {
     roomId: 'briefing',
-    line: 'Briefing: the planning board. Fit parts, supplies and the rocket inside mass and budget.',
+    line: 'Briefing, through the amber doorway: the planning board. Fit parts, supplies and the rocket inside mass and budget.',
   },
-  { roomId: 'launch-control', line: 'Launch Control: every seat calls go or no-go. Then we fly.' },
+  {
+    roomId: 'launch-control',
+    line: 'Launch Control, through the red doorway: every seat calls go or no-go. Then we fly.',
+  },
 ] as const
 
 export const HABITAT_LINES = [

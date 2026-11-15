@@ -17,16 +17,6 @@ import { getHqMap } from '../hqMap'
 import { ROLE_TOKEN } from '../mission/missionRun'
 import { savePlayerPos, useWorld } from '../worldStore'
 
-const BRIEFING = 'briefing'
-const BRIEFING_DOOR = 'briefing/exit'
-/** Where the crew stand around the meeting table, in briefing-room image pixels. */
-const TABLE_SPOTS: readonly Point[] = [
-  [720, 475],
-  [860, 525],
-  [625, 372],
-  [985, 478],
-]
-const TABLE_CENTER: Point = [800, 400]
 /** New random events: seeds stay in the range the scenario screen uses. */
 const SEED_MAX = 999_999_999
 /** Score bar colours: at or above GOOD is cyan, at or above POOR amber, below red. */
@@ -54,25 +44,24 @@ export function returnToEarth(run: MissionState, design: Design, content: Engine
     outcome: score.outcome,
     days: run.day,
   })
-  const door = getHqMap().doors.get(BRIEFING_DOOR)
-  if (door) savePlayerPos(door.arrival)
+  // Back in the Briefing room, next to the meeting table (hq-map.json "briefingArrival").
+  savePlayerPos(getHqMap().briefingArrival)
   debriefCue = true
   setPhase('hq')
 }
 
 /** The recruited crew (not the player) standing around the meeting table, in world pixels. */
 export function crewAtTable(team: readonly CrewMember[]): HqCrew[] {
-  const room = getHqMap().rooms.find((r) => r.room.id === BRIEFING)
-  if (!room) return []
+  const { tableSpots, tableCenter } = getHqMap()
   return team
     .filter((m) => !m.isPlayer)
-    .slice(0, TABLE_SPOTS.length)
+    .slice(0, tableSpots.length)
     .map((m, i) => {
-      const [x, y] = TABLE_SPOTS[i]!
+      const [x, y] = tableSpots[i]!
       return {
-        at: [room.at[0] + x, room.at[1] + y] as Point,
+        at: [x, y] as Point,
         color: ROLE_TOKEN[m.role],
-        facing: facingFrom(TABLE_CENTER[0] - x, TABLE_CENTER[1] - y),
+        facing: facingFrom(tableCenter[0] - x, tableCenter[1] - y),
       }
     })
 }

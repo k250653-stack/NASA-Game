@@ -29,10 +29,10 @@ export const useWorld = create<WorldState>()(
     }),
     {
       name: 'mission-control-world',
-      version: 2,
-      // v1 saved a current room instead of a world position; start those in the lobby.
+      version: 3,
       // A popup left open last session must not reopen the HQ on load.
       merge: (persisted, current) => ({ ...current, ...(persisted as object), popup: null }),
+      // v1/v2 saved positions on the old separate-room HQ; start those at the front entrance.
       migrate: (persisted) => ({ ...initial, ...(persisted as object), playerPos: null }),
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({

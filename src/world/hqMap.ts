@@ -1,122 +1,173 @@
 /**
- * The HQ building: every room from rooms/hq-map.json placed on one world canvas, and the door
- * portals between them (each door's `to` + `arrive` in its room JSON). WORLD pixels. Pure TS.
+ * The HQ as one connected map (rooms/hq-map.json over public/assets/backgrounds/hq-map.png):
+ * room floors, the open doorways between them, furniture, stations and the outdoor path.
+ * Every coordinate is a map-image pixel = a world pixel. Pure TS, validated with Zod.
  */
 import { z } from 'zod'
-import { centroid, pointInPolygon, translate, type Point, type Polygon } from './geometry'
+import { IMAGE_KINDS } from '@/ui/assets'
+import { centroid, convexHull, type Point, type Polygon } from './geometry'
 import mapJson from './rooms/hq-map.json'
-import { getRoom, LOBBY_ID, type Door, type Room, type Step } from './rooms/room'
+import { STEPS, type Step } from './rooms/room'
+
+const point = z.tuple([z.number(), z.number()])
+const polygon = z.array(point).min(3)
+
+/** What a station opens: a mission step, or the lobby's small HQ info popup. */
+export type StationOpens = Step | 'info'
 
 const mapSchema = z.object({
-  /** Room image top-left corners in world pixels. */
-  rooms: z.array(z.object({ id: z.string(), at: z.tuple([z.number(), z.number()]) })),
+  image: z.object({ kind: z.enum(IMAGE_KINDS), id: z.string(), ext: z.string() }),
+  size: z.tuple([z.number().int().positive(), z.number().int().positive()]),
+  /** Where a new game starts: on the stone path outside the front entrance. */
+  spawn: point,
+  /** Walkable outside the building (only the entrance path). */
+  outdoor: z.array(polygon),
+  rooms: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      /** Locked until this step is reachable (see steps.ts); none = always open. */
+      gate: z.enum(STEPS).optional(),
+      floor: polygon,
+    }),
+  ),
+  doorways: z.array(
+    z.object({
+      id: z.string(),
+      label: z.string(),
+      /** Theme colour token of the door frame, e.g. "role-comms". */
+      color: z.string(),
+      /** The room this doorway leads into from the lobby (its gate locks the doorway). */
+      room: z.string(),
+      /** Floor strip through the door opening, overlapping both floors. */
+      area: polygon,
+    }),
+  ),
+  blocked: z.array(polygon),
+  /**
+   * Tall furniture drawn again over the player when the player stands behind it (foot-Y
+   * sorting): its silhouette is the footprint raised by `height` pixels.
+   */
+  occluders: z.array(z.object({ id: z.string(), height: z.number(), footprint: polygon })),
+  stations: z.array(
+    z.object({
+      id: z.string(),
+      label: z.string(),
+      room: z.string(),
+      opens: z.union([z.enum(STEPS), z.literal('info')]),
+      area: polygon,
+      /** How close (px) the player's feet must be to use it. */
+      reach: z.number().positive().default(48),
+    }),
+  ),
+  /** Debrief: where the crew stand round the meeting table, and where the player arrives. */
+  tableSpots: z.array(point),
+  tableCenter: point,
+  briefingArrival: point,
 })
 
-export interface PlacedStation {
+type MapJson = z.infer<typeof mapSchema>
+
+export interface HqRoom {
+  id: string
+  name: string
+  gate: Step | undefined
+  floor: Polygon
+  /** Floor centre (camera target, padlock position). */
+  center: Point
+}
+
+export interface HqDoorway {
+  id: string
+  label: string
+  color: string
+  room: string
+  area: Polygon
+}
+
+export interface HqStation {
   key: string
   label: string
-  opens: Step
+  room: string
+  opens: StationOpens
   area: Polygon
   reach: number
 }
 
-export interface PlacedDoor {
-  /** "roomId/doorId" */
-  key: string
-  roomId: string
-  door: Door
-  area: Polygon
-  /** Where the player stands after arriving through this door (on the floor, just outside it). */
-  arrival: Point
-  /** Key of the door this one leads to (null if its room is not on the map). */
-  target: string | null
-}
-
-export interface PlacedRoom {
-  room: Room
-  at: Point
-  floors: Polygon[]
-  blocked: Polygon[]
-  stations: PlacedStation[]
-  doors: PlacedDoor[]
-  /** Floor centre in world pixels (camera target). */
-  center: Point
+export interface HqOccluder {
+  id: string
+  /** Silhouette in world pixels. */
+  shape: Polygon
+  /** Foot line: the player is behind the object when their feet are above this y. */
+  baseY: number
 }
 
 export interface HqMap {
-  rooms: PlacedRoom[]
-  lobby: PlacedRoom
-  doors: Map<string, PlacedDoor>
+  image: MapJson['image']
+  size: readonly [number, number]
+  spawn: Point
+  outdoor: Polygon[]
+  rooms: HqRoom[]
+  doorways: HqDoorway[]
+  blocked: Polygon[]
+  occluders: HqOccluder[]
+  stations: HqStation[]
+  tableSpots: Point[]
+  tableCenter: Point
+  briefingArrival: Point
 }
 
-/** Walk from the door towards the room centre until on free floor and clear of the door. */
-function arrivalPoint(area: Polygon, floors: Polygon[], blocked: Polygon[], center: Point): Point {
-  const from = centroid(area)
-  for (let t = 0; t <= 1; t += 0.01) {
-    const p: Point = [from[0] + (center[0] - from[0]) * t, from[1] + (center[1] - from[1]) * t]
-    const onFloor =
-      floors.some((f) => pointInPolygon(p, f)) && !blocked.some((b) => pointInPolygon(p, b))
-    if (onFloor && !pointInPolygon(p, area)) {
-      // A little further in, so the player does not stand on the threshold.
-      const s = Math.min(1, t + 0.06)
-      return [from[0] + (center[0] - from[0]) * s, from[1] + (center[1] - from[1]) * s]
-    }
-  }
-  return center
-}
-
-function place(room: Room, at: Point, onMap: Set<string>): PlacedRoom {
-  const floors = room.walkable.map((p) => translate(p as Polygon, at))
-  const blocked = room.blocked.map((p) => translate(p as Polygon, at))
-  const center = centroid(floors[0]!)
-  return {
-    room,
-    at,
-    floors,
-    blocked,
-    center,
-    stations: room.stations.map((s) => ({
-      key: `${room.id}/${s.id}`,
-      label: s.label,
-      opens: s.opens,
-      area: translate(s.area as Polygon, at),
-      reach: s.reach,
-    })),
-    doors: room.doors.map((d) => {
-      const area = translate(d.area as Polygon, at)
-      return {
-        key: `${room.id}/${d.id}`,
-        roomId: room.id,
-        door: d,
-        area,
-        arrival: arrivalPoint(area, floors, blocked, center),
-        target: onMap.has(d.to) && d.arrive ? `${d.to}/${d.arrive}` : null,
-      }
-    }),
-  }
-}
+export const LOBBY_ROOM = 'lobby'
 
 let cached: HqMap | null = null
 
 export function getHqMap(): HqMap {
   if (cached) return cached
-  const map = mapSchema.parse(mapJson)
-  const onMap = new Set(map.rooms.map((r) => r.id))
-  const rooms = map.rooms.map((r) => place(getRoom(r.id), r.at as Point, onMap))
-  const lobby = rooms.find((r) => r.room.id === LOBBY_ID)
-  if (!lobby) throw new Error('hq-map.json: the lobby must be placed')
-  const doors = new Map(rooms.flatMap((r) => r.doors.map((d) => [d.key, d] as const)))
-  for (const d of doors.values()) {
-    if (d.target && !doors.has(d.target))
-      throw new Error(`Door ${d.key} leads to unknown door ${d.target}`)
+  const m = mapSchema.parse(mapJson)
+  const roomIds = new Set(m.rooms.map((r) => r.id))
+  for (const d of m.doorways) {
+    if (!roomIds.has(d.room))
+      throw new Error(`hq-map.json: doorway ${d.id} leads to unknown room ${d.room}`)
   }
-  cached = { rooms, lobby, doors }
+  cached = {
+    image: m.image,
+    size: m.size,
+    spawn: m.spawn as Point,
+    outdoor: m.outdoor as Polygon[],
+    rooms: m.rooms.map((r) => ({
+      id: r.id,
+      name: r.name,
+      gate: r.gate,
+      floor: r.floor as Polygon,
+      center: centroid(r.floor as Polygon),
+    })),
+    doorways: m.doorways.map((d) => ({ ...d, area: d.area as Polygon })),
+    blocked: m.blocked as Polygon[],
+    occluders: m.occluders.map((o) => {
+      const foot = o.footprint as Polygon
+      const raised = foot.map(([x, y]) => [x, y - o.height] as const)
+      return {
+        id: o.id,
+        shape: convexHull([...foot, ...raised]),
+        baseY: Math.max(...foot.map((p) => p[1])),
+      }
+    }),
+    stations: m.stations.map((s) => ({
+      key: s.id,
+      label: s.label,
+      room: s.room,
+      opens: s.opens,
+      area: s.area as Polygon,
+      reach: s.reach,
+    })),
+    tableSpots: m.tableSpots as Point[],
+    tableCenter: m.tableCenter as Point,
+    briefingArrival: m.briefingArrival as Point,
+  }
   return cached
 }
 
-/** Rooms behind a gated lobby door, with that door (for lock reasons). */
-export function gatedRooms(map: HqMap): { roomId: string; door: Door }[] {
-  return map.lobby.doors
-    .filter((d) => d.door.gate && d.target)
-    .map((d) => ({ roomId: d.door.to, door: d.door }))
+/** Rooms that lock until a step is reachable, each with its gate. */
+export function gatedRooms(map: HqMap): { roomId: string; gate: Step }[] {
+  return map.rooms.flatMap((r) => (r.gate ? [{ roomId: r.id, gate: r.gate }] : []))
 }

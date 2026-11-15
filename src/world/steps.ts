@@ -1,11 +1,11 @@
 /**
- * The four mission steps in the HQ: which screens a station opens, and when the lobby door
- * that leads to it unlocks.
+ * The four mission steps in the HQ: which screens a station opens, and when the room (and the
+ * lobby doorway into it) unlocks.
  */
 import { getContent } from '@/content/load'
 import { validateTeam } from '@/engine/recruitment'
 import { useStore, type Phase } from '@/store'
-import type { Door, Step } from './rooms/room'
+import type { Step } from './rooms/room'
 
 /** First screen a station opens, and the screens that still belong to that step. */
 export const STEP_SCREENS: Record<Step, { entry: Phase; phases: readonly Phase[] }> = {
@@ -32,13 +32,12 @@ function teamReady(): boolean {
 }
 
 /**
- * Why the door is locked, or null when it opens. Gate order: Planning, then Personnel (scenario
- * chosen), Briefing (valid crew), Launch Control (plan finished).
+ * Why a room with this gate is locked, or null when it is open. Gate order: Planning, then
+ * Personnel (scenario chosen), Briefing (valid crew), Launch Control (plan finished).
  */
-export function doorLockReason(door: Door, planningDone: boolean): string | null {
-  if (door.locked) return door.lockedReason ?? 'This door is not open yet.'
+export function gateLockReason(gate: Step | undefined, planningDone: boolean): string | null {
   const { game, mission } = useStore.getState()
-  switch (door.gate) {
+  switch (gate) {
     case undefined:
     case 'planning':
       return null
