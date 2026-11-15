@@ -76,6 +76,13 @@ export const ConstantsSchema = z.strictObject({
     level: z.number().min(0).max(1),
     source: NonEmptyString,
   }),
+  /** Crew dialogue (world/mission/dialogue): trust scale and the "recent event" window. */
+  dialogue: z.strictObject({
+    startTrust: z.number().min(0),
+    trustMax: z.number().positive(),
+    recentTurns: z.number().int().positive(),
+    source: NonEmptyString,
+  }),
   /** Player movement (world/player): speed factor on the pack walk, and the Shift multiplier. */
   player: z.strictObject({
     walkSpeedFactor: z.number().positive(),

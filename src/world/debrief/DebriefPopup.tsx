@@ -14,6 +14,7 @@ import { changeLines, graphSeries, newMission, redesignAndRetry } from './debrie
 import { CrewReactions, H3, RunCompare, ScoreBreakdown } from './DebriefSections'
 import { decisionCounts, type DecisionCounts } from '../mission/proposal'
 import { runKey, useTaskStats } from '../mission/crewTask'
+import { sideMission, useCrewLife } from '../mission/crewLife'
 import { MissionGraph } from './MissionGraph'
 import { ProblemList } from '../mission/ProblemLog'
 import { problemLog } from '../mission/problems'
@@ -110,6 +111,7 @@ export function DebriefPopup({ onClose }: { onClose: () => void }) {
         </header>
         <DecisionLine counts={decisionCounts(run, p.design, p.content)} />
         <TaskLine runKey={runKey(run)} />
+        <SideMissionLine />
 
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-8">
           <div className="space-y-6">
@@ -228,6 +230,22 @@ function TaskLine({ runKey: key }: { runKey: string }) {
         {mine ? stats.completed : 0}/{mine ? stats.attempted : 0}
       </span>
       <span className="label-caps text-sm text-muted">completed</span>
+    </p>
+  )
+}
+
+/** Side missions finished this mission (kept per launch). */
+function SideMissionLine() {
+  const done = useCrewLife((s) => s.done)
+  return (
+    <p className="mt-1 flex flex-wrap items-baseline gap-x-2" data-testid="sidemission-counts">
+      <span className="label-caps text-sm text-muted">Side missions</span>
+      <span className="font-mono text-lg text-primary tabular-nums">{done.length}</span>
+      {done.map((d) => (
+        <span key={d.id} className="font-mono text-xs text-success">
+          ✓ {sideMission(d.id)?.title ?? d.id} (day {d.day})
+        </span>
+      ))}
     </p>
   )
 }

@@ -1,0 +1,82 @@
+{
+  "_note": "Optional side missions started from a crew member's dialogue. Rewards go through the engine (morale) and the trust store; the teamwork score reads morale, so no separate scoring hook is added.",
+  "items": [
+    {
+      "id": "crater-photo",
+      "crewId": "lin",
+      "title": "A photo from outside",
+      "brief": "Lin wants a photo: visit the Airlock on a calm turn",
+      "kind": "visit_station",
+      "calmOnly": true,
+      "station": "airlock",
+      "turns": 1,
+      "rewardMorale": 8,
+      "rewardTrust": 1,
+      "followUp": "I got the picture on the long-range link. Earth saw it live. Thank you, really."
+    },
+    {
+      "id": "comms-log",
+      "crewId": "omar",
+      "title": "The missing message",
+      "brief": "Omar asks you to check the comms log at the Comms station",
+      "kind": "visit_station",
+      "calmOnly": false,
+      "station": "comms",
+      "turns": 1,
+      "rewardMorale": 6,
+      "rewardTrust": 1,
+      "followUp": "You found it! A friendly ham operator saying hello. Made my week."
+    },
+    {
+      "id": "quiet-days",
+      "crewId": "sana",
+      "title": "Two quiet turns",
+      "brief": "Sana needs quiet: keep her off the EVA for 2 turns",
+      "kind": "avoid_eva",
+      "calmOnly": false,
+      "turns": 2,
+      "rewardMorale": 8,
+      "rewardTrust": 1,
+      "followUp": "Thank you for the quiet days. My forecast improved by one whole decimal. I am thrilled."
+    },
+    {
+      "id": "plant-experiment",
+      "crewId": "maya",
+      "title": "Maya's plant experiment",
+      "brief": "Visit the Science bench 3 turns in a row to watch Maya's plant",
+      "kind": "visit_station",
+      "calmOnly": false,
+      "station": "science",
+      "turns": 3,
+      "rewardMorale": 10,
+      "rewardTrust": 2,
+      "followUp": "It sprouted! Right in front of us! I named it Basil Armstrong."
+    },
+    {
+      "id": "power-walkround",
+      "crewId": "bilal",
+      "title": "The power walk-round",
+      "brief": "Bilal wants you at the Power panel two turns in a row",
+      "kind": "visit_station",
+      "calmOnly": false,
+      "station": "power",
+      "turns": 2,
+      "rewardMorale": 7,
+      "rewardTrust": 1,
+      "followUp": "Thanks for the walk-round. You noticed the thing with the third fuse. Sharp eye."
+    },
+    {
+      "id": "spares-count",
+      "crewId": "kofi",
+      "title": "The great spares count",
+      "brief": "Kofi asks you to visit the Repair station on a calm turn",
+      "kind": "visit_station",
+      "calmOnly": true,
+      "station": "repair",
+      "turns": 1,
+      "rewardMorale": 6,
+      "rewardTrust": 1,
+      "followUp": "The count matches the spreadsheet! First time ever. I am not crying, you are crying."
+    }
+  ]
+}

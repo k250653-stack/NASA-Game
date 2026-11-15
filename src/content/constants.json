@@ -195,5 +195,11 @@
     "fadeOutSec": 1,
     "level": 0.05,
     "source": "Game audio design: which alert sound each unresolved problem plays (generated, no files)."
+  },
+  "dialogue": {
+    "startTrust": 1,
+    "trustMax": 5,
+    "recentTurns": 2,
+    "source": "Game design values for crew dialogue: trust pips, and how many turns an event counts as recent."
   }
 }

@@ -477,6 +477,26 @@ export function dispatchEvent(
 }
 
 /**
+ * Changes one crew member's morale (a dialogue choice or side-mission reward), clamped to
+ * 0-100 and recorded in the change history. Pure: returns a new state.
+ */
+export function adjustCrewMorale(
+  state: MissionState,
+  crewId: string,
+  delta: number,
+  source: string,
+): MissionState {
+  const c = state.crew[crewId]
+  if (!c || delta === 0) return state
+  const s = cloneState(state)
+  const cs = s.crew[crewId]!
+  const before = cs.morale
+  cs.morale = clamp(before + delta, 0, 100)
+  recordChange(s, `morale:${crewId}`, cs.morale - before, 'event', source, 'a talk with the player')
+  return s
+}
+
+/**
  * Drops a pending problem nobody can answer (no workable option), with a log line, so the
  * mission can go on. Pure: returns a new state.
  */

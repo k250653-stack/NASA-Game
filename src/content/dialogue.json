@@ -1,0 +1,1331 @@
+{
+  "_note": "Crew dialogue. Each member has 5 everyday lines, an event reaction and a low-resource reaction. Lines marked fact:true teach something real (approximate teaching values). Choices change trust (store) and morale (engine).",
+  "items": [
+    {
+      "id": "ayesha-normal-1",
+      "crewId": "ayesha",
+      "kind": "normal",
+      "text": "Good morning. I have a plan for the plan. Do not worry, it only has eleven steps.",
+      "when": {},
+      "fact": false,
+      "choices": [
+        {
+          "text": "Eleven? Trim it to five.",
+          "reply": "Five. Fine. I will cry quietly into my ice core.",
+          "trust": 1,
+          "morale": 2
+        },
+        {
+          "text": "Love it. Go on.",
+          "reply": "Step one: coffee. I like how you think.",
+          "trust": 1,
+          "morale": 4
+        }
+      ]
+    },
+    {
+      "id": "ayesha-normal-2",
+      "crewId": "ayesha",
+      "kind": "normal",
+      "text": "Ice remembers. Layers in a core are like pages of a diary, one per year. Out here, the rock does the same trick, only slower.",
+      "when": {
+        "maxTrust": 3
+      },
+      "fact": true,
+      "choices": [
+        {
+          "text": "That is beautiful.",
+          "reply": "Thank you. Nobody ever says that to the geologist.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Can it find us water?",
+          "reply": "Maybe. Ask me again after lunch.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "ayesha-normal-3",
+      "crewId": "ayesha",
+      "kind": "normal",
+      "text": "The drill is humming. I named it Gerald. Gerald does not like being rushed.",
+      "when": {
+        "destination": "moon"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Tell Gerald good luck.",
+          "reply": "He heard you. He is very proud.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Gerald works for us.",
+          "reply": "Gerald has unionised. I am negotiating.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "ayesha-normal-4",
+      "crewId": "ayesha",
+      "kind": "normal",
+      "text": "Mars rock is rusty because iron met a little oxygen long ago. The whole planet is a rust bucket with a great view.",
+      "when": {
+        "destination": "mars"
+      },
+      "fact": true,
+      "choices": [
+        {
+          "text": "Rust bucket, I like it.",
+          "reply": "Put it on a mug. I will buy two.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Is that why it is red?",
+          "reply": "Yes! The dust is iron oxide, like rust on a bicycle.",
+          "trust": 1,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "ayesha-normal-5",
+      "crewId": "ayesha",
+      "kind": "normal",
+      "text": "You are quiet today. If something is wrong with the data, I promise not to make a flowchart about it. Probably.",
+      "when": {
+        "moraleBelow": 55
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Just tired. Thanks.",
+          "reply": "Rest. The rocks are not going anywhere. That is their whole personality.",
+          "trust": 1,
+          "morale": 5
+        },
+        {
+          "text": "Make the flowchart.",
+          "reply": "Flowchart acquired. Feeling better already.",
+          "trust": 1,
+          "morale": 3
+        }
+      ]
+    },
+    {
+      "id": "ayesha-event-6",
+      "crewId": "ayesha",
+      "kind": "event",
+      "text": "That find was real, was it not? Ice! I need a minute. Maybe a few minutes. I may hug the drill.",
+      "when": {
+        "recentEvent": "ice-discovery"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Take the minute. You earned it.",
+          "reply": "You are kind. Gerald has been told.",
+          "trust": 2,
+          "morale": 6
+        },
+        {
+          "text": "Sample it before it melts.",
+          "reply": "Right. Sample. Professional face on.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "ayesha-resource-7",
+      "crewId": "ayesha",
+      "kind": "resource",
+      "text": "Careful with the power. Instruments make heat, heat is power, power is... a lovely circle, but it ends in a cold lab.",
+      "when": {
+        "lowResource": "battery"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "We will fix it.",
+          "reply": "I believe you. I will pause the second drill.",
+          "trust": 1,
+          "morale": 2
+        },
+        {
+          "text": "Keep drilling.",
+          "reply": "Then I drill. Quietly. Politely. Sadly.",
+          "trust": 0,
+          "morale": -3
+        }
+      ]
+    },
+    {
+      "id": "maya-normal-8",
+      "crewId": "maya",
+      "kind": "normal",
+      "text": "Hey! I grew basil in a jar on the sill back home. Planning a tiny experiment here. Do not tell Ayesha, she will want a protocol.",
+      "when": {},
+      "fact": false,
+      "choices": [
+        {
+          "text": "Count me in. Tell me more.",
+          "reply": "Okay, okay. Come by the science bench a few days in a row and watch it with me!",
+          "trust": 1,
+          "morale": 3,
+          "startSideMission": "plant-experiment"
+        },
+        {
+          "text": "Sounds fun. Later.",
+          "reply": "Later is fine. Plants are patient. I am not, but I try.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "maya-normal-9",
+      "crewId": "maya",
+      "kind": "normal",
+      "text": "Every instrument here has a little personality. The spectrometer is dramatic. The sample drill is a grump.",
+      "when": {
+        "maxTrust": 3
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "And you?",
+          "reply": "I am the one with the screwdriver, so I am the boss.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Keep them happy.",
+          "reply": "Snacks for the machines. Got it.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "maya-normal-10",
+      "crewId": "maya",
+      "kind": "normal",
+      "text": "Is it weird that I can hear the habitat breathe? The fans go in and out, in and out. It is kind of soothing.",
+      "when": {
+        "destination": "moon"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "That is the life support.",
+          "reply": "Best lullaby ever. Do not tell Bilal I said that.",
+          "trust": 1,
+          "morale": 2
+        },
+        {
+          "text": "Weird, but nice.",
+          "reply": "High praise from you!",
+          "trust": 1,
+          "morale": 3
+        }
+      ]
+    },
+    {
+      "id": "maya-normal-11",
+      "crewId": "maya",
+      "kind": "normal",
+      "text": "Fun fact: Mars sunsets are blue. The dust scatters red light away from the Sun. I want to see one so badly.",
+      "when": {
+        "destination": "mars"
+      },
+      "fact": true,
+      "choices": [
+        {
+          "text": "A blue sunset? Wow.",
+          "reply": "Right?! Rovers have photographed it. Real! I check every day.",
+          "trust": 1,
+          "morale": 4
+        },
+        {
+          "text": "Back to work.",
+          "reply": "Yes, boss. Still dreaming a little, though.",
+          "trust": 0,
+          "morale": -1
+        }
+      ]
+    },
+    {
+      "id": "maya-normal-12",
+      "crewId": "maya",
+      "kind": "normal",
+      "text": "I keep second-guessing my readings. Ayesha says that is what a scientist does, but it feels like I am just slow.",
+      "when": {
+        "moraleBelow": 55
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Your checks catch real errors.",
+          "reply": "Okay. Thank you. I needed that, honestly.",
+          "trust": 2,
+          "morale": 6
+        },
+        {
+          "text": "Speed matters too.",
+          "reply": "Got it. I will try to trust myself faster.",
+          "trust": 0,
+          "morale": -2
+        }
+      ]
+    },
+    {
+      "id": "maya-event-13",
+      "crewId": "maya",
+      "kind": "event",
+      "text": "Phew, the jam is cleared! Turns out one tiny grain of dust can stop a whole drill. I love and hate this place.",
+      "when": {
+        "recentEvent": "instrument-jam"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Great fix, Maya.",
+          "reply": "Thanks! I will name the grain. Gary. Gary lost.",
+          "trust": 2,
+          "morale": 5
+        },
+        {
+          "text": "Check the others too.",
+          "reply": "On it! Gary has cousins, I bet.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "maya-resource-14",
+      "crewId": "maya",
+      "kind": "resource",
+      "text": "Is the air feeling a bit thin to you? Maybe it is just me. Maybe let us check the numbers anyway?",
+      "when": {
+        "lowResource": "oxygen"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Good catch. We will look.",
+          "reply": "Thank you! Better safe than breathless.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "It is fine.",
+          "reply": "Okay... if you say so. I will count my breaths. Just in case.",
+          "trust": 0,
+          "morale": -2
+        }
+      ]
+    },
+    {
+      "id": "bilal-normal-15",
+      "crewId": "bilal",
+      "kind": "normal",
+      "text": "Rule one: every system survives two failures before anyone notices. Rule two: nobody touches my wiring without telling me.",
+      "when": {},
+      "fact": false,
+      "choices": [
+        {
+          "text": "Understood, chief.",
+          "reply": "Chief. I like that. I will add it to my door.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Rules are rules.",
+          "reply": "Finally, someone sensible.",
+          "trust": 1,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "bilal-normal-16",
+      "crewId": "bilal",
+      "kind": "normal",
+      "text": "Walk the power panel with me sometime. I will show you where I hide the spare fuses. Do not tell Sana, she will put them in a spreadsheet.",
+      "when": {
+        "maxTrust": 3
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Show me, now.",
+          "reply": "Careful, it is a long story. Start at the battery rack, then the main bus.",
+          "trust": 1,
+          "morale": 3,
+          "startSideMission": "power-walkround"
+        },
+        {
+          "text": "Another day.",
+          "reply": "Fair. The fuses are not going anywhere. Neither am I.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "bilal-normal-17",
+      "crewId": "bilal",
+      "kind": "normal",
+      "text": "Moon nights last about two weeks. I like batteries. Batteries do not need the Sun to feel loved.",
+      "when": {
+        "destination": "moon"
+      },
+      "fact": true,
+      "choices": [
+        {
+          "text": "Batteries it is.",
+          "reply": "Finally someone who understands me.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Fission would be easier.",
+          "reply": "Easier, yes. Louder, also yes. Dad jokes in the reactor room.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "bilal-normal-18",
+      "crewId": "bilal",
+      "kind": "normal",
+      "text": "Dust on solar panels is the enemy. On Mars, a good gust of wind can clean them. A tidy planet, whatever else it is.",
+      "when": {
+        "destination": "mars"
+      },
+      "fact": true,
+      "choices": [
+        {
+          "text": "Wind as a cleaning crew!",
+          "reply": "Free labour. I approve.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "We should wipe them ourselves.",
+          "reply": "Then we need suits and time. Possible. Let us plan it.",
+          "trust": 1,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "bilal-normal-19",
+      "crewId": "bilal",
+      "kind": "normal",
+      "text": "It is a good crew. Tough one, but good. I just want everyone to go home with all their fingers.",
+      "when": {
+        "minTrust": 3
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "That is the plan.",
+          "reply": "Then we are on the same page. A rare thing.",
+          "trust": 2,
+          "morale": 5
+        },
+        {
+          "text": "And all the toes.",
+          "reply": "Toes too. You are funny. I like that.",
+          "trust": 1,
+          "morale": 4
+        }
+      ]
+    },
+    {
+      "id": "bilal-event-20",
+      "crewId": "bilal",
+      "kind": "event",
+      "text": "Cell fault, but the second cell caught it. That is the two-failure rule doing its job. I may cry a little.",
+      "when": {
+        "recentEvent": "battery-fault"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Textbook, Bilal.",
+          "reply": "Do not make me emotional in front of the switchboard.",
+          "trust": 2,
+          "morale": 6
+        },
+        {
+          "text": "Check the rest.",
+          "reply": "Already doing it. I have a clipboard and no mercy.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "bilal-resource-21",
+      "crewId": "bilal",
+      "kind": "resource",
+      "text": "Power is thin. I would rather turn off some science than the heat. Say the word, I will do it.",
+      "when": {
+        "lowResource": "power"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Do it, protect the heat.",
+          "reply": "Understood. Priorities straight.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Keep science running.",
+          "reply": "Then I will watch the gauge like a hawk.",
+          "trust": 0,
+          "morale": -3
+        }
+      ]
+    },
+    {
+      "id": "lin-normal-22",
+      "crewId": "lin",
+      "kind": "normal",
+      "text": "A radio wave takes about 1.3 seconds to reach the Moon. Close enough for a conversation, far enough to teach patience.",
+      "when": {
+        "destination": "moon"
+      },
+      "fact": true,
+      "choices": [
+        {
+          "text": "Patience is underrated.",
+          "reply": "Say that to the antenna. It likes to hear it.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "And Mars?",
+          "reply": "Minutes. Many. You learn to leave good voicemails.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "lin-normal-23",
+      "crewId": "lin",
+      "kind": "normal",
+      "text": "Messages to Earth take between 4 and 24 minutes each way, depending on the orbits. We do not chat, we write letters.",
+      "when": {
+        "destination": "mars"
+      },
+      "fact": true,
+      "choices": [
+        {
+          "text": "Letters, I like that.",
+          "reply": "Good letters need good stationery. I am working on it.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Painfully slow.",
+          "reply": "It is physics. I am slow with a smile.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "lin-normal-24",
+      "crewId": "lin",
+      "kind": "normal",
+      "text": "I once talked a probe back from safe mode over a twenty-minute round trip. It felt like arguing with the future.",
+      "when": {},
+      "fact": false,
+      "choices": [
+        {
+          "text": "Tell me everything.",
+          "reply": "Best story I have. Sit down. It involves coffee and a lot of silence.",
+          "trust": 2,
+          "morale": 4
+        },
+        {
+          "text": "Impressive.",
+          "reply": "It was mostly waiting. But thank you.",
+          "trust": 1,
+          "morale": 2
+        }
+      ]
+    },
+    {
+      "id": "lin-normal-25",
+      "crewId": "lin",
+      "kind": "normal",
+      "text": "Could you do me a favour? I would love a photo of the landscape outside, for the team on Earth. A calm day, a quick trip to the airlock?",
+      "when": {
+        "maxTrust": 4
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Sure, I will go to the airlock.",
+          "reply": "Wonderful! A calm day is perfect. Take your time, and stand somewhere with a view.",
+          "trust": 1,
+          "morale": 3,
+          "startSideMission": "crater-photo"
+        },
+        {
+          "text": "Not today.",
+          "reply": "No pressure! Ask again when the moment is right.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "lin-normal-26",
+      "crewId": "lin",
+      "kind": "normal",
+      "text": "I am a bit worried the team is going quiet. When it is quiet in here, I talk more. It helps, mostly.",
+      "when": {
+        "moraleBelow": 55
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Talk to me, then.",
+          "reply": "Oh, thank you. I will start with the weather on Jupiter. It is a long one.",
+          "trust": 2,
+          "morale": 6
+        },
+        {
+          "text": "Quiet is fine.",
+          "reply": "Of course. I will hum quietly then.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "lin-event-27",
+      "crewId": "lin",
+      "kind": "event",
+      "text": "Link is back! For a minute I thought we were alone out here. That is a feeling you never forget.",
+      "when": {
+        "recentEvent": "comms-outage"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "You kept us calm.",
+          "reply": "That is the job. Also, the antenna was just upset.",
+          "trust": 2,
+          "morale": 5
+        },
+        {
+          "text": "Add a backup link.",
+          "reply": "Already thinking about it. A good idea, thank you.",
+          "trust": 1,
+          "morale": 2
+        }
+      ]
+    },
+    {
+      "id": "lin-resource-28",
+      "crewId": "lin",
+      "kind": "resource",
+      "text": "Not to be dramatic, but the water is dropping faster than I like. It is a good moment for a quiet look at the recycler.",
+      "when": {
+        "lowResource": "water"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Thank you, we will check.",
+          "reply": "Appreciated. Calm is easier with a full tank.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "It will hold.",
+          "reply": "I trust you. I will keep an eye on the gauge anyway.",
+          "trust": 0,
+          "morale": -2
+        }
+      ]
+    },
+    {
+      "id": "sana-normal-29",
+      "crewId": "sana",
+      "kind": "normal",
+      "text": "I ran the power model again. Three scenarios, two of them end well. The third one I am not showing you. For your own good.",
+      "when": {},
+      "fact": false,
+      "choices": [
+        {
+          "text": "Show me the third one.",
+          "reply": "Bold. Fine. It is mostly clouds of dust and a lot of sad graphs.",
+          "trust": 1,
+          "morale": 2
+        },
+        {
+          "text": "Stick with the two.",
+          "reply": "Wise. Two is a great number.",
+          "trust": 1,
+          "morale": 4
+        }
+      ]
+    },
+    {
+      "id": "sana-normal-30",
+      "crewId": "sana",
+      "kind": "normal",
+      "text": "Honestly, I do better with a quiet day and a spreadsheet than a loud one with a wrench. If you could keep me off the EVA list for a couple of turns, I would be so grateful.",
+      "when": {
+        "maxTrust": 3
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Consider it done.",
+          "reply": "Thank you. I will repay you with a very accurate forecast.",
+          "trust": 2,
+          "morale": 5,
+          "startSideMission": "quiet-days"
+        },
+        {
+          "text": "No promises.",
+          "reply": "That is fair. I will do my best either way.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "sana-normal-31",
+      "crewId": "sana",
+      "kind": "normal",
+      "text": "Solar output drops with dust, and a thin film of it can cut power by a lot. I model it as a leaky bucket, but a bucket of light.",
+      "when": {},
+      "fact": true,
+      "choices": [
+        {
+          "text": "Leaky bucket of light, nice.",
+          "reply": "It will go in my thesis. With a footnote to you.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Can we clean it?",
+          "reply": "Yes. By suit, by wind, or by prayer. In that order.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "sana-normal-32",
+      "crewId": "sana",
+      "kind": "normal",
+      "text": "The Moon gives us about 14 days of sun, then 14 of night. I like predictable. Predictable is my love language.",
+      "when": {
+        "destination": "moon"
+      },
+      "fact": true,
+      "choices": [
+        {
+          "text": "Predictable is good.",
+          "reply": "I knew I liked you. Tea?",
+          "trust": 1,
+          "morale": 4
+        },
+        {
+          "text": "Not very exciting.",
+          "reply": "Excitement is a power spike. I avoid those.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "sana-normal-33",
+      "crewId": "sana",
+      "kind": "normal",
+      "text": "It is not that I dislike the workbench. It dislikes me. Let us leave it at that.",
+      "when": {
+        "minTrust": 3
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "You are great at forecasts.",
+          "reply": "Aw. That is the nicest thing anyone said to me this week.",
+          "trust": 2,
+          "morale": 5
+        },
+        {
+          "text": "Practice makes better.",
+          "reply": "It will have to. I will practise. Slowly.",
+          "trust": 1,
+          "morale": 2
+        }
+      ]
+    },
+    {
+      "id": "sana-event-34",
+      "crewId": "sana",
+      "kind": "event",
+      "text": "The long night is on us. I warned you three days ago, but I did it in a footnote. Next time I will use bold.",
+      "when": {
+        "recentEvent": "long-dark-period"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "You were right. Thanks.",
+          "reply": "It is rare to hear it. Thank you.",
+          "trust": 2,
+          "morale": 6
+        },
+        {
+          "text": "Use bold next time.",
+          "reply": "Bold, underlined, and a siren.",
+          "trust": 1,
+          "morale": 2
+        }
+      ]
+    },
+    {
+      "id": "sana-resource-35",
+      "crewId": "sana",
+      "kind": "resource",
+      "text": "The battery is draining quicker than the model said. Either the model is wrong or something is leaking. I would prefer the model.",
+      "when": {
+        "lowResource": "battery"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Cut non-essential loads.",
+          "reply": "Doing it now. The lights will be dimmer, the mood braver.",
+          "trust": 1,
+          "morale": 2
+        },
+        {
+          "text": "Keep everything on.",
+          "reply": "Then we find out what the model got wrong. The hard way.",
+          "trust": 0,
+          "morale": -3
+        }
+      ]
+    },
+    {
+      "id": "kofi-normal-36",
+      "crewId": "kofi",
+      "kind": "normal",
+      "text": "I have never missed a launch window or a budget. I am telling you this because I am nervous, and nervous people brag.",
+      "when": {},
+      "fact": false,
+      "choices": [
+        {
+          "text": "That is impressive.",
+          "reply": "Thank you. I feel better. Slightly less nervous. Slightly.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "You will be fine.",
+          "reply": "You say that like it is easy. I like it.",
+          "trust": 1,
+          "morale": 2
+        }
+      ]
+    },
+    {
+      "id": "kofi-normal-37",
+      "crewId": "kofi",
+      "kind": "normal",
+      "text": "A rocket is mostly fuel. Every kilo we carry needs more kilos of fuel to lift it. That is why I count spares like a dragon counts gold.",
+      "when": {
+        "maxTrust": 3
+      },
+      "fact": true,
+      "choices": [
+        {
+          "text": "Count them for me?",
+          "reply": "Gladly. I will give you a report. Or a poem. Spreadsheet poem.",
+          "trust": 1,
+          "morale": 3,
+          "startSideMission": "spares-count"
+        },
+        {
+          "text": "We have enough.",
+          "reply": "Enough is a dangerous word. I will check anyway.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "kofi-normal-38",
+      "crewId": "kofi",
+      "kind": "normal",
+      "text": "Fun math: a bigger rocket costs more, but fewer launches. Fewer launches cost less overall. Welcome to my favourite headache.",
+      "when": {},
+      "fact": false,
+      "choices": [
+        {
+          "text": "Headaches pay well.",
+          "reply": "Never in money. Always in joy.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Keep it simple.",
+          "reply": "Simple is my enemy and my friend. We will negotiate.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "kofi-normal-39",
+      "crewId": "kofi",
+      "kind": "normal",
+      "text": "Moon missions are close enough that Earth can help in real time. It makes budgets feel safer. Mars, I am less sure.",
+      "when": {
+        "destination": "moon"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Earth has our back.",
+          "reply": "It does. And the invoices.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "And Mars?",
+          "reply": "We will see. I packed extra snacks.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "kofi-normal-40",
+      "crewId": "kofi",
+      "kind": "normal",
+      "text": "Crew morale is cheaper than hardware and does more work. I read that somewhere. I made it up. It is still true.",
+      "when": {
+        "moraleBelow": 55
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Tell the crew that.",
+          "reply": "I will. With biscuits.",
+          "trust": 2,
+          "morale": 6
+        },
+        {
+          "text": "Focus on the budget.",
+          "reply": "The budget is fine. It is the people I worry about.",
+          "trust": 0,
+          "morale": -2
+        }
+      ]
+    },
+    {
+      "id": "kofi-event-41",
+      "crewId": "kofi",
+      "kind": "event",
+      "text": "We lost a bit of fuel, but the margin held. I trimmed a little too close earlier, I admit. Lesson noted.",
+      "when": {
+        "recentEvent": "crew-fatigue"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "We all trim sometimes.",
+          "reply": "Thank you. I will pad the next one. Slightly.",
+          "trust": 2,
+          "morale": 5
+        },
+        {
+          "text": "Never again.",
+          "reply": "Never. I promise. Almost never.",
+          "trust": 1,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "kofi-resource-42",
+      "crewId": "kofi",
+      "kind": "resource",
+      "text": "Food is running lower than my spreadsheet. The spreadsheet is lying, or the crew is hungry. Probably both.",
+      "when": {
+        "lowResource": "food"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Start rationing.",
+          "reply": "Rationing set. I will make it fair. I hope.",
+          "trust": 1,
+          "morale": 2
+        },
+        {
+          "text": "Keep eating.",
+          "reply": "Eating is morale. I support morale.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "omar-normal-43",
+      "crewId": "omar",
+      "kind": "normal",
+      "text": "I built my first antenna from a coat hanger when I was twelve. It reached a country I had never heard of. I never looked back.",
+      "when": {},
+      "fact": false,
+      "choices": [
+        {
+          "text": "A coat hanger? Amazing.",
+          "reply": "Wire is wire. Signal is signal. People are people.",
+          "trust": 1,
+          "morale": 4
+        },
+        {
+          "text": "Do that here.",
+          "reply": "If you give me ten minutes and some copper.",
+          "trust": 1,
+          "morale": 2
+        }
+      ]
+    },
+    {
+      "id": "omar-normal-44",
+      "crewId": "omar",
+      "kind": "normal",
+      "text": "Could you check the comms log at the comms station? I think we are missing a message and I do not want to complain.",
+      "when": {
+        "maxTrust": 3
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "I will check the log.",
+          "reply": "Thank you. Quiet help is the best help.",
+          "trust": 1,
+          "morale": 3,
+          "startSideMission": "comms-log"
+        },
+        {
+          "text": "Later, Omar.",
+          "reply": "Of course. I will wait. I am good at waiting.",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "omar-normal-45",
+      "crewId": "omar",
+      "kind": "normal",
+      "text": "A solar flare is like a sneeze from the Sun. Most are harmless, but a big one can crackle radios across half a planet.",
+      "when": {},
+      "fact": true,
+      "choices": [
+        {
+          "text": "A sneeze, ha.",
+          "reply": "Exactly. Bless you, Sun.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Should we worry?",
+          "reply": "A little. Not today. I keep my radio on a clean antenna.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "omar-normal-46",
+      "crewId": "omar",
+      "kind": "normal",
+      "text": "Navigation is mostly patience. You point, you wait, you check. Airlines taught me that. Space just makes the waiting longer.",
+      "when": {
+        "destination": "mars"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Patience, got it.",
+          "reply": "Good. You are learning the hard way. It is the best way.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Hurry up.",
+          "reply": "The stars do not hurry. I will try to hurry them.",
+          "trust": 0,
+          "morale": -1
+        }
+      ]
+    },
+    {
+      "id": "omar-normal-47",
+      "crewId": "omar",
+      "kind": "normal",
+      "text": "I do not talk much, but I notice things. You are a good captain. Kind. That counts for more than it sounds.",
+      "when": {
+        "minTrust": 3
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Thank you, Omar.",
+          "reply": "No need to thank me. Just keep the radio on.",
+          "trust": 2,
+          "morale": 6
+        },
+        {
+          "text": "You talk enough.",
+          "reply": "Ha. Dry humour. I approve.",
+          "trust": 1,
+          "morale": 4
+        }
+      ]
+    },
+    {
+      "id": "omar-event-48",
+      "crewId": "omar",
+      "kind": "event",
+      "text": "The flare hurt the signal for a while. Static everywhere. I like static, but not that much.",
+      "when": {
+        "recentEvent": "solar-flare"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "You handled it.",
+          "reply": "I turned it off and on again. Classic.",
+          "trust": 2,
+          "morale": 5
+        },
+        {
+          "text": "Better shielding next time.",
+          "reply": "Noted. I will write it on my antenna.",
+          "trust": 1,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "omar-resource-49",
+      "crewId": "omar",
+      "kind": "resource",
+      "text": "The air tastes stale to me. I may be imagining it. I do not want to bother anyone, so I am only telling you.",
+      "when": {
+        "lowResource": "oxygen"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "You did right to say.",
+          "reply": "Thank you. I feel better knowing.",
+          "trust": 2,
+          "morale": 4
+        },
+        {
+          "text": "You are imagining it.",
+          "reply": "Perhaps. I will keep quiet. And keep breathing.",
+          "trust": 0,
+          "morale": -3
+        }
+      ]
+    },
+    {
+      "id": "zara-normal-50",
+      "crewId": "zara",
+      "kind": "normal",
+      "text": "In my old job I ran a room of forty people and one very loud kettle. Out here it is just you and me. I can work with that.",
+      "when": {},
+      "fact": false,
+      "choices": [
+        {
+          "text": "Happy to have you.",
+          "reply": "Good. Ground rules: be honest, be quick, be kind. In that order.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Do not boss me.",
+          "reply": "I will boss gently. Deal?",
+          "trust": 0,
+          "morale": 0
+        }
+      ]
+    },
+    {
+      "id": "zara-normal-51",
+      "crewId": "zara",
+      "kind": "normal",
+      "text": "Strong personalities clash. That is physics, not drama. I try to be the one who says sorry first. It is annoying, but it works.",
+      "when": {
+        "maxTrust": 3
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "That is wise.",
+          "reply": "Wisdom is mostly practice. And a thick skin.",
+          "trust": 1,
+          "morale": 4
+        },
+        {
+          "text": "Try not to clash.",
+          "reply": "I will do my best. No promises about Kofi.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "zara-normal-52",
+      "crewId": "zara",
+      "kind": "normal",
+      "text": "A go/no-go poll works because every console owns one problem. No hero decisions. Only honest calls, out loud.",
+      "when": {},
+      "fact": true,
+      "choices": [
+        {
+          "text": "Honest calls, good rule.",
+          "reply": "It saved my skin more than once.",
+          "trust": 1,
+          "morale": 3
+        },
+        {
+          "text": "Heroes are fun though.",
+          "reply": "Heroes are tired. I prefer checklists.",
+          "trust": 0,
+          "morale": 1
+        }
+      ]
+    },
+    {
+      "id": "zara-normal-53",
+      "crewId": "zara",
+      "kind": "normal",
+      "text": "Moon missions are a dress rehearsal for Mars. Think of it as the dress rehearsal we get to enjoy.",
+      "when": {
+        "destination": "moon"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "I like that.",
+          "reply": "Then we will make it a good show.",
+          "trust": 1,
+          "morale": 4
+        },
+        {
+          "text": "It feels real enough.",
+          "reply": "Good. Real is how we learn.",
+          "trust": 1,
+          "morale": 2
+        }
+      ]
+    },
+    {
+      "id": "zara-normal-54",
+      "crewId": "zara",
+      "kind": "normal",
+      "text": "We are all tired. I will say it so nobody else has to. Be gentle with each other for a bit.",
+      "when": {
+        "moraleBelow": 55
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "Thank you for saying it.",
+          "reply": "It is my favourite part of the job, funnily enough.",
+          "trust": 2,
+          "morale": 7
+        },
+        {
+          "text": "Keep pushing.",
+          "reply": "Understood. I will push. Gently. And watch for cracks.",
+          "trust": 0,
+          "morale": -2
+        }
+      ]
+    },
+    {
+      "id": "zara-event-55",
+      "crewId": "zara",
+      "kind": "event",
+      "text": "That argument got loud. I am sorry, that was partly me. I should have stepped back sooner.",
+      "when": {
+        "recentEvent": "crew-argument"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "We all got heated.",
+          "reply": "Thank you for being generous. I will keep my voice down.",
+          "trust": 2,
+          "morale": 6
+        },
+        {
+          "text": "Let us not repeat it.",
+          "reply": "Agreed. Tea for everyone.",
+          "trust": 1,
+          "morale": 2
+        }
+      ]
+    },
+    {
+      "id": "zara-resource-56",
+      "crewId": "zara",
+      "kind": "resource",
+      "text": "Reserves are low. I do not like the look of those numbers, and I like them less every hour. Your call, but I would act soon.",
+      "when": {
+        "lowResource": "food"
+      },
+      "fact": false,
+      "choices": [
+        {
+          "text": "You are right. Acting now.",
+          "reply": "Good. Decisions beat worry, every time.",
+          "trust": 2,
+          "morale": 3
+        },
+        {
+          "text": "We will manage.",
+          "reply": "I hope so. I am watching the numbers with you.",
+          "trust": 0,
+          "morale": -2
+        }
+      ]
+    }
+  ]
+}

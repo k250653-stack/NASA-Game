@@ -8,6 +8,9 @@ import { runKey, TASK_LABEL, useCrewTask, useTaskStats } from './mission/crewTas
 import { ProblemButtons, ProblemLogPanel } from './mission/ProblemLog'
 import { problemLog, reopenProblem, useProblems } from './mission/problems'
 import { alertCategory, setAlert } from '@/ui/alertLayer'
+import { toast } from '@/ui/uiStore'
+import { CrewTalk, SideMissionList } from './mission/DialogueBox'
+import { ensureRun, noteStationVisit, sideMission, useCrewLife } from './mission/crewLife'
 import { offerTip } from '@/nova/tips'
 import { setAmbience, setStationHum } from '@/ui/ambience'
 import { Button } from '@/ui/Button'
@@ -50,7 +53,11 @@ const END_CARD_MS = 2800
 /** Event that shakes the screen when it hits. */
 const IMPACT_EVENT = 'micrometeoroid-hit'
 
-type Popup = { kind: 'crew'; id: string } | { kind: 'station'; key: WorkstationKind } | null
+type Popup =
+  | { kind: 'crew'; id: string }
+  | { kind: 'status'; id: string }
+  | { kind: 'station'; key: WorkstationKind }
+  | null
 
 /** Phase "mission": the run plays out in the habitat with the crew at their posts. */
 export default function HabitatWorld() {
@@ -76,6 +83,10 @@ export default function HabitatWorld() {
   const problemsDismissed = useProblems((s) => s.dismissed)
   const logOpen = useProblems((s) => s.logOpen)
   const [confirmNext, setConfirmNext] = useState(false)
+  // Counts for trust and side missions belong to this mission.
+  useEffect(() => {
+    if (m.run) ensureRun(m.run)
+  }, [m.run === null])
   const taskOpen = useCrewTask((s) => s.open)
   const paused =
     popup !== null ||
@@ -215,7 +226,13 @@ export default function HabitatWorld() {
           return
         }
         if (t.kind === 'crew') setPopup({ kind: 'crew', id: t.key })
-        else setPopup({ kind: 'station', key: t.key })
+        else {
+          // A side mission may want this station visited.
+          const r = useStore.getState().mission.run
+          if (r && noteStationVisit(t.key, r))
+            toast.success('Side mission done', 'They will say thanks tomorrow.')
+          setPopup({ kind: 'station', key: t.key })
+        }
       },
       isPaused: () => live.current,
       alerts: () => alertsRef.current,
@@ -278,7 +295,8 @@ export default function HabitatWorld() {
     )
   }
   const bars = gauges(run, p.design, p.content, scienceTarget)
-  const member = popup?.kind === 'crew' ? p.team.find((c) => c.id === popup.id) : undefined
+  const talkTo = popup?.kind === 'crew' ? p.team.find((c) => c.id === popup.id) : undefined
+  const member = popup?.kind === 'status' ? p.team.find((c) => c.id === popup.id) : undefined
   const showPrompt = target && !popup && !menu && !pending && !ending
   const action = target?.kind === 'crew' ? `Talk to ${target.label}` : `Use ${target?.label ?? ''}`
 
@@ -309,6 +327,7 @@ export default function HabitatWorld() {
         topLeft={
           <>
             <DayBadge info={dayInfo(run, p.destination, p.content)} />
+            <SideMissionHud />
             <TaskList
               active={activeTask}
               stationLabel={
@@ -382,6 +401,17 @@ export default function HabitatWorld() {
         onApprove={(e, pr) => void m.approve(e, pr)}
         onAckNotice={m.ackNotice}
       />
+      {talkTo && (
+        <CrewTalk
+          key={talkTo.id}
+          member={talkTo}
+          run={run}
+          gauges={bars}
+          content={p.content}
+          onStatus={() => setPopup({ kind: 'status', id: talkTo.id })}
+          onClose={() => setPopup(null)}
+        />
+      )}
       {member && (
         <CrewStatusPopup
           member={member}
@@ -467,5 +497,15 @@ export default function HabitatWorld() {
         onMainMenu={() => (setMenu(null), setPhase('title'))}
       />
     </motion.main>
+  )
+}
+
+/** Active side mission in the HUD (green, so it never reads as a problem). */
+function SideMissionHud() {
+  const active = useCrewLife((s) => s.active)
+  const m = active ? sideMission(active.id) : undefined
+  if (!active || !m) return null
+  return (
+    <SideMissionList title={m.title} brief={m.brief} progress={active.progress} turns={m.turns} />
   )
 }

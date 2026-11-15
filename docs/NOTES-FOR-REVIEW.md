@@ -307,3 +307,42 @@ Everything is generated (Web Audio + ZzFX), with no files. If an mp3 exists, it 
   - "Entering each HQ room the first time" is approximated by using that room's station, because the HQ scene doesn't report room changes to React.
   - The "science day" tip fires on the ice-discovery event only.
   - Tips that fire together with a lesson popup can sit behind it.
+
+### Task 6: crew dialogue and side missions
+- **Talking:** walk to a crew member and press E. A dialogue box opens with their portrait, name and role, typewriter text, 1–3 replies and a row of trust hearts. "Check status" opens the old status popup.
+- **Content (`src/content/dialogue.json`, Zod: `src/schemas/dialogue.ts`):** 56 lines, 7 per crew member.
+  - Five everyday lines each, an event reaction and a low-resource reaction.
+  - Conditions available: day range, destination, phase, low resource, morale below a value, a recent event, and trust range.
+  - Several lines teach a real fact, marked `fact: true`.
+  - The loader rejects unknown crew ids, events and side missions.
+- **Which line shows:** a follow-up (the turn after a side mission) comes first. Then a reaction to a recent event, then a low-resource reaction, then an everyday line chosen with the seeded generator from the seed, the turn and the crew member. It changes every turn, the same way for the same seed.
+- **Relationship:** each reply can change trust (kept in a small store, scale from `constants.dialogue`) and morale. Morale goes through the new pure engine function `adjustCrewMorale`, which clamps it and records the change.
+- **Side missions (`src/content/sideMissions.json`):** six of them, started from a reply tagged "side mission". One runs at a time, shown in green under the day badge.
+  - Lin: a photo from outside, at the Airlock on a calm turn.
+  - Omar: check the comms log at the Comms station.
+  - Sana: keep her off the EVA for two turns.
+  - Maya: visit the Science bench three turns in a row.
+  - Bilal: the Power panel two turns in a row.
+  - Kofi: the Repair station on a calm turn.
+- **Reward and follow-up:** morale (engine) and trust. The teamwork score reads morale, so no separate scoring hook was added. The next turn that crew member opens with a follow-up line.
+- **Debrief:** it lists the finished side missions with the day.
+- **Unsure:**
+  - I didn't add science points as a reward. No existing hook awards them without changing the engine, so morale and trust only.
+  - The Moon has few turns, so Maya's "3 turns in a row" may be hard to finish there.
+  - A side mission that fails (Sana goes on an EVA) silently drops off the list.
+  - Dialogue is written in English only.
+
+## Final report
+
+**New keys:** Q reopens the pending problem. L toggles the problems log. Space or E stops the repair timing bar. E opens a waiting hands-on task.
+**New settings:** Master volume, NOVA tips (lots, some, off), CRT scanlines, and the repair mini-game switch.
+**New content files:** `tasks.json`, `novaTips.json`, `dialogue.json`, `sideMissions.json`. `constants.json` gained `player`, `alert`, `dialogue` and `minigame`. Of those, `player` and `alert` are from this run.
+
+**Test these first in the browser:**
+1. Walk through a doorway in each room, and along the lobby and Briefing edges. Check the sliding, the smaller feet and the new speed.
+2. Launch (Moon, Engineer, the Director seat is easiest), then close an event popup with Esc. The "!" should pulse, with Q to reopen it.
+3. Press NEXT TURN with a problem pending and read the confirm text.
+4. Open the LOG with L and click a pending entry.
+5. Talk to a crew member and start a side mission.
+6. Listen for the ambient beds, the pad music, the alert layer and the doorway hiss, and check the levels.
+7. Open the Settings sound test (dev build) and the master slider.

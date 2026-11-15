@@ -4,6 +4,7 @@ import { offerTip } from '@/nova/tips'
 import { shakeScreen } from '@/ui/feel'
 import { playSound } from '@/ui/sound'
 import { advanceTurn, dropPending, isMissionOver } from '@/engine/mission'
+import { noteTurn } from './crewLife'
 import { useCrewTask } from './crewTask'
 import { useProblems } from './problems'
 import type { Design, EngineContent } from '@/engine/types'
@@ -85,6 +86,7 @@ export function useMissionRun(
     if (!s || !design || isMissionOver(s) || s.pendingEvents.length > 0) return
     const { state, newEvents } = advanceTurn(s, design, content, rngFor(s))
     setRun(state)
+    noteTurn(state, design, content)
     // NOVA: the first time dust builds up on the panels.
     if (state.dustLevel > s.dustLevel || newEvents.some((e) => e.id === DUST_STORM_EVENT))
       emitConcept('dust_solar')

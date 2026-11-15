@@ -14,6 +14,8 @@ import {
   LessonSchema,
   CrewTaskSchema,
   NovaTipSchema,
+  DialogueLineSchema,
+  SideMissionSchema,
   PartSchema,
   RocketSchema,
   RoleInfoSchema,
@@ -27,6 +29,8 @@ import {
   type Lesson,
   type CrewTask,
   type NovaTip,
+  type DialogueLine,
+  type SideMission,
   type Part,
   type Rocket,
   type Scenario,
@@ -40,6 +44,8 @@ import eventsJson from './events.json'
 import lessonsJson from './lessons.json'
 import tasksJson from './tasks.json'
 import novaTipsJson from './novaTips.json'
+import dialogueJson from './dialogue.json'
+import sideMissionsJson from './sideMissions.json'
 import constantsJson from './constants.json'
 import rolesJson from './roles.json'
 import baseSlotsJson from './baseSlots.json'
@@ -55,6 +61,8 @@ export interface GameContent {
   lessons: Lesson[]
   tasks: CrewTask[]
   novaTips: NovaTip[]
+  dialogue: DialogueLine[]
+  sideMissions: SideMission[]
   roles: RoleInfo[]
   baseSlots: BaseSlots[]
 }
@@ -142,6 +150,34 @@ function checkReferences(content: GameContent): void {
   const problems: Array<[string, string]> = []
 
   const eventIds = new Set(content.events.map((e) => e.id))
+  const crewIds = new Set(content.crew.map((c) => c.id))
+  const sideIds = new Set(content.sideMissions.map((m) => m.id))
+  content.dialogue.forEach((d) => {
+    if (!crewIds.has(d.crewId))
+      problems.push([
+        'dialogue.json',
+        `line "${d.id}" -> crewId "${d.crewId}" does not exist in crew.json`,
+      ])
+    if (d.when.recentEvent && !eventIds.has(d.when.recentEvent))
+      problems.push([
+        'dialogue.json',
+        `line "${d.id}" -> recentEvent "${d.when.recentEvent}" is not an event`,
+      ])
+    d.choices.forEach((ch) => {
+      if (ch.startSideMission && !sideIds.has(ch.startSideMission))
+        problems.push([
+          'dialogue.json',
+          `line "${d.id}" starts unknown side mission "${ch.startSideMission}"`,
+        ])
+    })
+  })
+  content.sideMissions.forEach((m) => {
+    if (!crewIds.has(m.crewId))
+      problems.push([
+        'sideMissions.json',
+        `mission "${m.id}" -> crewId "${m.crewId}" does not exist in crew.json`,
+      ])
+  })
   content.tasks.forEach((t) => {
     if (!eventIds.has(t.id))
       problems.push(['tasks.json', `task "${t.id}" does not match any event id in events.json`])
@@ -177,7 +213,6 @@ function checkReferences(content: GameContent): void {
       ])
     }
   })
-  const crewIds = new Set(content.crew.map((c) => c.id))
   const categories: readonly string[] = PART_CATEGORIES
   content.events.forEach((e) => {
     e.options.forEach((o) => {
@@ -240,6 +275,8 @@ export function validateContent(raw: {
   /** Optional so callers that predate hands-on tasks still work; defaults to tasks.json. */
   tasks?: unknown
   novaTips?: unknown
+  dialogue?: unknown
+  sideMissions?: unknown
   roles: unknown
   baseSlots: unknown
 }): GameContent {
@@ -254,6 +291,12 @@ export function validateContent(raw: {
     lessons: parseContentFile('lessons.json', LessonSchema, raw.lessons),
     tasks: parseContentFile('tasks.json', CrewTaskSchema, raw.tasks ?? tasksJson),
     novaTips: parseContentFile('novaTips.json', NovaTipSchema, raw.novaTips ?? novaTipsJson),
+    dialogue: parseContentFile('dialogue.json', DialogueLineSchema, raw.dialogue ?? dialogueJson),
+    sideMissions: parseContentFile(
+      'sideMissions.json',
+      SideMissionSchema,
+      raw.sideMissions ?? sideMissionsJson,
+    ),
     roles: parseContentFile('roles.json', RoleInfoSchema, raw.roles),
     baseSlots: parseContentFile('baseSlots.json', BaseSlotsSchema, raw.baseSlots),
   }
@@ -268,6 +311,8 @@ export function validateContent(raw: {
       ['lessons.json', content.lessons],
       ['tasks.json', content.tasks],
       ['novaTips.json', content.novaTips],
+      ['dialogue.json', content.dialogue],
+      ['sideMissions.json', content.sideMissions],
     ] as const
   ).forEach(([file, items]) => assertUniqueIds(file, items))
   checkReferences(content)
@@ -285,6 +330,8 @@ export const RAW_CONTENT = {
   lessons: lessonsJson,
   tasks: tasksJson,
   novaTips: novaTipsJson,
+  dialogue: dialogueJson,
+  sideMissions: sideMissionsJson,
   roles: rolesJson,
   baseSlots: baseSlotsJson,
 } as const
