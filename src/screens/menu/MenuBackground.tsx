@@ -19,7 +19,9 @@ export function MenuBackground({ launchT = null }: MenuBackgroundProps) {
   const shaking = !reduced && sinceIgnition >= 0 && sinceIgnition < LAUNCH.shakeMs
   // Whole-pixel shake that dies down; deterministic from the clock.
   const amp = shaking ? Math.round(4 * (1 - sinceIgnition / LAUNCH.shakeMs)) : 0
-  const shake = amp ? `translate(${(Math.floor(sinceIgnition / 35) % 2 ? 1 : -1) * amp}px, ${(Math.floor(sinceIgnition / 50) % 2 ? 1 : -1) * Math.ceil(amp / 2)}px)` : undefined
+  const shake = amp
+    ? `translate(${(Math.floor(sinceIgnition / 35) % 2 ? 1 : -1) * amp}px, ${(Math.floor(sinceIgnition / 50) % 2 ? 1 : -1) * Math.ceil(amp / 2)}px)`
+    : undefined
   const dim = t === null ? 0 : riseProgress(t) * 0.55
 
   return (

@@ -278,6 +278,8 @@ export function resolveEvent(
   ctx: MissionContext,
   handledBy: 'player' | 'ai' | 'standing-orders' = 'player',
   logPrefix = '',
+  /** Repair mini-game hit: added to the success chance, capped at constants.minigame.maxChance. */
+  chanceBonus = 0,
 ): { state: MissionState; result: ResolveResult } {
   const refuse = (explanation: string) => ({
     state,
@@ -320,7 +322,11 @@ export function resolveEvent(
     if ((c.crewEnergy ?? 0) > 0) cs.busyTurns += 1
   }
 
-  const chance = successChance(state, event, option, crew, ctx)
+  const base = successChance(state, event, option, crew, ctx)
+  const chance =
+    chanceBonus > 0
+      ? Math.max(base, Math.min(ctx.content.constants.minigame.maxChance, base + chanceBonus))
+      : base
   const success = rng.chance(chance)
   s.decisions.push({
     turn: s.turnIndex,

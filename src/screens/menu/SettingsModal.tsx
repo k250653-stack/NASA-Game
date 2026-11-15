@@ -1,7 +1,7 @@
 import { Button } from '@/ui/Button'
 import { Modal } from '@/ui/Modal'
 import { useSettings } from '@/ui/settingsStore'
-import { CrtToggle, SoundTest, VolumeSliders } from './AudioSettings'
+import { CrtToggle, MinigameToggle, SoundTest, VolumeSliders } from './AudioSettings'
 import { hintsOn } from '@/nova/novaStore'
 import { useStore } from '@/store'
 
@@ -88,6 +88,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
         />
         <VolumeSliders />
         <CrtToggle />
+        <MinigameToggle />
         <SoundTest />
       </div>
     </Modal>

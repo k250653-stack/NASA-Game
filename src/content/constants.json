@@ -134,5 +134,23 @@
     "reliabilityConcernBelow": 0.92,
     "scienceConcernBelow": 1,
     "source": "TODO"
+  },
+  "minigame": {
+    "eventIds": [
+      "solar-panel-damage",
+      "battery-fault",
+      "recycler-failure",
+      "co2-scrubber",
+      "instrument-jam",
+      "drill-stuck",
+      "comms-outage"
+    ],
+    "optionTag": "repair",
+    "hitBonus": 0.15,
+    "maxChance": 0.95,
+    "durationMs": 3000,
+    "sweepMs": 1100,
+    "minZone": 0.08,
+    "source": "Game design values for the repair timing mini-game (gameplay, not physics)."
   }
 }

@@ -78,6 +78,29 @@ export function CrtToggle() {
   )
 }
 
+/** Repair timing mini-game during the mission (on by default). */
+export function MinigameToggle() {
+  const on = useSettings((s) => s.minigames)
+  const set = useSettings((s) => s.setMinigames)
+  return (
+    <label className="flex items-center justify-between gap-6 py-3">
+      <span>
+        <span className="block text-primary">Repair mini-game</span>
+        <span className="block text-sm text-muted">
+          Timing bar on repairs: a hit adds to the success chance.
+        </span>
+      </span>
+      <input
+        type="checkbox"
+        checked={on}
+        onChange={(e) => set(e.target.checked)}
+        className="size-5 accent-alert"
+        data-testid="setting-minigames"
+      />
+    </label>
+  )
+}
+
 /** Dev builds only: one button per sound effect, to hear and judge them. */
 export function SoundTest() {
   if (!import.meta.env.DEV) return null

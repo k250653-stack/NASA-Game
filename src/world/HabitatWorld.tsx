@@ -255,7 +255,7 @@ export default function HabitatWorld() {
         sting={m.sting}
         acting={m.acting}
         delayMin={dayInfo(run, p.destination, p.content).delayMin}
-        onChoose={(e, o, c) => void m.choose(e, o, c)}
+        onChoose={(e, o, c, b) => void m.choose(e, o, c, b)}
         onApprove={(e, pr) => void m.approve(e, pr)}
         onAckNotice={m.ackNotice}
       />

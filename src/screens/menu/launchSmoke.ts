@@ -25,7 +25,14 @@ const spread = (i: number) => ((i * 37) % 11) / 10
  */
 export function launchPuffs(t: number, baseX: number, baseY: number, px: number, travel: number) {
   const out: Puff[] = []
-  const add = (key: string, x: number, y: number, size: number, opacity: number, tone: Puff['tone']) => {
+  const add = (
+    key: string,
+    x: number,
+    y: number,
+    size: number,
+    opacity: number,
+    tone: Puff['tone'],
+  ) => {
     if (opacity <= 0.02) return
     const s = Math.max(px * 2, snap(size, px * 2))
     out.push({ key, x: snap(x - s / 2, px), y: snap(y - s / 2, px), size: s, opacity, tone })
@@ -39,7 +46,14 @@ export function launchPuffs(t: number, baseX: number, baseY: number, px: number,
     if (age < 0 || age > life || born > LAUNCH.ignition) continue
     const u = age / life
     const side = i % 2 ? 1 : -1
-    add(`v${i}`, baseX + side * (6 + u * 18) * px, baseY - u * 14 * px, (3 + u * 6 + i * 0.4) * px, 0.55 * (1 - u), 'bg-primary')
+    add(
+      `v${i}`,
+      baseX + side * (6 + u * 18) * px,
+      baseY - u * 14 * px,
+      (3 + u * 6 + i * 0.4) * px,
+      0.55 * (1 - u),
+      'bg-primary',
+    )
   }
 
   // Ignition: clouds roll out sideways along the pad.
@@ -66,7 +80,14 @@ export function launchPuffs(t: number, baseX: number, baseY: number, px: number,
     const u = age / life
     const y = baseY - riseProgress(born) * travel
     const x = baseX + (spread(i) - 0.5) * 8 * px * (1 + u * 2)
-    add(`t${i}`, x, y + u * 6 * px, (6 + u * 14) * px, 0.6 * (1 - u), i % 2 ? 'bg-subtle' : 'bg-muted')
+    add(
+      `t${i}`,
+      x,
+      y + u * 6 * px,
+      (6 + u * 14) * px,
+      0.6 * (1 - u),
+      i % 2 ? 'bg-subtle' : 'bg-muted',
+    )
   }
   return out
 }

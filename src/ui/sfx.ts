@@ -29,6 +29,8 @@ export const SOUND_IDS = [
   'unlock',
   'typewriter',
   'event-sting',
+  'minigame-hit',
+  'minigame-miss',
 ] as const
 export type SoundId = (typeof SOUND_IDS)[number]
 
@@ -57,6 +59,13 @@ const SOUNDS: Record<SoundId, number[]> = {
   // Two quick rising blips: "Day X: event!"
   'event-sting': [
     0.26, 0, 440, 0, 0.05, 0.08, 1, 1, 0, 0, 220, 0.05, 0.12, 0, 0, 0, 0, 1, 0, 0, 2600,
+  ],
+  // Mini-game: a bright double ping for a hit, a low soft thud for a miss.
+  'minigame-hit': [
+    0.28, 0, 660, 0, 0.04, 0.12, 1, 1, 0, 0, 330, 0.04, 0, 0, 0, 0, 0, 1, 0, 0, 3000,
+  ],
+  'minigame-miss': [
+    0.25, 0, 160, 0, 0.06, 0.14, 1, 1, -1.5, 0, 0, 0, 0, 0.2, 0, 0, 0, 0.8, 0, 0, 700,
   ],
 }
 

@@ -60,6 +60,23 @@ export const ConstantsSchema = z.strictObject({
     playerApprovesAllEvents: z.boolean(),
     source: NonEmptyString,
   }),
+  /** Repair timing mini-game (world/mission/RepairTiming): which options, and the bonus for a hit. */
+  minigame: z.strictObject({
+    eventIds: z.array(z.string()),
+    /** Options with this tag get the timing bar. */
+    optionTag: z.string(),
+    /** Added to the success chance on a hit (0.15 = +15 points). */
+    hitBonus: z.number().min(0).max(1),
+    /** The bonus never pushes the chance above this. */
+    maxChance: z.number().min(0).max(1),
+    /** The bar stops by itself (a miss) after this long, ms. */
+    durationMs: z.number().positive(),
+    /** Time for the marker to cross the bar once, ms. */
+    sweepMs: z.number().positive(),
+    /** Smallest green zone, as a share of the bar. */
+    minZone: z.number().min(0).max(1),
+    source: NonEmptyString,
+  }),
   /**
    * Event pacing (engine/events.ts applyPacing): a first event early, then neither too close
    * together nor too far apart. Days are mission days; per destination, else default.

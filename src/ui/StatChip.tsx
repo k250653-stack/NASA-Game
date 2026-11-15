@@ -32,8 +32,12 @@ export function StatChip({
       className={`inline-flex items-center border-2 border-border bg-surface ${compact ? 'gap-1 px-1.5 py-0.5' : 'gap-2 px-2.5 py-1'} ${className}`}
     >
       {icon && <Icon name={icon} size={compact ? 12 : 16} className="text-muted" />}
-      <span className={`label-caps text-muted ${compact ? 'text-[10px]' : 'text-xs'}`}>{label}</span>
-      <span className={`font-mono tabular-nums ${compact ? 'ml-auto text-[11px]' : 'text-sm'} ${TONE_TEXT[tone]}`}>
+      <span className={`label-caps text-muted ${compact ? 'text-[10px]' : 'text-xs'}`}>
+        {label}
+      </span>
+      <span
+        className={`font-mono tabular-nums ${compact ? 'ml-auto text-[11px]' : 'text-sm'} ${TONE_TEXT[tone]}`}
+      >
         {value}
         {unit && <span className="ml-0.5 text-subtle">{unit}</span>}
       </span>

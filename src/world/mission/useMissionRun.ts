@@ -125,6 +125,7 @@ export function useMissionRun(
       crewId: string | null,
       handledBy: 'player' | 'ai',
       prefix: string,
+      chanceBonus = 0,
     ) => {
       const s = useStore.getState().mission.run
       if (!s || !design) return
@@ -137,6 +138,7 @@ export function useMissionRun(
         { design, content },
         handledBy,
         prefix,
+        chanceBonus,
       )
       if (!result.applied) {
         setToast({ id: Date.now(), ok: false, text: result.explanation })
@@ -162,9 +164,11 @@ export function useMissionRun(
 
   /** The player's own choice (their event, or an override of a teammate's proposal). */
   const choose = useCallback(
-    (event: GameEvent, optionId: string, crewId: string | null) => {
+    (event: GameEvent, optionId: string, crewId: string | null, chanceBonus = 0) => {
       const own = design ? isOwnEvent(event, design) : true
-      return resolve(event, optionId, crewId, 'player', own ? 'You: ' : 'You (override): ')
+      const how = own ? 'You' : 'You (override)'
+      const prefix = chanceBonus > 0 ? `${how}, hands-on repair hit: ` : `${how}: `
+      return resolve(event, optionId, crewId, 'player', prefix, chanceBonus)
     },
     [design, resolve],
   )

@@ -21,6 +21,8 @@ interface SettingsState {
   musicVolume: number
   /** Subtle CRT scanline overlay. */
   crt: boolean
+  /** Repair timing mini-game during the mission (off = the plain chance is used). */
+  minigames: boolean
   setSoundOn: (on: boolean) => void
   setMusicOn: (on: boolean) => void
   setReducedMotion: (on: boolean) => void
@@ -28,6 +30,7 @@ interface SettingsState {
   setSoundVolume: (v: number) => void
   setMusicVolume: (v: number) => void
   setCrt: (on: boolean) => void
+  setMinigames: (on: boolean) => void
 }
 
 export const useSettings = create<SettingsState>()(
@@ -40,6 +43,7 @@ export const useSettings = create<SettingsState>()(
       soundVolume: 0.8,
       musicVolume: 0.5,
       crt: false,
+      minigames: true,
       setSoundOn: (soundOn) => set({ soundOn }),
       setMusicOn: (musicOn) => set({ musicOn }),
       setReducedMotion: (reducedMotion) => set({ reducedMotion }),
@@ -47,6 +51,7 @@ export const useSettings = create<SettingsState>()(
       setSoundVolume: (soundVolume) => set({ soundVolume }),
       setMusicVolume: (musicVolume) => set({ musicVolume }),
       setCrt: (crt) => set({ crt }),
+      setMinigames: (minigames) => set({ minigames }),
     }),
     {
       name: SETTINGS_KEY,
@@ -59,6 +64,7 @@ export const useSettings = create<SettingsState>()(
         soundVolume: s.soundVolume,
         musicVolume: s.musicVolume,
         crt: s.crt,
+        minigames: s.minigames,
       }),
     },
   ),
