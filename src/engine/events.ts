@@ -24,7 +24,7 @@ import {
   teamModifiers,
 } from './missionHelpers'
 import type { Rng } from './rng'
-import type { Turn } from './timeline'
+import { missionTimeline, type Turn } from './timeline'
 import type { Design, EngineContent, MissionContext, MissionState } from './types'
 
 export function conditionMet(c: EventCondition, s: MissionState, ctx: MissionContext): boolean {
@@ -105,6 +105,58 @@ export function rollEvents(
     if (rng.chance(eventChance(e, s, ctx))) fired.push(e)
   }
   return fired
+}
+
+/** Pacing for this destination (constants.pacing). */
+export function pacingFor(ctx: MissionContext, destinationId: string) {
+  const p = ctx.content.constants.pacing
+  return p.byDestination[destinationId] ?? p.default
+}
+
+/** Mission day the most recent event fired on (start of its turn), or null before the first. */
+export function lastEventDay(s: MissionState, turns: readonly Turn[]): number | null {
+  let last: number | null = null
+  for (const h of Object.values(s.eventHistory)) {
+    const day = turns[h.lastTurn]?.startDay
+    if (day !== undefined && (last === null || day > last)) last = day
+  }
+  return last
+}
+
+/**
+ * Pacing on top of the dice: drops rolled events that come too soon after the last one, and when
+ * nothing fired forces one (picked with the seeded rng, weighted by each event's chance) if the
+ * first event is due or the quiet stretch would pass maxEventGapDays. Deterministic per seed.
+ */
+export function applyPacing(
+  fired: GameEvent[],
+  s: MissionState,
+  ctx: MissionContext,
+  turn: Turn,
+  rng: Rng,
+): GameEvent[] {
+  const pace = pacingFor(ctx, s.destinationId)
+  const dest = ctx.content.destinations.find((d) => d.id === s.destinationId)
+  if (!dest) return fired
+  const last = lastEventDay(s, missionTimeline(dest))
+  const since = last === null ? Number.POSITIVE_INFINITY : turn.startDay - last
+  if (fired.length > 0) return since < pace.minEventGapDays ? [] : fired
+  const due =
+    last === null
+      ? turn.startDay + turn.days >= pace.firstEventByDay
+      : since + turn.days > pace.maxEventGapDays
+  if (!due) return []
+  const pool = eligibleEvents(s, ctx, turn)
+    .map((e) => ({ e, w: eventChance(e, s, ctx) }))
+    .filter((x) => x.w > 0)
+  const total = pool.reduce((acc, x) => acc + x.w, 0)
+  if (total <= 0) return []
+  let r = rng.next() * total
+  for (const x of pool) {
+    r -= x.w
+    if (r <= 0) return [x.e]
+  }
+  return [pool[pool.length - 1]!.e]
 }
 
 export const isEvaOption = (o: EventOption): boolean =>

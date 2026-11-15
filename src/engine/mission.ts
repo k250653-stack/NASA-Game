@@ -6,7 +6,7 @@
 import type { Destination, GameEvent, Part, Weakness } from '@/schemas'
 import { computeTotals, marginRatio, resolveDesign } from './budget'
 import { chooseResponse, eventOwner } from './crewAI'
-import { resolveEvent, rollEvents } from './events'
+import { applyPacing, isEvaOption, resolveEvent, rollEvents } from './events'
 import { fmt } from './format'
 import { recordChange, recordSnapshot } from './history'
 import {
@@ -407,10 +407,19 @@ function checkCrewHealth(s: MissionState, ctx: MissionContext): void {
   }
 }
 
+/** Option tags the standing orders steer (constants: StandingOrdersSchema). */
+const ORDER_TAGS = new Set(['eva', 'rest', 'continue', 'shed_science', 'ration'])
+
+/** Does any standing order apply to this event (an EVA, rest, shed-science or ration option)? */
+export function standingOrderCovers(event: GameEvent): boolean {
+  return event.options.some((o) => isEvaOption(o) || o.tags.some((t) => ORDER_TAGS.has(t)))
+}
+
 /**
- * Routes a fired event. Not the player's role -> the AI owner of that role answers.
- * Player's role but urgent and the signal delay is too long for a live answer -> the crew
- * answers under standing orders. Otherwise it waits in pendingEvents for the player.
+ * Routes a fired event. Urgent + signal delay too long for a live answer + a standing order that
+ * covers it -> the crew answers under standing orders. Otherwise it waits in pendingEvents for
+ * the player: their own role as a decision, a teammate's as a proposal to approve or override
+ * (settings.playerApprovesAllEvents). With that setting off, teammates answer their own events.
  */
 export function dispatchEvent(
   state: MissionState,
@@ -424,7 +433,9 @@ export function dispatchEvent(
   const delaySec = signalDelay(dest, state.day)
   const delayed =
     !settings.liveResponseDestinations.includes(dest.id) && delaySec > settings.delayThresholdSec
-  if (playerOwns && !(delayed && event.urgency === 'urgent')) {
+  // Standing orders answer only urgent events under signal delay that an order actually covers.
+  const byOrders = delayed && event.urgency === 'urgent' && standingOrderCovers(event)
+  if ((playerOwns || settings.playerApprovesAllEvents) && !byOrders) {
     const s = cloneState(state)
     s.pendingEvents.push({
       uid: `${event.id}@${state.turnIndex}`,
@@ -450,7 +461,7 @@ export function dispatchEvent(
     })
     return s
   }
-  const prefix = playerOwns
+  const prefix = byOrders
     ? `Handled by crew (signal delay ${fmt(delaySec / 60, 1)} min) under standing orders. ${decision.reason} `
     : `${owner.name} (${ROLE_NAMES[event.role]}) handled "${event.title}". ${decision.reason} `
   return resolveEvent(
@@ -460,7 +471,7 @@ export function dispatchEvent(
     decision.crewId,
     rng,
     ctx,
-    playerOwns ? 'standing-orders' : 'ai',
+    byOrders ? 'standing-orders' : 'ai',
     prefix,
   ).state
 }
@@ -512,7 +523,7 @@ export function advanceTurn(
     else delete s.disabledParts[id]
   }
 
-  const fired = rollEvents(s, ctx, turn, rng)
+  const fired = applyPacing(rollEvents(s, ctx, turn, rng), s, ctx, turn, rng)
   let next = s
   for (const e of fired) {
     next.eventHistory[e.id] = {

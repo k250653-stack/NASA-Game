@@ -39,7 +39,23 @@
   "settings": {
     "liveResponseDestinations": ["moon"],
     "delayThresholdSec": 60,
+    "playerApprovesAllEvents": true,
     "source": "TODO"
+  },
+  "pacing": {
+    "default": {
+      "firstEventByDay": 3,
+      "minEventGapDays": 3,
+      "maxEventGapDays": 6
+    },
+    "byDestination": {
+      "mars": {
+        "firstEventByDay": 3,
+        "minEventGapDays": 2,
+        "maxEventGapDays": 5
+      }
+    },
+    "source": "Game design values (pacing for play, not physics). Mars turns are 15-30 days long, so every Mars turn ends up with an event."
   },
   "mission": {
     "startMorale": 80,

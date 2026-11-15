@@ -28,6 +28,7 @@ export const SOUND_IDS = [
   'nova-beep',
   'unlock',
   'typewriter',
+  'event-sting',
 ] as const
 export type SoundId = (typeof SOUND_IDS)[number]
 
@@ -53,6 +54,10 @@ const SOUNDS: Record<SoundId, number[]> = {
   'nova-beep': [0.12, 0, 880, 0, 0.022, 0.025, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3000],
   unlock: [0.3, 0, 262, 0.02, 0.16, 0.3, 1, 1, 6, 0, 131, 0.06, 0, 0, 0, 0, 0, 0.8, 0, 0, 2800],
   typewriter: [0.07, 0, 1400, 0, 0.003, 0.012, 4, 1, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 1, 0, 0, 2400],
+  // Two quick rising blips: "Day X: event!"
+  'event-sting': [
+    0.26, 0, 440, 0, 0.05, 0.08, 1, 1, 0, 0, 220, 0.05, 0.12, 0, 0, 0, 0, 1, 0, 0, 2600,
+  ],
 }
 
 /** How much a sound's pitch may wander per play (0 = never); the rest play the same each time. */

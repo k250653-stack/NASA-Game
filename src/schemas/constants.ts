@@ -10,6 +10,15 @@ const Sourced = z.strictObject({
 const NonNegKg = z.number().nonnegative({ error: 'must be >= 0 kg' })
 
 /** Global engine constants: src/content/constants.json. */
+const PacingSchema = z.strictObject({
+  /** An event is forced in the turn that reaches this day if none has fired yet. */
+  firstEventByDay: z.number().nonnegative(),
+  /** Rolled events are dropped while fewer days than this have passed since the last one. */
+  minEventGapDays: z.number().nonnegative(),
+  /** An event is forced when the quiet stretch would grow past this many days. */
+  maxEventGapDays: z.number().positive(),
+})
+
 export const ConstantsSchema = z.strictObject({
   _note: z.string().optional(),
   /** Consumables one crew member uses per day. */
@@ -44,6 +53,20 @@ export const ConstantsSchema = z.strictObject({
     liveResponseDestinations: z.array(z.string()),
     /** One-way delay above which urgent events are handled by standing orders, seconds. */
     delayThresholdSec: z.number().nonnegative(),
+    /**
+     * Every event goes to the player: their own role as a decision, a teammate's as a proposal to
+     * approve or override. False = teammates resolve their own events silently (old behaviour).
+     */
+    playerApprovesAllEvents: z.boolean(),
+    source: NonEmptyString,
+  }),
+  /**
+   * Event pacing (engine/events.ts applyPacing): a first event early, then neither too close
+   * together nor too far apart. Days are mission days; per destination, else default.
+   */
+  pacing: z.strictObject({
+    default: PacingSchema,
+    byDestination: z.record(z.string(), PacingSchema),
     source: NonEmptyString,
   }),
   /** Turn-loop tuning (see engine/mission.ts and engine/events.ts). */

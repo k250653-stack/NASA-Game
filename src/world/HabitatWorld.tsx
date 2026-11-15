@@ -13,7 +13,7 @@ import { returnToEarth } from './debrief/debrief'
 import { HabitatCanvas } from './HabitatCanvas'
 import type { HabitatCallbacks, HabitatScene, HabitatTarget, NpcSpec } from './HabitatScene'
 import { InteractPrompt, promptTransform } from './InteractPrompt'
-import { EventPopup } from './mission/EventPopup'
+import { MissionEventLayer } from './mission/MissionEventLayer'
 import { MissionEndCard } from './mission/MissionEndCard'
 import {
   DayBadge,
@@ -60,7 +60,8 @@ export default function HabitatWorld() {
   const promptRef = useRef<HTMLDivElement>(null)
   const anchor = useRef({ x: 0, y: 0 })
   const live = useRef(false)
-  const paused = popup !== null || menu !== null || m.pending !== null || ending || novaOpen
+  const paused =
+    popup !== null || menu !== null || m.pending !== null || m.notice !== null || ending || novaOpen
   // Popups closing must always hand the keyboard back to the player.
   useReleaseFocus(paused)
   const tutorial = useHabitatTutorial(paused)
@@ -160,7 +161,7 @@ export default function HabitatWorld() {
   useEffect(() => {
     finish.current = { design: p.design, content: p.content }
   }, [p.design, p.content])
-  const done = m.over && !m.acting && !m.pending
+  const done = m.over && !m.acting && !m.pending && !m.notice
   useEffect(() => {
     if (!done) return
     const a = setTimeout(() => setEnding(true), END_PAUSE_MS)
@@ -232,7 +233,7 @@ export default function HabitatWorld() {
         }
         bottomRight={
           <TurnControls
-            canAdvance={!m.over && !pending && !m.acting}
+            canAdvance={!m.over && !pending && !m.notice && !m.acting}
             fastForward={m.fastForward}
             onNext={m.nextTurn}
             onFastForward={m.setFastForward}
@@ -245,16 +246,19 @@ export default function HabitatWorld() {
         onDone={tutorial.onDone}
         onSkip={tutorial.active ? skipTutorial : undefined}
       />
-      {pending && !m.acting && (
-        <EventPopup
-          key={pending.id + run.turnIndex}
-          event={pending}
-          run={run}
-          design={p.design}
-          content={p.content}
-          onChoose={(o, c) => void m.choose(pending, o, c)}
-        />
-      )}
+      <MissionEventLayer
+        run={run}
+        design={p.design}
+        content={p.content}
+        pending={pending}
+        notice={m.notice}
+        sting={m.sting}
+        acting={m.acting}
+        delayMin={dayInfo(run, p.destination, p.content).delayMin}
+        onChoose={(e, o, c) => void m.choose(e, o, c)}
+        onApprove={(e, pr) => void m.approve(e, pr)}
+        onAckNotice={m.ackNotice}
+      />
       {member && (
         <CrewStatusPopup
           member={member}

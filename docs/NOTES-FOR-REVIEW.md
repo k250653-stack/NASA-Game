@@ -168,3 +168,39 @@ RESULT: all checks passed
 - **Front walls:** the occluders for the lobby front walls (both sides), Briefing, Launch and Personnel now start on the real top edge of the wall art.
   - The Personnel-to-Launch inner wall follows the notch.
 - **Unchanged and still correct:** the door frames, door areas, the other blockers, all tall-furniture occluders and all station areas. Each was checked against the art.
+
+## Mission run: why the player never got a decision (diagnosis)
+
+- **Events are rolled.** Each turn, `rollEvents` in `src/engine/events.ts` rolls every eligible event against a small per-turn chance (mostly 4–15 %). At most 2 events fire per turn. On the Moon there are only 11 turns (3 + 7 + 1, each 3–4 days long). So a quiet run can have very few events, and nothing guarantees one early or regularly.
+- **Most events are auto-resolved inside the engine.** `dispatchEvent` in `src/engine/mission.ts` decides who answers. Only events in the player's own role go to `pendingEvents`, which is what opens the popup. Events for any other role are answered on the spot by that teammate (`crewAI.chooseResponse`), inside `advanceTurn`, before the UI ever sees them. Those are the "Sana handled…" and "Bilal fixed…" log lines.
+  - The 22 events split by role as: Power & Life 9, Comms & Nav 6, Launch & Budget 4, Science 3.
+  - So a Science player owns 3 of the 22 events, and some of those can only fire on the surface.
+- **Standing orders cover urgent events on Mars.** Urgent events during signal delay are answered by "standing orders", whether or not an order covers that event type.
+- **Fast-forward and the popup are not the cause.** Fast-forward already stops when `pendingEvents` is non-empty, and `EventPopup` is mounted in `HabitatWorld`. They just almost never got a pending event to show.
+
+**Fix plan:**
+- **Route every event to the player.** With a new content setting, the engine sends every event to `pendingEvents`.
+  - Events in the player's own role, or any event for the Mission Director, open a full decision.
+  - A teammate's event opens their proposal, which the player approves or overrides.
+  - Only Mars urgent events covered by a relevant standing order auto-resolve, and those are still shown to the player.
+- **Add a pacing rule** in the engine, configured in `constants.json`, so events come early and regularly.
+
+## Mission run: what changed
+
+- **Routing (`dispatchEvent`, `src/engine/mission.ts`):** with `settings.playerApprovesAllEvents: true` in `constants.json`, every event goes to `pendingEvents`.
+  - The UI shows the player's own events, or every event for the Mission Director, as the full decision.
+  - A teammate's event shows as "<name> (role) proposes: <option> with <crew>, because <reason>", with APPROVE (Enter) or OVERRIDE. The reason comes from `crewAI.chooseResponse`.
+  - Standing orders still answer Mars urgent events under signal delay, but only when an order covers that event. That means one of its options is an EVA, rest/continue, shed-science or ration option (`standingOrderCovers`).
+  - Every standing-order answer is shown to the player afterwards with an OK button.
+  - Setting the flag to `false` restores the old behaviour, where teammates answered silently.
+- **Pacing (`applyPacing`, `src/engine/events.ts`):** this runs after the normal roll, so it is deterministic with the seed. The values are in `constants.pacing`.
+  - Default: `firstEventByDay` 3, `minEventGapDays` 3, `maxEventGapDays` 6. Mars: 3 / 2 / 5.
+  - A rolled event is dropped if it comes sooner than the minimum gap after the last one.
+  - If nothing fired and the first event is due, or the quiet stretch would pass the maximum gap, one eligible event is forced. It is picked with the seeded generator, weighted by its normal chance.
+  - Moon turns are 3–4 days long, so an event comes every one or two turns. Mars turns are 15–30 days long, so every Mars turn now has an event. The engine cannot do "every 3–5 days" inside a 30-day turn.
+- **Who decided:**
+  - Log lines are prefixed "You: …", "You (override): …", "<name> (approved by you): …" or "Handled by crew (signal delay …)".
+  - The debrief shows counts for: decided by you, approved, overridden and standing orders.
+  - The teamwork score maths is unchanged. It only uses morale, conflicts and trades, so the counts are shown, not scored.
+- **Fast-forward:** it skips quiet turns and stops at the next event, with a "Day X: event!" banner, a ZzFX sting and a 2 px shake.
+- **Unit tests that will need updating:** a few tests in `src/engine/__tests__/mission.test.ts` assume the old routing, where teammates answer their own events and standing orders answer every delayed urgent event. They were not run, as requested.

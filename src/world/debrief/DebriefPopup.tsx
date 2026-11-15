@@ -11,6 +11,7 @@ import { PopupPanel } from '../PopupPanel'
 import { CauseList } from './CauseList'
 import { changeLines, graphSeries, newMission, redesignAndRetry } from './debrief'
 import { CrewReactions, H3, RunCompare, ScoreBreakdown } from './DebriefSections'
+import { decisionCounts, type DecisionCounts } from '../mission/proposal'
 import { MissionGraph } from './MissionGraph'
 
 const OUTCOME = {
@@ -93,6 +94,7 @@ export function DebriefPopup({ onClose }: { onClose: () => void }) {
             <span className="text-xl text-subtle"> / 100</span>
           </p>
         </header>
+        <DecisionLine counts={decisionCounts(run, p.design, p.content)} />
 
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-8">
           <div className="space-y-6">
@@ -164,5 +166,25 @@ export function DebriefPopup({ onClose }: { onClose: () => void }) {
         </footer>
       </div>
     </PopupPanel>
+  )
+}
+
+/** Who made the calls during the mission: you, your approvals of teammates, overrides, orders. */
+function DecisionLine({ counts }: { counts: DecisionCounts }) {
+  const items: Array<[string, number]> = [
+    ['Decided by you', counts.decided],
+    ['Teammate plans approved', counts.approved],
+    ['Overridden by you', counts.overridden],
+    ['Standing orders', counts.standingOrders],
+  ]
+  return (
+    <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-1" data-testid="decision-counts">
+      {items.map(([label, n]) => (
+        <li key={label} className="flex items-baseline gap-2">
+          <span className="label-caps text-sm text-muted">{label}</span>
+          <span className="font-mono text-lg text-primary tabular-nums">{n}</span>
+        </li>
+      ))}
+    </ul>
   )
 }

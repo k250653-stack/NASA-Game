@@ -9,11 +9,13 @@ import { useStore } from '@/store'
 import { emitConcept } from '@/store/concepts'
 import type { WorkstationKind } from '../rooms/room'
 import { actionPost, rngFor } from './missionRun'
+import { isOwnEvent, type Proposal } from './proposal'
 
 /** Pause between fast-forwarded turns, in ms, so the crew walks and the log can be followed. */
 const FF_STEP_MS = 450
-/** How long the result line stays up. */
+/** How long the result line and the "Day X: event!" sting stay up. */
 const TOAST_MS = 3500
+const STING_MS = 1600
 /** Event that teaches dust on solar panels the first time it fires. */
 const DUST_STORM_EVENT = 'dust-storm'
 
@@ -23,12 +25,21 @@ export interface Toast {
   text: string
 }
 
+/** A standing order answered an event under signal delay: shown so the player still sees it. */
+export interface Notice {
+  key: string
+  title: string
+  optionLabel: string
+  success: boolean
+}
+
 /** Plays a crew member's action in the room; resolves when they are back at their post. */
 export type ActFn = (crewId: string, kind: WorkstationKind) => Promise<void>
 
 /**
- * Drives the mission with the engine: Next Turn, Fast-Forward (stops when the player is needed
- * or the mission ends) and the player's answers. Every new state is saved to the store.
+ * Drives the mission with the engine. Next Turn; Fast-Forward skips quiet days and stops at the
+ * next event. Every event waits for the player: their own as a decision, a teammate's as a
+ * proposal to approve or override. Every new state is saved to the store.
  */
 export function useMissionRun(
   design: Design | null,
@@ -42,6 +53,8 @@ export function useMissionRun(
   const [fastForward, setFastForward] = useState(false)
   const [acting, setActing] = useState(false)
   const [toast, setToast] = useState<Toast | null>(null)
+  const [notices, setNotices] = useState<Notice[]>([])
+  const [sting, setSting] = useState<{ day: number; key: number } | null>(null)
   const actRef = useRef(act)
   useEffect(() => {
     actRef.current = act
@@ -52,23 +65,17 @@ export function useMissionRun(
     const t = setTimeout(() => setToast(null), TOAST_MS)
     return () => clearTimeout(t)
   }, [toast])
+  useEffect(() => {
+    if (!sting) return
+    const t = setTimeout(() => setSting(null), STING_MS)
+    return () => clearTimeout(t)
+  }, [sting])
 
   const pendingId = run?.pendingEvents[0]?.eventId
   const pending: GameEvent | null =
     (pendingId && content.events.find((e) => e.id === pendingId)) || null
   const over = run ? isMissionOver(run) : false
-
-  /** Crew who answered events since `before` walk to where they acted. */
-  const playDecisions = useCallback(
-    (before: MissionState, after: MissionState) => {
-      for (const d of after.decisions.slice(before.decisions.length)) {
-        const event = content.events.find((e) => e.id === d.eventId)
-        if (event && d.crewId && d.handledBy !== 'player')
-          void actRef.current(d.crewId, actionPost(event, d.optionId))
-      }
-    },
-    [content],
-  )
+  const notice = notices[0] ?? null
 
   const nextTurn = useCallback(() => {
     const s = useStore.getState().mission.run
@@ -78,21 +85,47 @@ export function useMissionRun(
     // NOVA: the first time dust builds up on the panels.
     if (state.dustLevel > s.dustLevel || newEvents.some((e) => e.id === DUST_STORM_EVENT))
       emitConcept('dust_solar')
-    // Fast-forward stops when the player is needed or the mission ends.
-    if (state.pendingEvents.length > 0 || isMissionOver(state)) setFastForward(false)
-    playDecisions(s, state)
-  }, [design, content, setRun, playDecisions])
+    // Standing orders answered something under signal delay: queue it so the player sees it.
+    const auto: Notice[] = []
+    for (const d of state.decisions.slice(s.decisions.length)) {
+      const event = content.events.find((e) => e.id === d.eventId)
+      if (!event) continue
+      if (d.crewId) void actRef.current(d.crewId, actionPost(event, d.optionId))
+      if (d.handledBy === 'standing-orders')
+        auto.push({
+          key: `${d.eventId}@${d.turn}`,
+          title: event.title,
+          optionLabel: event.options.find((o) => o.id === d.optionId)?.label ?? d.optionId,
+          success: d.success,
+        })
+    }
+    if (auto.length) setNotices((n) => [...n, ...auto])
+    // Something happened: stop fast-forward, with a short "Day X: event!" sting.
+    if (newEvents.length > 0) {
+      setFastForward(false)
+      setSting({ day: state.day, key: state.turnIndex })
+      playSound('event-sting')
+      shakeScreen('small')
+    }
+    if (isMissionOver(state)) setFastForward(false)
+  }, [design, content, setRun])
 
   // Fast-forward: one turn every FF_STEP_MS until an event needs the player or the mission ends.
   useEffect(() => {
-    if (!fastForward || pending || over || acting || paused) return
+    if (!fastForward || pending || notice || over || acting || paused) return
     const t = setTimeout(nextTurn, FF_STEP_MS)
     return () => clearTimeout(t)
-  }, [fastForward, pending, over, acting, paused, run, nextTurn])
+  }, [fastForward, pending, notice, over, acting, paused, run, nextTurn])
 
-  /** The player's answer: resolve, close the popup, play the action, then show the result. */
-  const choose = useCallback(
-    async (event: GameEvent, optionId: string, crewId: string | null) => {
+  /** Resolves, plays the walk to the station, then shows the result as a toast. */
+  const resolve = useCallback(
+    async (
+      event: GameEvent,
+      optionId: string,
+      crewId: string | null,
+      handledBy: 'player' | 'ai',
+      prefix: string,
+    ) => {
       const s = useStore.getState().mission.run
       if (!s || !design) return
       const { state, result } = resolveEvent(
@@ -102,7 +135,8 @@ export function useMissionRun(
         crewId,
         rngFor(s),
         { design, content },
-        'player',
+        handledBy,
+        prefix,
       )
       if (!result.applied) {
         setToast({ id: Date.now(), ok: false, text: result.explanation })
@@ -120,11 +154,49 @@ export function useMissionRun(
       setToast({
         id: Date.now(),
         ok: result.success,
-        text: result.success ? label : `${label} failed${detail ? `: ${detail}` : ''}`,
+        text: `${label} ${result.success ? 'succeeded' : 'failed'}${detail ? `: ${detail}` : ''}`,
       })
     },
     [design, content, setRun],
   )
 
-  return { run, pending, over, acting, fastForward, setFastForward, nextTurn, choose, toast }
+  /** The player's own choice (their event, or an override of a teammate's proposal). */
+  const choose = useCallback(
+    (event: GameEvent, optionId: string, crewId: string | null) => {
+      const own = design ? isOwnEvent(event, design) : true
+      return resolve(event, optionId, crewId, 'player', own ? 'You: ' : 'You (override): ')
+    },
+    [design, resolve],
+  )
+
+  /** The player approved the teammate's proposal. */
+  const approve = useCallback(
+    (event: GameEvent, p: Proposal) =>
+      resolve(
+        event,
+        p.decision.optionId,
+        p.decision.crewId,
+        'ai',
+        `${p.owner.name} (approved by you): `,
+      ),
+    [resolve],
+  )
+
+  const ackNotice = useCallback(() => setNotices((n) => n.slice(1)), [])
+
+  return {
+    run,
+    pending,
+    notice,
+    ackNotice,
+    sting,
+    over,
+    acting,
+    fastForward,
+    setFastForward,
+    nextTurn,
+    choose,
+    approve,
+    toast,
+  }
 }

@@ -179,7 +179,12 @@ export class HQScene extends Phaser.Scene {
     kb.on('keydown-E', () => this.onUse())
     kb.addCapture(K.F2)
     // F2: overlay of every polygon; in dev builds also the hitbox editor.
-    this.editor = new HitboxEditor(this, rawHqMap(), (raw) => this.applyMap(raw), import.meta.env.DEV)
+    this.editor = new HitboxEditor(
+      this,
+      rawHqMap(),
+      (raw) => this.applyMap(raw),
+      import.meta.env.DEV,
+    )
     kb.on('keydown-F2', () => this.editor?.toggle())
     this.input.on('pointerdown', (p: Phaser.Input.Pointer) => this.onPointerDown(p))
     this.input.on('pointermove', (p: Phaser.Input.Pointer) => {
@@ -329,12 +334,10 @@ export class HQScene extends Phaser.Scene {
     let dim = this.dimmers.get(roomId)
     if (!dim) {
       dim = this.add.graphics().setDepth(DEPTH_DIM)
-      dim
-        .fillStyle(tokenColor('bg'), 1)
-        .fillPoints(
-          room.floor.map(([x, y]) => new Phaser.Math.Vector2(x, y)),
-          true,
-        )
+      dim.fillStyle(tokenColor('bg'), 1).fillPoints(
+        room.floor.map(([x, y]) => new Phaser.Math.Vector2(x, y)),
+        true,
+      )
       this.dimmers.set(roomId, dim)
     }
     dim.setAlpha(LOCKED_DIM)

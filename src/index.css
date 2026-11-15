@@ -265,3 +265,13 @@ body {
     animation: none !important;
   }
 }
+
+/* "Day X: event!" sting: a 2 px nudge (src/ui/feel.ts, skipped with reduced motion). */
+@keyframes screen-shake-small {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(-2px, 1px); }
+  66% { transform: translate(2px, -1px); }
+}
+.screen-shake-small {
+  animation: screen-shake-small 0.2s steps(3) 2;
+}

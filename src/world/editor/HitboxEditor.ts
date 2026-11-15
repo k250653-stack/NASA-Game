@@ -104,18 +104,38 @@ export class HitboxEditor {
   private shapes(): Shape[] {
     const r = this.raw
     const out: Shape[] = []
-    const removeAt = <T>(list: T[], item: T) => () => {
-      const i = list.indexOf(item)
-      if (i < 0) return false
-      list.splice(i, 1)
-      return true
-    }
+    const removeAt =
+      <T>(list: T[], item: T) =>
+      () => {
+        const i = list.indexOf(item)
+        if (i < 0) return false
+        list.splice(i, 1)
+        return true
+      }
     for (const room of r.rooms)
-      out.push({ kind: 'walkable', label: `floor ${room.id}`, pts: room.floor as Pt[], color: tokenColor(KIND_COLOR.walkable), remove: () => false })
+      out.push({
+        kind: 'walkable',
+        label: `floor ${room.id}`,
+        pts: room.floor as Pt[],
+        color: tokenColor(KIND_COLOR.walkable),
+        remove: () => false,
+      })
     for (const o of r.outdoor)
-      out.push({ kind: 'walkable', label: 'walkable (extra)', pts: o as Pt[], color: tokenColor(KIND_COLOR.walkable), remove: removeAt(r.outdoor, o) })
+      out.push({
+        kind: 'walkable',
+        label: 'walkable (extra)',
+        pts: o as Pt[],
+        color: tokenColor(KIND_COLOR.walkable),
+        remove: removeAt(r.outdoor, o),
+      })
     for (const b of r.blocked)
-      out.push({ kind: 'blocked', label: 'blocker', pts: b as Pt[], color: tokenColor(KIND_COLOR.blocked), remove: removeAt(r.blocked, b) })
+      out.push({
+        kind: 'blocked',
+        label: 'blocker',
+        pts: b as Pt[],
+        color: tokenColor(KIND_COLOR.blocked),
+        remove: removeAt(r.blocked, b),
+      })
     for (const o of r.occluders)
       out.push({
         kind: 'occluder',
@@ -126,9 +146,21 @@ export class HitboxEditor {
         baseY: { get: () => o.baseY, set: (y) => (o.baseY = y) },
       })
     for (const d of r.doorways)
-      out.push({ kind: 'doorway', label: `doorway ${d.id}`, pts: d.area as Pt[], color: tokenColor(d.color), remove: removeAt(r.doorways, d) })
+      out.push({
+        kind: 'doorway',
+        label: `doorway ${d.id}`,
+        pts: d.area as Pt[],
+        color: tokenColor(d.color),
+        remove: removeAt(r.doorways, d),
+      })
     for (const s of r.stations)
-      out.push({ kind: 'station', label: `station ${s.id}`, pts: s.area as Pt[], color: tokenColor(KIND_COLOR.station), remove: removeAt(r.stations, s) })
+      out.push({
+        kind: 'station',
+        label: `station ${s.id}`,
+        pts: s.area as Pt[],
+        color: tokenColor(KIND_COLOR.station),
+        remove: removeAt(r.stations, s),
+      })
     return out
   }
 
@@ -144,13 +176,30 @@ export class HitboxEditor {
         r.blocked.push(pts)
         break
       case 'occluder':
-        r.occluders.push({ id: `occluder-${n}`, baseY: Math.max(...pts.map((p) => p[1])), area: pts })
+        r.occluders.push({
+          id: `occluder-${n}`,
+          baseY: Math.max(...pts.map((p) => p[1])),
+          area: pts,
+        })
         break
       case 'doorway':
-        r.doorways.push({ id: `door-${n}`, label: 'New doorway', color: 'accent', room: r.rooms[0]!.id, area: pts })
+        r.doorways.push({
+          id: `door-${n}`,
+          label: 'New doorway',
+          color: 'accent',
+          room: r.rooms[0]!.id,
+          area: pts,
+        })
         break
       case 'station':
-        r.stations.push({ id: `station-${n}`, label: 'New station', room: r.rooms[0]!.id, opens: 'planning', area: pts, reach: 48 })
+        r.stations.push({
+          id: `station-${n}`,
+          label: 'New station',
+          room: r.rooms[0]!.id,
+          opens: 'planning',
+          area: pts,
+          reach: 48,
+        })
         break
     }
   }
@@ -183,7 +232,10 @@ export class HitboxEditor {
         const [bx, by] = pts[(i + 1) % pts.length]!
         const dx = bx - ax
         const dy = by - ay
-        const t = Math.max(0, Math.min(1, ((at[0] - ax) * dx + (at[1] - ay) * dy) / (dx * dx + dy * dy || 1)))
+        const t = Math.max(
+          0,
+          Math.min(1, ((at[0] - ax) * dx + (at[1] - ay) * dy) / (dx * dx + dy * dy || 1)),
+        )
         const px = ax + t * dx
         const py = ay + t * dy
         if (Math.hypot(at[0] - px, at[1] - py) <= this.tol(EDGE_HIT))
@@ -336,13 +388,16 @@ export class HitboxEditor {
       const c = tokenColor(KIND_COLOR[this.kind])
       g.lineStyle(line * 2, c, 1)
       const pts = [...this.creating, this.mouse]
-      for (let i = 1; i < pts.length; i++) g.lineBetween(pts[i - 1]![0], pts[i - 1]![1], pts[i]![0], pts[i]![1])
+      for (let i = 1; i < pts.length; i++)
+        g.lineBetween(pts[i - 1]![0], pts[i - 1]![1], pts[i]![0], pts[i]![1])
       g.fillStyle(c, 1)
       for (const [x, y] of this.creating) g.fillRect(x - box / 2, y - box / 2, box, box)
     }
     this.status.textContent = this.editable
       ? `HITBOX EDITOR  new type: ${EDIT_KINDS.indexOf(this.kind) + 1} ${this.kind}` +
-        (this.creating ? `  ·  creating (${this.creating.length} pts, Enter closes, Backspace undoes)` : '') +
+        (this.creating
+          ? `  ·  creating (${this.creating.length} pts, Enter closes, Backspace undoes)`
+          : '') +
         (this.selected ? `\nselected: ${this.selected.label}` : '') +
         '\ndrag vertex · click edge = add · right-click vertex = delete · 1-5 type · N new · Del remove · B baseY · Ctrl+S save'
       : 'F2 overlay (read-only in this build) · click logs world coordinates'

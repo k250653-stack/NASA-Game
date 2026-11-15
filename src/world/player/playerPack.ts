@@ -106,11 +106,7 @@ export function facingFromScreenVector(
  * Keys are ground-plane intent (right = E, down = S, right+down = SE), so a held key pair
  * gives the diagonal sector. Same as facingFromScreenVector with the y part pre-halved.
  */
-export function facingFromKeys(
-  dx: number,
-  dy: number,
-  previous: PlayerDirection,
-): PlayerDirection {
+export function facingFromKeys(dx: number, dy: number, previous: PlayerDirection): PlayerDirection {
   return facingFromScreenVector(dx, dy / 2, previous)
 }
 
