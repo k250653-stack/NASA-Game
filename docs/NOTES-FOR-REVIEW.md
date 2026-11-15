@@ -246,3 +246,25 @@ Unsure:
 - **Speeds:** walk is now 3.5× the player pack's walk, up from 2.2×. Sprint (Shift) is walk × 1.6 = 5.6×, up from 3.6×. The values are in `constants.json` under `player`.
 - **Animation:** the walk animation already runs at the same factor as the movement (`PlayerActor` speeds its frame clock by the factor), so the feet keep planted. Footstep sounds come faster too.
 - **HQ and habitat:** both scenes use the same `PlayerActor`, so they move at the same speed.
+
+### Task 3: pending problems, alert audio, problems log
+- **Problems stay pending:** the event and proposal popups now have × and Esc. Closing one dismisses it, and the problem stays pending.
+  - A pulsing "!" with the count sits on the right edge of the HUD. It is amber, or red when more than one problem is pending or any is urgent.
+  - Clicking it, or pressing **Q**, reopens the popup.
+  - When a hands-on task is running, a "← Task: …" tag points to it.
+  - The player can walk while a problem is dismissed.
+- **NEXT TURN with problems pending** asks "N problems unresolved. The responsible teammate will handle them with their default choice. Continue?".
+  - Continue resolves each one with the crewAI proposal, logged "Not handled by you. <name> used the default: …".
+  - A problem nobody can answer is dropped with a log line, using the new pure helper `dropPending` in `src/engine/mission.ts`.
+  - **FAST-FORWARD** stays disabled while anything is pending.
+- **Alert layer (`src/ui/alertLayer.ts`):** a generated Web Audio drone, chosen by the first pending problem's category.
+  - Power is a deep pulse. Comms is morse-like blips. Crew is a soft, tense tone. Environment is seeded noise with a slow filter sweep.
+  - A soft `alert-beep` plays every 2 s, and the layer fades out within 1 s.
+  - It follows the sound volume and mute settings. The category map is in `constants.json` under `alert`.
+  - The first-fire sting and the 2 px shake already existed from the mission-run task.
+- **Problems log:** the **LOG** button, or **L**, opens a notebook with All / Pending / Resolved / Failed tabs.
+  - Each entry shows the day, the event and its picture, the station, who handled it, the option, the crew member, the result and the resource changes.
+  - Clicking a pending entry reopens its popup.
+  - The entries are rebuilt from the saved mission state (`problemLog` in `src/world/mission/problems.ts`), so they persist with the mission without a second store.
+  - The debrief shows them as "Mission Log".
+- **Unsure:** "who handled it" is read from the log line prefix: You / approved / standing order / not handled by you. Resource changes are the raw engine change records, for example "batteryWh −1,200", not percentages.

@@ -4,7 +4,12 @@ import { usePlanning } from '@/screens/planning/usePlanning'
 import { useStore } from '@/store'
 import { NovaCompanion } from '@/nova/NovaCompanion'
 import { useHints } from '@/nova/tutorial'
-import { runKey, useCrewTask, useTaskStats } from './mission/crewTask'
+import { runKey, TASK_LABEL, useCrewTask, useTaskStats } from './mission/crewTask'
+import { ProblemButtons, ProblemLogPanel } from './mission/ProblemLog'
+import { problemLog, reopenProblem, useProblems } from './mission/problems'
+import { alertCategory, setAlert } from '@/ui/alertLayer'
+import { Button } from '@/ui/Button'
+import { Modal } from '@/ui/Modal'
 import { TaskList, TaskPanel } from './mission/TaskPanel'
 import { skipTutorial, useNova } from '@/nova/novaStore'
 import { useHabitatTutorial } from '@/nova/tutorial'
@@ -66,11 +71,16 @@ export default function HabitatWorld() {
   const anchor = useRef({ x: 0, y: 0 })
   const live = useRef(false)
   const activeTask = useCrewTask((s) => s.active)
+  const problemsDismissed = useProblems((s) => s.dismissed)
+  const logOpen = useProblems((s) => s.logOpen)
+  const [confirmNext, setConfirmNext] = useState(false)
   const taskOpen = useCrewTask((s) => s.open)
   const paused =
     popup !== null ||
     menu !== null ||
-    (m.pending !== null && activeTask === null) ||
+    (m.pending !== null && activeTask === null && !problemsDismissed) ||
+    logOpen ||
+    confirmNext ||
     taskOpen ||
     m.notice !== null ||
     ending ||
@@ -129,6 +139,26 @@ export default function HabitatWorld() {
 
   const room = getRoom(p.destination?.id === 'mars' ? 'mars-habitat' : 'moon-habitat')
   const stationLabels = Object.fromEntries(room.workstations.map((w) => [w.kind, w.label]))
+  const stationLabel = (k: string) => stationLabels[k] ?? k
+  // Alert layer: plays while anything is pending, in the first problem's category.
+  const firstPending = m.run?.pendingEvents[0]?.eventId ?? null
+  useEffect(() => {
+    void setAlert(firstPending ? alertCategory(firstPending) : null)
+  }, [firstPending])
+  useEffect(() => () => void setAlert(null), [])
+  // Q reopens the problem popup, L opens the log.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || (e.target as HTMLElement).closest?.('input, textarea, select'))
+        return
+      const k = e.key.toLowerCase()
+      if (k === 'q' && (useStore.getState().mission.run?.pendingEvents.length ?? 0) > 0)
+        reopenProblem()
+      else if (k === 'l') useProblems.setState((s) => ({ logOpen: !s.logOpen }))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
   // NOVA: one tip the first time a hands-on task is waiting.
   const hintsOn = useHints()
   const diyTipShown = useNova((s) => s.diyTipShown)
@@ -270,9 +300,12 @@ export default function HabitatWorld() {
         }
         bottomRight={
           <TurnControls
-            canAdvance={!m.over && !pending && !m.notice && !m.acting}
+            canAdvance={!m.over && !m.notice && !m.acting}
+            canFastForward={!m.over && !pending && !m.notice && !m.acting}
             fastForward={m.fastForward}
-            onNext={m.nextTurn}
+            onNext={() =>
+              m.run && m.run.pendingEvents.length > 0 ? setConfirmNext(true) : m.nextTurn()
+            }
             onFastForward={m.setFastForward}
           />
         }
@@ -348,6 +381,55 @@ export default function HabitatWorld() {
           outcome={computeScore(run, p.design, p.content, { tradesCount: trades }).outcome}
         />
       )}
+      <ProblemButtons
+        pending={run.pendingEvents.length}
+        urgent={run.pendingEvents.some(
+          (pe) => p.content.events.find((e) => e.id === pe.eventId)?.urgency === 'urgent',
+        )}
+        taskLabel={
+          activeTask
+            ? `${TASK_LABEL[activeTask.task.taskType]}: ${stationLabel(activeTask.task.station)}`
+            : null
+        }
+      />
+      {logOpen && (
+        <ProblemLogPanel
+          entries={problemLog(
+            run,
+            p.content.events,
+            (id) => p.content.crew.find((c) => c.id === id)?.name ?? id,
+          )}
+          stationLabel={stationLabel}
+        />
+      )}
+      <Modal
+        open={confirmNext}
+        onClose={() => setConfirmNext(false)}
+        title="Unresolved problems"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmNext(false)}>
+              Go back
+            </Button>
+            <Button
+              onClick={() => {
+                setConfirmNext(false)
+                m.handOverAndAdvance()
+              }}
+              data-testid="confirm-handover"
+            >
+              Continue
+            </Button>
+          </>
+        }
+      >
+        <p className="text-primary" data-testid="handover-text">
+          {run.pendingEvents.length} problem{run.pendingEvents.length === 1 ? '' : 's'} unresolved.
+          The responsible teammate will handle {run.pendingEvents.length === 1 ? 'it' : 'them'} with
+          their default choice. Continue?
+        </p>
+      </Modal>
       <PauseMenu
         state={menu}
         onChange={setMenu}

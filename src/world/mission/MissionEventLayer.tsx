@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useProblems } from './problems'
 import { AnimatePresence, motion } from 'motion/react'
 import type { Design, EngineContent, MissionState } from '@/engine/types'
 import type { GameEvent } from '@/schemas'
@@ -48,8 +49,26 @@ interface MissionEventLayerProps {
 export function MissionEventLayer(p: MissionEventLayerProps) {
   // Event uid the player chose to decide themselves.
   const [overridden, setOverridden] = useState<string | null>(null)
-  const uid = p.run.pendingEvents[0]?.uid ?? null
-  const ev = p.pending
+  // Which pending problem to show: the one clicked in the log, else the oldest.
+  const focusUid = useProblems((s) => s.focusUid)
+  const dismissed = useProblems((s) => s.dismissed)
+  const shown = p.run.pendingEvents.find((e) => e.uid === focusUid) ?? p.run.pendingEvents[0]
+  const uid = shown?.uid ?? null
+  const ev = (shown && p.content.events.find((e) => e.id === shown.eventId)) || null
+  const dismiss = () => useProblems.setState({ dismissed: true })
+  // Esc closes the popup; the problem stays pending.
+  const popupUp = ev !== null && !dismissed
+  useEffect(() => {
+    if (!popupUp) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return
+      e.preventDefault()
+      e.stopPropagation()
+      useProblems.setState({ dismissed: true })
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [popupUp])
   const proposal =
     ev && !isOwnEvent(ev, p.design) ? teammateProposal(p.run, ev, p.design, p.content) : null
   const decideMyself = ev && (!proposal || overridden === uid)
@@ -119,7 +138,7 @@ export function MissionEventLayer(p: MissionEventLayerProps) {
           }}
         />
       )}
-      {ev && !p.acting && !timing && !taskRunning && decideMyself && (
+      {ev && !dismissed && !p.acting && !timing && !taskRunning && decideMyself && (
         <EventPopup
           key={`${uid}-decide`}
           event={ev}
@@ -128,15 +147,17 @@ export function MissionEventLayer(p: MissionEventLayerProps) {
           content={p.content}
           onChoose={(o, c) => pick(ev, o, c)}
           diy={diy}
+          onClose={dismiss}
         />
       )}
-      {ev && !p.acting && !taskRunning && !decideMyself && proposal && (
+      {ev && !dismissed && !p.acting && !taskRunning && !decideMyself && proposal && (
         <ProposalPopup
           key={`${uid}-proposal`}
           event={ev}
           proposal={proposal}
           onApprove={() => p.onApprove(ev, proposal)}
           onOverride={() => setOverridden(uid)}
+          onClose={dismiss}
         />
       )}
       {!ev && !p.acting && p.notice && (

@@ -157,5 +157,43 @@
     "walkSpeedFactor": 3.5,
     "sprintMultiplier": 1.6,
     "source": "Game feel values. walkSpeedFactor multiplies the player pack walk (movement and walk animation together, so feet stay planted); sprint = walk x sprintMultiplier (Shift). Same in HQ and habitat."
+  },
+  "alert": {
+    "categories": {
+      "power": [
+        "solar-panel-damage",
+        "battery-fault",
+        "recycler-failure",
+        "co2-scrubber",
+        "long-dark-period"
+      ],
+      "comms": [
+        "comms-outage",
+        "ground-station-request",
+        "data-overflow",
+        "rover-stuck",
+        "instrument-jam",
+        "drill-stuck",
+        "ice-discovery"
+      ],
+      "crew": [
+        "crew-fatigue",
+        "crew-argument",
+        "minor-injury",
+        "morale-boost",
+        "efficient-routine"
+      ],
+      "environment": [
+        "dust-storm",
+        "solar-flare",
+        "radiation-spike",
+        "dust-devil-cleaning",
+        "micrometeoroid-hit"
+      ]
+    },
+    "beepEverySec": 2,
+    "fadeOutSec": 1,
+    "level": 0.05,
+    "source": "Game audio design: which alert sound each unresolved problem plays (generated, no files)."
   }
 }

@@ -93,6 +93,8 @@ export function MissionLog({ log }: { log: readonly LogEntry[] }) {
 
 interface ControlsProps {
   canAdvance: boolean
+  /** Fast-forward stays off while a problem is pending (Next Turn asks first instead). */
+  canFastForward?: boolean
   fastForward: boolean
   onNext: () => void
   onFastForward: (on: boolean) => void
@@ -102,7 +104,13 @@ const BTN =
   'border px-4 py-2 font-title text-lg tracking-widest uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:border-border disabled:text-subtle'
 
 /** Bottom-right: Next Turn, and Fast-Forward that becomes Stop while running. */
-export function TurnControls({ canAdvance, fastForward, onNext, onFastForward }: ControlsProps) {
+export function TurnControls({
+  canAdvance,
+  canFastForward,
+  fastForward,
+  onNext,
+  onFastForward,
+}: ControlsProps) {
   return (
     <div className="flex gap-2">
       <button
@@ -127,7 +135,7 @@ export function TurnControls({ canAdvance, fastForward, onNext, onFastForward }:
         <button
           type="button"
           className={`${BTN} border-alert bg-bg/90 text-alert hover:bg-alert/10`}
-          disabled={!canAdvance}
+          disabled={!(canFastForward ?? canAdvance)}
           onClick={() => onFastForward(true)}
           data-testid="fast-forward"
         >

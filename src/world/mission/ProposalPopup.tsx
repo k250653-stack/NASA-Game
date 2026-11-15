@@ -12,10 +12,17 @@ interface ProposalPopupProps {
   proposal: Proposal
   onApprove: () => void
   onOverride: () => void
+  onClose?: () => void
 }
 
 /** A teammate's event: their plan in one line; APPROVE (Enter) or OVERRIDE to choose yourself. */
-export function ProposalPopup({ event, proposal, onApprove, onOverride }: ProposalPopupProps) {
+export function ProposalPopup({
+  event,
+  proposal,
+  onApprove,
+  onOverride,
+  onClose,
+}: ProposalPopupProps) {
   const { owner, decision, optionLabel, actor } = proposal
   useEffect(() => {
     playSound(event.urgency === 'urgent' ? 'alarm' : 'radio')
@@ -28,7 +35,7 @@ export function ProposalPopup({ event, proposal, onApprove, onOverride }: Propos
     return () => window.removeEventListener('keydown', onKey)
   }, [event.id, event.urgency, onApprove])
   return (
-    <PopupPanel section="Event" title={event.title}>
+    <PopupPanel section="Event" title={event.title} onClose={onClose}>
       <div
         className="mx-auto max-w-4xl px-6 py-6"
         data-testid="proposal-popup"

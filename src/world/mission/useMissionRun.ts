@@ -2,14 +2,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { isEvaOption, resolveEvent } from '@/engine/events'
 import { shakeScreen } from '@/ui/feel'
 import { playSound } from '@/ui/sound'
-import { advanceTurn, isMissionOver } from '@/engine/mission'
+import { advanceTurn, dropPending, isMissionOver } from '@/engine/mission'
+import { useCrewTask } from './crewTask'
+import { useProblems } from './problems'
 import type { Design, EngineContent } from '@/engine/types'
 import type { GameEvent } from '@/schemas'
 import { useStore } from '@/store'
 import { emitConcept } from '@/store/concepts'
 import type { WorkstationKind } from '../rooms/room'
 import { actionPost, rngFor } from './missionRun'
-import { isOwnEvent, type Proposal } from './proposal'
+import { isOwnEvent, teammateProposal, type Proposal } from './proposal'
 
 /** Pause between fast-forwarded turns, in ms, so the crew walks and the log can be followed. */
 const FF_STEP_MS = 450
@@ -102,6 +104,7 @@ export function useMissionRun(
     if (auto.length) setNotices((n) => [...n, ...auto])
     // Something happened: stop fast-forward, with a short "Day X: event!" sting.
     if (newEvents.length > 0) {
+      useProblems.setState({ dismissed: false, focusUid: null })
       setFastForward(false)
       setSting({ day: state.day, key: state.turnIndex })
       playSound('event-sting')
@@ -190,6 +193,42 @@ export function useMissionRun(
     [resolve],
   )
 
+  /**
+   * Next Turn with problems still pending (after the player confirmed): each goes to the
+   * responsible teammate's default choice (crewAI), logged "Not handled by you"; problems nobody
+   * can answer are dropped with a log line. Then the turn advances.
+   */
+  const handOverAndAdvance = useCallback(() => {
+    let s = useStore.getState().mission.run
+    if (!s || !design) return
+    for (const pend of [...s.pendingEvents]) {
+      const event = content.events.find((e) => e.id === pend.eventId)
+      if (!event) continue
+      const prop = teammateProposal(s, event, design, content)
+      if (prop) {
+        const { state, result } = resolveEvent(
+          s,
+          event,
+          prop.decision.optionId,
+          prop.decision.crewId,
+          rngFor(s),
+          { design, content },
+          'ai',
+          `Not handled by you. ${prop.owner.name} used the default: `,
+        )
+        if (result.applied) {
+          s = state
+          continue
+        }
+      }
+      s = dropPending(s, pend.uid, event.title)
+    }
+    useCrewTask.getState().set({ active: null, open: false })
+    useProblems.setState({ dismissed: false, focusUid: null })
+    setRun(s)
+    nextTurn()
+  }, [design, content, setRun, nextTurn])
+
   const ackNotice = useCallback(() => setNotices((n) => n.slice(1)), [])
 
   return {
@@ -205,6 +244,7 @@ export function useMissionRun(
     nextTurn,
     choose,
     approve,
+    handOverAndAdvance,
     toast,
   }
 }

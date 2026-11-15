@@ -21,16 +21,26 @@ interface EventPopupProps {
   onChoose: (optionId: string, crewId: string | null) => void
   /** Offered on repair-type events with a hands-on task (content/tasks.json). */
   diy?: { label: string; station: string; onPick: () => void }
+  /** × / Esc: close; the problem stays pending (the "!" button reopens it). */
+  onClose?: () => void
 }
 
 /** An event for the player's seat: what happened, and every option with who, cost and odds. */
-export function EventPopup({ event, run, design, content, onChoose, diy }: EventPopupProps) {
+export function EventPopup({
+  event,
+  run,
+  design,
+  content,
+  onChoose,
+  diy,
+  onClose,
+}: EventPopupProps) {
   const options = availableOptions(run, event, design, content)
   // Urgent events sound the alarm; routine ones come in over the radio.
   const urgent = event.urgency === 'urgent'
   useEffect(() => playSound(urgent ? 'alarm' : 'radio'), [event.id, urgent])
   return (
-    <PopupPanel section="Event" title={event.title}>
+    <PopupPanel section="Event" title={event.title} onClose={onClose}>
       <div className="mx-auto max-w-4xl px-6 py-6" data-testid="event-popup" data-event={event.id}>
         <AssetImage
           kind="events"

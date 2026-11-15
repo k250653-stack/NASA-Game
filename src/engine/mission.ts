@@ -476,6 +476,24 @@ export function dispatchEvent(
   ).state
 }
 
+/**
+ * Drops a pending problem nobody can answer (no workable option), with a log line, so the
+ * mission can go on. Pure: returns a new state.
+ */
+export function dropPending(state: MissionState, uid: string, title: string): MissionState {
+  const s = cloneState(state)
+  const p = s.pendingEvents.find((e) => e.uid === uid)
+  s.pendingEvents = s.pendingEvents.filter((e) => e.uid !== uid)
+  s.eventLog.push({
+    turnIndex: s.turnIndex,
+    day: s.day,
+    kind: 'warning',
+    eventId: p?.eventId,
+    text: `Not handled by you: nobody could respond to "${title}".`,
+  })
+  return s
+}
+
 /** Simulates one turn. Returns the new state and the events that fired this turn. */
 export function advanceTurn(
   state: MissionState,

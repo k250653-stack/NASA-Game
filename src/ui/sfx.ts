@@ -35,6 +35,7 @@ export const SOUND_IDS = [
   'scrub',
   'signal-beep',
   'valve-hiss',
+  'alert-beep',
 ] as const
 export type SoundId = (typeof SOUND_IDS)[number]
 
@@ -76,6 +77,8 @@ const SOUNDS: Record<SoundId, number[]> = {
   scrub: [0.08, 0, 600, 0.01, 0.05, 0.06, 4, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0.6, 0, 0, 1400],
   'signal-beep': [0.14, 0, 700, 0, 0.04, 0.05, 0, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2600],
   'valve-hiss': [0.07, 0, 400, 0.02, 0.1, 0.1, 4, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0.5, 0, 0, 1200],
+  // Pending problem: a soft two-tone beep every few seconds (alert layer).
+  'alert-beep': [0.12, 0, 740, 0, 0.05, 0.06, 0, 1, 0, 0, -120, 0.06, 0, 0, 0, 0, 0, 1, 0, 0, 2400],
 }
 
 /** How much a sound's pitch may wander per play (0 = never); the rest play the same each time. */

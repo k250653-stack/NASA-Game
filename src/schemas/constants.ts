@@ -60,6 +60,22 @@ export const ConstantsSchema = z.strictObject({
     playerApprovesAllEvents: z.boolean(),
     source: NonEmptyString,
   }),
+  /** Alert layer while problems are pending (ui/alertLayer): event id lists per sound category. */
+  alert: z.strictObject({
+    categories: z.strictObject({
+      power: z.array(z.string()),
+      comms: z.array(z.string()),
+      crew: z.array(z.string()),
+      environment: z.array(z.string()),
+    }),
+    /** Soft alarm beep interval, seconds. */
+    beepEverySec: z.number().positive(),
+    /** Fade-out once nothing is pending, seconds. */
+    fadeOutSec: z.number().positive(),
+    /** Loudness of the drone at full music volume (kept low). */
+    level: z.number().min(0).max(1),
+    source: NonEmptyString,
+  }),
   /** Player movement (world/player): speed factor on the pack walk, and the Shift multiplier. */
   player: z.strictObject({
     walkSpeedFactor: z.number().positive(),

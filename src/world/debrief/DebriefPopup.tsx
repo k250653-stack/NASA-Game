@@ -14,6 +14,17 @@ import { CrewReactions, H3, RunCompare, ScoreBreakdown } from './DebriefSections
 import { decisionCounts, type DecisionCounts } from '../mission/proposal'
 import { runKey, useTaskStats } from '../mission/crewTask'
 import { MissionGraph } from './MissionGraph'
+import { ProblemList } from '../mission/ProblemLog'
+import { problemLog } from '../mission/problems'
+
+/** Habitat station names for the mission log (the debrief has no habitat room loaded). */
+const STATION_NAME: Record<string, string> = {
+  power: 'Power & Life Support',
+  comms: 'Comms station',
+  science: 'Science bench',
+  repair: 'Repair station',
+  airlock: 'Airlock',
+}
 
 const OUTCOME = {
   success: { label: 'Success', text: 'text-success' },
@@ -114,6 +125,19 @@ export function DebriefPopup({ onClose }: { onClose: () => void }) {
               <h3 className={H3}>What happened</h3>
               <div className="mt-2">
                 <CauseList causes={causes} />
+              </div>
+            </section>
+            <section data-testid="debrief-mission-log">
+              <h3 className={H3}>Mission Log</h3>
+              <div className="mt-2 max-h-96 overflow-y-auto">
+                <ProblemList
+                  entries={problemLog(
+                    run,
+                    p.content.events,
+                    (id) => p.content.crew.find((c) => c.id === id)?.name ?? id,
+                  )}
+                  stationLabel={(k) => STATION_NAME[k] ?? k}
+                />
               </div>
             </section>
             <section>
