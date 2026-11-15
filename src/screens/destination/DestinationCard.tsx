@@ -48,6 +48,8 @@ export function DestinationCard({ destination: d, selected, onSelect }: Destinat
           <StatChip compact className="w-full" icon="IconSolarPanel" label="Avg sunlight" value={facts.sunlight} />
           <StatChip compact className="w-full" icon="IconWeight" label="Gravity" value={facts.gravity} />
           <StatChip
+            compact
+            className="w-full"
             icon="IconPackage"
             label="Resupply"
             value={facts.resupply}
