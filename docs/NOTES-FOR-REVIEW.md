@@ -106,3 +106,65 @@ Choices made while working unattended. Nothing here was run in a browser or test
   (`src/ui/RocketArt.tsx`).
 - **Credits:** the three `rocket-*-flameon.png` files were untracked and are now committed. I
   don't know how they were made; if AI-generated they need CREDITS.md rows.
+
+## Hitbox rules (measured from the hand-tuned Mission Planning room)
+
+Measured by overlaying `src/world/rooms/hq-map.json` on `public/assets/backgrounds/hq-map.png`
+(1672 × 941). All numbers are image pixels; "≈" means read off a 3× zoom by eye.
+
+- **Back walls** (the wall face you can see, behind the room): the floor edge runs parallel to
+  the wall's base line and stops **≈ 15 px below it** (planning back corner: wall base ≈ y 144,
+  floor vertex `[462,159]`). Feet never touch the drawn wall face.
+- **Low front walls** (the near walls you look over): the floor edge sits **≈ 4 px inside the
+  top edge of the wall art** (planning: front wall top `[96,322]→[412,428]`, floor
+  `[120,326]→[403,426]`). The front-wall occluder (`baseY: 9999`) starts exactly on that top
+  edge, so the feet stop just before the wall is drawn over them.
+- **Inner walls that stick into the room** (seen from their top, like the planning/lobby wall):
+  the floor is notched along the wall's top edge, again ≈ 4 px inside
+  (`[563,427] → [521,355] → [403,426]` follows `wall-planning-lobby` `[412,428] → [527,346]`).
+  That wall gets its own occluder with a real `baseY` (400) instead of 9999.
+- **Doorways:** the room floor reaches right up to the door line between the two posts
+  (planning floor point `[563,427]` sits on the door's floor line), and the doorway area overlaps
+  both the room floor and the lobby floor, so there is no gap to step across.
+- **Furniture blockers = footprint only:** the part touching the floor, inset ≈ 2–6 px from the
+  drawn outline. The holo-table blocker covers y 255–332 of an object drawn y 196–338, i.e.
+  roughly the lower half (legs and chair feet), full drawn width.
+- **Occluders for tall objects:** trace the drawn silhouette; `baseY` is the floor line where
+  the object stands, ≈ 8 px above its lowest drawn pixel (holo-table: lowest point 338,
+  `baseY` 330). Door frames: posts + top beam, `baseY` on the doorway floor line.
+
+## Hitbox check (`node scripts/check-hitboxes.mjs`)
+
+```
+ok   room lobby: 10871/10885 free cells reachable
+ok   room mission-planning: 4471/4471 free cells reachable
+ok   room personnel: 3702/3702 free cells reachable
+ok   room briefing: 3873/3873 free cells reachable
+ok   room launch-control: 3446/3451 free cells reachable
+ok   station star-map: nearest reachable point 0.0 px (reach 48)
+ok   station desk-terminal: nearest reachable point 0.0 px (reach 48)
+ok   station meeting-table: nearest reachable point 0.0 px (reach 48)
+ok   station console-rows: nearest reachable point 0.0 px (reach 48)
+
+RESULT: all checks passed
+```
+
+## Hitbox pass: what changed and what to check in F2
+
+- **Lobby:** the floor is retraced (24 points).
+  - Back walls: 15 px in front of the wall base.
+  - Planning and Personnel door gaps: the floor reaches the door line.
+  - Notches: around the briefing pillar at x 612 and the launch pillar at x 1060.
+  - Front walls: just inside the low front walls, and down into the entrance gate between x 780 and 890.
+  - Check: the west corner `[481,473]`, the east corner `[1176,472]`, and whether the bench blockers still sit right.
+- **Personnel:** the floor follows the back walls, the front wall, and the notch where Launch Control's corner pokes in, from `[1418,398]` to `[1365,378]` to `[1273,427]`.
+  - Removed the plant blocker in the back corner, because the plant stands against the wall, off the floor.
+  - Check: the doorway edge from `[1150,336]` to `[1022,293]`.
+- **Briefing:** the floor is the full room, with the back corner at `[307,533]`, the doorway at `[493,618]` to `[598,673]`, and the front corner at `[355,795]`.
+  - Check: the west corner `[68,650]` near the cable art on the floor.
+- **Launch Control:** the floor is the full room, with the back corner at `[1367,525]`, the east corner at `[1598,656]` and the front corner at `[1327,798]`.
+  - The back console blocker now also covers its chairs, down to y 662.
+  - Check: whether the gap between the two console rows should be walkable.
+- **Front walls:** the occluders for the lobby front walls (both sides), Briefing, Launch and Personnel now start on the real top edge of the wall art.
+  - The Personnel-to-Launch inner wall follows the notch.
+- **Unchanged and still correct:** the door frames, door areas, the other blockers, all tall-furniture occluders and all station areas. Each was checked against the art.
