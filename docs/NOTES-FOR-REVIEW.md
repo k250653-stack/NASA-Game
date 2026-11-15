@@ -232,3 +232,12 @@ Unsure:
 - **radiation-spike** fits a valve only loosely, but it was mapped to Pressure Valve as asked.
 - **Events with no crew option** (`crewId: null`): the bonus still applies to the chance, but nobody walks to a station.
 - **No screen-edge arrow:** the habitat room always fits on screen, so the arrow over the station is enough.
+
+## Overnight tasks
+
+### Task 1: wall sliding and doorways
+- **Wall sliding already existed** in both scenes: they try the full move, then X only, then Y only. I kept it, and it now uses the new foot check everywhere.
+- **Foot shape:** the foot ellipse shrank from 14×7 to 10×6 px (`FOOT_RX`/`FOOT_RY` in `src/world/geometry.ts`). The habitat now uses the same foot ellipse as the HQ, where it used to check a single point.
+- **Doorways win:** `canStandFeet` takes the open doorway areas. A foot point inside a doorway ignores every blocker, and doorway areas were already counted as walkable.
+- **Unstuck safety:** both scenes remember the last spot where the feet fitted and snap back to it if the player is ever off the floor.
+- **Skipped:** I didn't widen any doorway. All four HQ doorway areas are already about 95–190 px wide and overlap both floors, as the hitbox check showed. The habitat rooms have no doorways. The Mission Planning polygons are untouched.

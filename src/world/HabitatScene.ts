@@ -22,7 +22,7 @@ import {
   type Facing,
   type Motion,
 } from './character'
-import { canStand, centroid, distanceToPolygon, type Point, type Polygon } from './geometry'
+import { canStandFeet, centroid, distanceToPolygon, type Point, type Polygon } from './geometry'
 import { popOutline, tokenColor, tokenCss } from './hqArt'
 import { createRng } from '@/engine/rng'
 import { reducedMotion } from '@/ui/feel'
@@ -105,6 +105,7 @@ export class HabitatScene extends Phaser.Scene {
   private glow: Phaser.GameObjects.Graphics | null = null
   private debug: Phaser.GameObjects.Graphics | null = null
   private cam = { x: 0, y: 0 }
+  private lastValid: Point | null = null
   private dimmer: Phaser.GameObjects.Rectangle | null = null
   private taskArrow: Phaser.GameObjects.Graphics | null = null
   /** Seeded, so idle fidgets never use Math.random (CLAUDE.md rule 7). */
@@ -198,6 +199,7 @@ export class HabitatScene extends Phaser.Scene {
       (mx, my) => this.move(mx, my),
       () => playSound('footstep'),
     )
+    this.keepOnFloor()
     const alerted = this.cb().crewAlerts?.() ?? []
     for (const npc of this.npcs.values()) {
       npc.bubble
@@ -443,8 +445,15 @@ export class HabitatScene extends Phaser.Scene {
       [x + mx, y],
       [x, y + my],
     ]
-    const next = tries.find((p) => canStand(p, this.room.walkable, this.room.blocked))
+    const next = tries.find((p) => canStandFeet(p, this.room.walkable, this.room.blocked))
     if (next) this.player.setPosition(next[0], next[1])
+  }
+
+  /** Unstuck safety: remember the last fitting spot, snap back to it if the feet are ever off. */
+  private keepOnFloor() {
+    const p: Point = [this.player.x, this.player.y]
+    if (canStandFeet(p, this.room.walkable, this.room.blocked)) this.lastValid = p
+    else if (this.lastValid) this.player.setPosition(this.lastValid[0], this.lastValid[1])
   }
 
   /** The nearest crew member in talking range, else the nearest workstation in reach. */

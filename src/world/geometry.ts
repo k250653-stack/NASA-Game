@@ -47,9 +47,9 @@ export function canStand(
   return walkable.some((w) => pointInPolygon(p, w)) && !blocked.some((b) => pointInPolygon(p, b))
 }
 
-/** The player's collision shape: a small ellipse at the feet (half-width, half-height in px). */
-export const FOOT_RX = 7
-export const FOOT_RY = 3.5
+/** The player's collision shape: a small ellipse at the feet, 10 x 6 px (half-width, half-height). */
+export const FOOT_RX = 5
+export const FOOT_RY = 3
 
 /**
  * The foot ellipse fits: its centre and its four extreme points are each on some walkable
@@ -59,6 +59,8 @@ export function canStandFeet(
   [x, y]: Point,
   walkable: readonly Polygon[],
   blocked: readonly Polygon[],
+  /** Doorway areas: inside one, blockers are ignored (doorways always let you through). */
+  openings: readonly Polygon[] = [],
 ): boolean {
   const pts: Point[] = [
     [x, y],
@@ -67,7 +69,11 @@ export function canStandFeet(
     [x, y - FOOT_RY],
     [x, y + FOOT_RY],
   ]
-  return pts.every((p) => canStand(p, walkable, blocked))
+  return pts.every(
+    (p) =>
+      walkable.some((w) => pointInPolygon(p, w)) &&
+      (openings.some((o) => pointInPolygon(p, o)) || !blocked.some((b) => pointInPolygon(p, b))),
+  )
 }
 
 export function translate(poly: Polygon, [dx, dy]: Point): Polygon {

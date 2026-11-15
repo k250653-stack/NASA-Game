@@ -110,6 +110,10 @@ export class HQScene extends Phaser.Scene {
   private paused = false
   private room: HqRoom | null = null
   private walkable: Polygon[] = []
+  /** Open doorway areas (blockers are ignored inside them). */
+  private openings: Polygon[] = []
+  /** Last spot the feet fitted: the player snaps back here if they ever end up off the floor. */
+  private lastValid: Point = [0, 0]
   private locked = new Map<string, boolean>()
   private dimmers = new Map<string, Phaser.GameObjects.Graphics>()
   private padlocks = new Map<string, Phaser.GameObjects.Graphics>()
@@ -161,6 +165,7 @@ export class HQScene extends Phaser.Scene {
     this.player = this.actor.sprite.setDepth(footDepth(start[1]))
     this.room = this.roomAt(start) ?? null
     this.saved = { at: 0, x: start[0], y: start[1] }
+    this.lastValid = start
     for (const c of this.crew) this.addCrew(c)
 
     const kb = this.input.keyboard!
@@ -213,6 +218,7 @@ export class HQScene extends Phaser.Scene {
       (mx, my) => this.move(mx, my),
       () => playSound('footstep'),
     )
+    this.keepOnFloor()
     this.player.setDepth(footDepth(this.player.y))
     this.room = this.roomAt([this.player.x, this.player.y]) ?? this.room
     this.updateTarget()
@@ -326,6 +332,7 @@ export class HQScene extends Phaser.Scene {
       ...this.map.outdoor,
       ...open.map((d) => d.area),
     ]
+    this.openings = open.map((d) => d.area)
   }
 
   private setLocked(roomId: string) {
@@ -388,6 +395,18 @@ export class HQScene extends Phaser.Scene {
     kb.enableGlobalCapture()
   }
 
+  /** Unstuck safety: remember the last fitting spot, snap back to it if the feet are ever off. */
+  private keepOnFloor() {
+    const p: Point = [this.player.x, this.player.y]
+    if (this.fits(p)) this.lastValid = p
+    else this.player.setPosition(this.lastValid[0], this.lastValid[1])
+  }
+
+  /** Feet fit here: on a floor, doorway or the path; blockers never win inside a doorway. */
+  private fits(p: Point): boolean {
+    return canStandFeet(p, this.walkable, this.map.blocked, this.openings)
+  }
+
   /** Moves if the new spot is standable; otherwise slides along one axis. */
   private move(mx: number, my: number) {
     const { x, y } = this.player
@@ -396,7 +415,7 @@ export class HQScene extends Phaser.Scene {
       [x + mx, y],
       [x, y + my],
     ]
-    const next = tries.find((p) => canStandFeet(p, this.walkable, this.map.blocked))
+    const next = tries.find((p) => this.fits(p))
     if (next) this.player.setPosition(next[0], next[1])
   }
 
