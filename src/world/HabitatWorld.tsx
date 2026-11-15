@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { usePlanning } from '@/screens/planning/usePlanning'
 import { useStore } from '@/store'
+import { returnToEarth } from './debrief/debrief'
 import { HabitatCanvas } from './HabitatCanvas'
 import type { HabitatCallbacks, HabitatScene, HabitatTarget, NpcSpec } from './HabitatScene'
 import { InteractPrompt, promptTransform } from './InteractPrompt'
@@ -83,13 +84,22 @@ export default function HabitatWorld() {
   }, [])
 
   // Mission over: let the last action finish, fade to the title card, then the debrief.
+  const finish = useRef({ design: p.design, content: p.content })
+  useEffect(() => {
+    finish.current = { design: p.design, content: p.content }
+  }, [p.design, p.content])
   const done = m.over && !m.acting && !m.pending
   useEffect(() => {
     if (!done) return
     const a = setTimeout(() => setEnding(true), END_PAUSE_MS)
-    const b = setTimeout(() => setPhase('review'), END_PAUSE_MS + END_CARD_MS)
+    // Back to Earth: the run is scored and saved, then the HQ Briefing room opens the debrief.
+    const b = setTimeout(() => {
+      const r = useStore.getState().mission.run
+      if (r && finish.current.design)
+        returnToEarth(r, finish.current.design, finish.current.content)
+    }, END_PAUSE_MS + END_CARD_MS)
     return () => (clearTimeout(a), clearTimeout(b))
-  }, [done, setPhase])
+  }, [done])
 
   const { run, pending } = m
   if (!run || !p.design || !p.destination) {

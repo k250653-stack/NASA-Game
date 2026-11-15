@@ -44,7 +44,8 @@ export default function App() {
   const reducedMotion = useSettings((s) => s.reducedMotion)
   // A station popup shows the phase's screen inside the HQ world instead of full screen.
   const popup = useWorld((s) => s.popup)
-  const inWorld = phase === 'hq' || popup !== null
+  // The debrief (phase review) is a popup over the HQ Briefing room.
+  const inWorld = phase === 'hq' || phase === 'review' || popup !== null
   // Each screen opens at the top (runs before a screen's own effects, e.g. Fix in Planning).
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
@@ -54,7 +55,11 @@ export default function App() {
     <MotionConfig reducedMotion={reducedMotion ? 'always' : 'user'}>
       <Starfield />
       <Suspense fallback={null}>
-        {inWorld ? <HQWorld popup={phase !== 'hq' ? <Screen /> : null} /> : <Screen />}
+        {inWorld ? (
+          <HQWorld popup={phase !== 'hq' && phase !== 'review' ? <Screen /> : null} />
+        ) : (
+          <Screen />
+        )}
       </Suspense>
       <Toaster />
     </MotionConfig>

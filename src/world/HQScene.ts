@@ -54,6 +54,14 @@ export type Target =
   | { kind: 'station'; key: string; label: string; opens: Step }
   | { kind: 'locked'; key: string; label: string; roomId: string }
 
+export interface HqCrew {
+  /** Feet position in WORLD pixels. */
+  at: Point
+  /** Theme colour token for the tint, e.g. "role-science". */
+  color: string
+  facing: Facing
+}
+
 export interface SceneCallbacks {
   onTarget: (target: Target | null) => void
   onInteract: (target: Target) => void
@@ -95,9 +103,13 @@ export class HQScene extends Phaser.Scene {
   private cam = { x: 0, y: 0 }
   private saved = { at: 0, x: 0, y: 0 }
 
-  constructor(callbacks: () => SceneCallbacks, spawn: Point | null) {
+  /** Crew standing in the HQ (the debrief in the Briefing room); idle, no collision. */
+  private readonly crew: readonly HqCrew[]
+
+  constructor(callbacks: () => SceneCallbacks, spawn: Point | null, crew: readonly HqCrew[] = []) {
     super('hq')
     this.cb = callbacks
+    this.crew = crew
     this.map = getHqMap()
     this.walkable = this.map.rooms.flatMap((r) => r.floors)
     this.blocked = this.map.rooms.flatMap((r) => r.blocked)
@@ -140,6 +152,17 @@ export class HQScene extends Phaser.Scene {
       .setScale(this.map.lobby.room.playerScale)
       .setDepth(5)
     this.playAnim('idle')
+    for (const c of this.crew) {
+      const { dir, flip } = sheetDir(c.facing)
+      const npc = this.add
+        .sprite(c.at[0], c.at[1], 'idle')
+        .setOrigin(0.5, FOOT_Y / FRAME_SIZE)
+        .setScale(this.map.lobby.room.playerScale)
+        .setDepth(4.5)
+        .setTint(tokenColor(c.color))
+        .setFlipX(flip)
+      if (this.anims.exists(animKey('idle', dir))) npc.play(animKey('idle', dir))
+    }
     this.saved = { at: 0, x: sx, y: sy }
     this.inDoor = this.doorAt(this.spawn)?.key ?? null
 
