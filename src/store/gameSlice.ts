@@ -1,4 +1,5 @@
 import type { Difficulty, RoleChoice } from '@/schemas'
+import { DEFAULT_APPEARANCE, type PlayerAppearance } from '@/world/player/playerPack'
 import type { SliceCreator } from './types'
 
 /** Navigation is the phase. There is no router: App.tsx renders the screen for the phase. */
@@ -15,10 +16,11 @@ export const PHASES = [
   'codex',
 ] as const
 /**
- * Screens outside the linear flow: 'hq' is the walkable HQ lobby (src/world) whose doors open
+ * Screens outside the linear flow: 'appearance' is the choose-your-astronaut screen after a new
+ * game; 'hq' is the walkable HQ lobby (src/world) whose doors open
  * flow screens; 'styleguide' is dev-only. Next/Back from either go to the title.
  */
-export type Phase = (typeof PHASES)[number] | 'hq' | 'styleguide'
+export type Phase = (typeof PHASES)[number] | 'appearance' | 'hq' | 'styleguide'
 
 /** Fixed seed used by the "demo run" button so the judged run is always the same. */
 export const DEMO_SEED = 20261114
@@ -38,6 +40,8 @@ export interface GameState {
   seed: number
   /** Concepts the player has met (see store/concepts.ts). */
   conceptsSeen: string[]
+  /** Which astronaut the player walks as. Older saves lack it and get the default. */
+  playerAppearance: PlayerAppearance
 }
 
 export interface GameSlice {
@@ -50,6 +54,7 @@ export interface GameSlice {
   setRoleChoice: (role: RoleChoice | null) => void
   setDifficulty: (difficulty: Difficulty) => void
   setCallsign: (callsign: string) => void
+  setPlayerAppearance: (appearance: PlayerAppearance) => void
   setSeed: (seed: number) => void
   /** New seed from the clock (seed creation only; all game randomness uses the seeded Rng). */
   rollSeed: () => void
@@ -65,6 +70,7 @@ export const initialGameState: GameState = {
   callsign: '',
   seed: DEMO_SEED,
   conceptsSeen: [],
+  playerAppearance: DEFAULT_APPEARANCE,
 }
 
 /** Position in the game flow, or -1 for screens outside it (styleguide). */
@@ -90,6 +96,8 @@ export const createGameSlice: SliceCreator<GameSlice> = (set, get) => ({
   setRoleChoice: (roleChoice) => set((s) => ({ game: { ...s.game, roleChoice } })),
   setDifficulty: (difficulty) => set((s) => ({ game: { ...s.game, difficulty } })),
   setCallsign: (callsign) => set((s) => ({ game: { ...s.game, callsign } })),
+  setPlayerAppearance: (playerAppearance) =>
+    set((s) => ({ game: { ...s.game, playerAppearance } })),
   setSeed: (seed) => set((s) => ({ game: { ...s.game, seed } })),
   rollSeed: () => set((s) => ({ game: { ...s.game, seed: Date.now() % SEED_RANGE } })),
   resetGame: () => set({ game: initialGameState }),

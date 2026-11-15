@@ -56,3 +56,17 @@ NASA Space Apps rules require AI-generated images to be disclosed. Every image b
 | `public/assets/sprites/rocket-heavy.png` | Generated with Google Gemini; background removal, nearest-neighbour resize and watermark by the team | AI-generated, edited by the team | No (too small, listed here) |
 | `public/icon.png` | Generated with Google Gemini; background removal, nearest-neighbour resize and watermark by the team | AI-generated, edited by the team | No (too small, listed here) |
 | `public/favicon.png` | Generated with Google Gemini; background removal, nearest-neighbour resize and watermark by the team | AI-generated, edited by the team | No (too small, listed here) |
+
+## Player astronaut pack (Usman, player pack 1.0.0)
+
+The two selectable player astronauts in `public/assets/player/` come from the main player pack.
+The body and suit art is code-defined articulated geometry rendered to a strict pixel grid; the
+heads are derived from an OpenAI-generated concept and head turnaround. The art is
+**AI-assisted** and is not claimed as hand-painted. Original fictional designs: no real
+astronaut likenesses, agency or company logos, or copied game sprites.
+
+| Asset | Method | Origin | Watermark |
+| ----- | ------ | ------ | --------- |
+| `public/assets/player/master`, `compact`, `gameplay` (idle and walk atlases) | Articulated geometry, depth-tested pixel raster, directional head sprites from the concept | AI-assisted (concept-derived heads) | No (sprites too small, listed here) |
+| `public/assets/player/portraits/` | Same pipeline, portrait crop | AI-assisted | No (too small, listed here) |
+| `public/assets/player/stills/`, `strips/` | Same pipeline, single frames and strips | AI-assisted | No (too small, listed here) |

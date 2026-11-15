@@ -26,7 +26,8 @@ export default function Title() {
     resetAll()
     resetWorld()
     setSandboxStart(sandbox)
-    setPhase(sandbox ? 'destination' : 'hq')
+    // Play first picks the astronaut, then walks into the HQ.
+    setPhase(sandbox ? 'destination' : 'appearance')
   }
 
   const items: MenuItem[] = [

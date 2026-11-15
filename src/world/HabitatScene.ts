@@ -27,17 +27,13 @@ import { popOutline, tokenColor, tokenCss } from './hqArt'
 import { createRng } from '@/engine/rng'
 import { reducedMotion } from '@/ui/feel'
 import type { Room, Workstation, WorkstationKind } from './rooms/room'
+import { PlayerActor } from './player/PlayerActor'
 import { addCutOutTexture } from './roomTexture'
 
-const WALK_SPEED = 90
-const RUN_SPEED = 170
 /** Idle fidgets: how often one crew member moves, and how long a turn-round lasts, ms. */
 const IDLE_EVERY_MS = 3500
 const IDLE_TURN_MS = 1800
 const FACINGS: readonly Facing[] = ['S', 'SE', 'E', 'NE', 'N', 'NW', 'W', 'SW']
-/** Footstep sound interval while walking / running, ms. */
-const WALK_STEP_MS = 300
-const RUN_STEP_MS = 220
 const NPC_SPEED = 110
 const CAMERA_TAU_MS = 200
 const ROOM_FOLLOW = 0.3
@@ -98,16 +94,15 @@ export class HabitatScene extends Phaser.Scene {
   private readonly specs: NpcSpec[]
   private readonly cb: () => HabitatCallbacks
   private readonly center: Point
+  private actor!: PlayerActor
   private player!: Phaser.GameObjects.Sprite
   private keys!: Keys
-  private facing: Facing = 'S'
   private npcs = new Map<string, Npc>()
   private target: HabitatTarget | null = null
   private paused = false
   private glow: Phaser.GameObjects.Graphics | null = null
   private debug: Phaser.GameObjects.Graphics | null = null
   private cam = { x: 0, y: 0 }
-  private stepMs = 0
   private dimmer: Phaser.GameObjects.Rectangle | null = null
   /** Seeded, so idle fidgets never use Math.random (CLAUDE.md rule 7). */
   private idleRng = createRng(31)
@@ -130,6 +125,7 @@ export class HabitatScene extends Phaser.Scene {
       const url = getAsset('sprites', `maincharacter/${SHEET_FILE[motion]}`, 'png')
       this.load.spritesheet(motion, url, { frameWidth: FRAME_SIZE, frameHeight: FRAME_SIZE })
     }
+    PlayerActor.preload(this)
     this.load.on('loaderror', (file: Phaser.Loader.File) =>
       console.warn(`[world] could not load "${file.src}"`),
     )
@@ -142,7 +138,10 @@ export class HabitatScene extends Phaser.Scene {
       this.add.image(0, 0, 'habitat-cut').setOrigin(0).setDepth(1)
     }
     this.createAnims()
-    this.player = this.makeSprite(this.center)
+    // The player is drawn from the player pack (cabin suit: helmet off inside the habitat).
+    this.actor = new PlayerActor(this, this.center[0], this.center[1])
+    this.actor.setVariant('cabin')
+    this.player = this.actor.sprite.setDepth(5 + this.center[1] / 10000)
     this.specs.forEach((spec, i) => this.addNpc(spec, i))
     this.time.addEvent({ delay: IDLE_EVERY_MS, loop: true, callback: () => this.fidget() })
     this.dimmer = this.add
@@ -189,20 +188,13 @@ export class HabitatScene extends Phaser.Scene {
     const k = this.keys
     const dx = Number(k.right.isDown || k.d.isDown) - Number(k.left.isDown || k.a.isDown)
     const dy = Number(k.down.isDown || k.s.isDown) - Number(k.up.isDown || k.w.isDown)
-    if (!this.paused && (dx || dy)) {
-      const running = k.shift.isDown
-      const step = ((running ? RUN_SPEED : WALK_SPEED) * deltaMs) / 1000 / Math.hypot(dx, dy)
-      this.move(dx * step, dy * step)
-      this.stepMs += deltaMs
-      if (this.stepMs >= (running ? RUN_STEP_MS : WALK_STEP_MS)) {
-        this.stepMs = 0
-        playSound('footstep')
-      }
-      this.facing = facingFrom(dx, dy)
-      this.play(this.player, running ? 'run' : 'walk', this.facing)
-    } else {
-      this.play(this.player, 'idle', this.facing)
-    }
+    const input = this.paused ? null : { dx, dy, running: k.shift.isDown }
+    this.actor.update(
+      deltaMs,
+      input,
+      (mx, my) => this.move(mx, my),
+      () => playSound('footstep'),
+    )
     const alerted = this.cb().crewAlerts?.() ?? []
     for (const npc of this.npcs.values()) {
       npc.bubble
@@ -492,7 +484,7 @@ export class HabitatScene extends Phaser.Scene {
     const v = cam.worldView
     this.cb().onPlayerScreen(
       (this.player.x - v.x) * cam.zoom,
-      (this.headY(this.player) - v.y) * cam.zoom,
+      (this.actor.headY() - v.y) * cam.zoom,
     )
   }
 

@@ -2,8 +2,10 @@ import type { RunComparison } from '@/engine/compareRuns'
 import type { MissionScore } from '@/engine/score'
 import type { MissionState } from '@/engine/types'
 import type { CrewMember } from '@/schemas'
+import { useStore } from '@/store'
 import { AssetImage } from '@/ui/AssetImage'
 import { InfoTip } from '@/ui/InfoTip'
+import { PlayerPortrait } from '@/ui/PlayerPortrait'
 import { SegmentBar } from '@/ui/SegmentBar'
 import { ROLE_LABEL } from '@/ui/labels'
 import { reactionLine, scoreTone } from './debrief'
@@ -73,8 +75,18 @@ export function CrewReactions({
   run: MissionState
   outcome: MissionScore['outcome']
 }) {
+  const callsign = useStore((s) => s.game.callsign)
   return (
     <ul className="space-y-2" data-testid="crew-reactions">
+      <li className="flex items-center gap-3" data-testid="debrief-player">
+        <PlayerPortrait size={64} />
+        <div className="min-w-0">
+          <p className="font-title tracking-wide text-primary uppercase">
+            {callsign || 'You'} <span className="text-xs text-subtle normal-case">Your plan</span>
+          </p>
+          <p className="text-sm text-muted">You set the design; here is how your crew felt.</p>
+        </div>
+      </li>
       {crew.map((m) => {
         const c = run.crew[m.id]
         return (

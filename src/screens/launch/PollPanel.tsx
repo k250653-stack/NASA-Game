@@ -4,6 +4,7 @@ import type { CrewMember } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
 import { ROLE_LABEL } from '@/ui/labels'
 import { Panel } from '@/ui/Panel'
+import { PlayerPortrait } from '@/ui/PlayerPortrait'
 import { Tooltip } from '@/ui/Tooltip'
 
 /** Seconds between voices in the poll, like a flight director going round the room. */
@@ -49,12 +50,18 @@ export function PollPanel({ lines, call, crew, callsign }: PollPanelProps) {
               <Tooltip content={l.reason}>
                 <button type="button" className="flex w-24 flex-col items-center gap-1">
                   <span className={`border-4 ${v.ring}`}>
-                    <AssetImage
-                      kind="portraits"
-                      id={member?.portrait ?? 'crew-player'}
-                      label={member?.name ?? (callsign || 'You')}
-                      className="block size-16"
-                    />
+                    {member ? (
+                      <AssetImage
+                        kind="portraits"
+                        id={member.portrait}
+                        label={member.name}
+                        className="block size-16"
+                      />
+                    ) : (
+                      <span title={callsign || 'You'} className="block">
+                        <PlayerPortrait size={64} className="block" />
+                      </span>
+                    )}
                   </span>
                   <span className="label-caps truncate text-sm text-primary">
                     {member ? member.name.split(' ')[0] : 'Your call'}

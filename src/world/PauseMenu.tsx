@@ -1,9 +1,11 @@
 import { SettingsModal } from '@/screens/menu/SettingsModal'
 import { Button } from '@/ui/Button'
+import { AstronautPicker } from '@/screens/menu/AstronautPicker'
+import { useStore } from '@/store'
 import { Modal } from '@/ui/Modal'
 import { openCodex, replayTutorial } from '@/nova/novaStore'
 
-export type PauseState = 'pause' | 'settings' | null
+export type PauseState = 'pause' | 'settings' | 'astronaut' | null
 
 interface PauseMenuProps {
   state: PauseState
@@ -13,6 +15,8 @@ interface PauseMenuProps {
 
 /** Esc in a room: Resume, Settings, Main menu. Closing Settings returns here. */
 export function PauseMenu({ state, onChange, onMainMenu }: PauseMenuProps) {
+  const appearance = useStore((s) => s.game.playerAppearance)
+  const setAppearance = useStore((s) => s.setPlayerAppearance)
   return (
     <>
       <Modal open={state === 'pause'} onClose={() => onChange(null)} title="Paused" size="sm">
@@ -20,6 +24,13 @@ export function PauseMenu({ state, onChange, onMainMenu }: PauseMenuProps) {
           <Button onClick={() => onChange(null)}>Resume</Button>
           <Button variant="secondary" onClick={() => onChange('settings')}>
             Settings
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => onChange('astronaut')}
+            data-testid="pause-change-astronaut"
+          >
+            Change astronaut
           </Button>
           <Button
             variant="secondary"
@@ -47,6 +58,21 @@ export function PauseMenu({ state, onChange, onMainMenu }: PauseMenuProps) {
         </div>
       </Modal>
       <SettingsModal open={state === 'settings'} onClose={() => onChange('pause')} />
+      <Modal
+        open={state === 'astronaut'}
+        onClose={() => onChange('pause')}
+        title="Change astronaut"
+        size="md"
+      >
+        <AstronautPicker
+          value={appearance}
+          scale={2}
+          onChoose={(id) => {
+            setAppearance(id)
+            onChange(null)
+          }}
+        />
+      </Modal>
     </>
   )
 }

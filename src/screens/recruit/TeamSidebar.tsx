@@ -1,3 +1,4 @@
+import { PlayerPortrait } from '@/ui/PlayerPortrait'
 import type { TeamValidation } from '@/engine/recruitment'
 import type { TeamAnalysis } from '@/engine/teamBalance'
 import type { CrewMember, RoleChoice } from '@/schemas'
@@ -46,7 +47,7 @@ export function TeamSidebar(p: TeamSidebarProps) {
           <li
             className={`flex items-center gap-2 border-2 px-2 py-1.5 ${roleClasses(p.roleChoice).border} ${roleClasses(p.roleChoice).bg}`}
           >
-            <Icon name="IconUser" size={18} className={roleClasses(p.roleChoice).text} />
+            <PlayerPortrait size={24} />
             <span className="text-sm font-medium text-primary">{p.callsign || 'You'}</span>
             <span className="ml-auto text-xs text-muted">{p.seatName}</span>
           </li>

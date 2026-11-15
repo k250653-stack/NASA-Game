@@ -2,7 +2,7 @@ import type { RoleUsage } from '@/engine/planningHints'
 import type { CrewMember, RoleChoice } from '@/schemas'
 import { AssetImage } from '@/ui/AssetImage'
 import { compactNumber } from '@/ui/compactNumber'
-import { HelmetPortrait } from '@/ui/HelmetPortrait'
+import { PlayerPortrait } from '@/ui/PlayerPortrait'
 import { Icon } from '@/ui/Icon'
 import { roleClasses } from '@/ui/roleColors'
 
@@ -47,7 +47,7 @@ export function TeamColumn({
         title={`${seatName}: ${usageText(playerUsage)}`}
         className={`${card} ${roleClasses(seat).border}`}
       >
-        <HelmetPortrait size={56} />
+        <PlayerPortrait size={56} className={`border-2 ${roleClasses(seat).border}`} />
         <p className="label-caps w-full truncate text-xs text-primary">{callsign || 'You'}</p>
         <p className={`label-caps w-full truncate text-xs ${roleClasses(seat).text}`}>
           {seat === 'director' ? 'Director' : seatName}

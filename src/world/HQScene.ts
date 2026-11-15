@@ -10,18 +10,15 @@ import { reportLoading } from '@/ui/loadingStore'
 import { playSound } from '@/ui/sound'
 import {
   animKey,
-  facingFrom,
   FOOT_Y,
   FRAME_RATE,
   FRAME_SIZE,
   FRAMES_PER_DIR,
-  HEAD_Y,
   MOTIONS,
   SHEET_DIRS,
   SHEET_FILE,
   sheetDir,
   type Facing,
-  type Motion,
 } from './character'
 import {
   canStand,
@@ -40,14 +37,10 @@ import {
   type PlacedRoom,
   type PlacedStation,
 } from './hqMap'
+import { PlayerActor } from './player/PlayerActor'
 import type { Step } from './rooms/room'
 import { addCutOutTexture } from './roomTexture'
 
-const WALK_SPEED = 90
-const RUN_SPEED = 170
-/** Footstep sound interval while walking / running, ms. */
-const WALK_STEP_MS = 300
-const RUN_STEP_MS = 220
 /** Camera smoothing time constants: following inside a room, and the portal pan (~0.5 s). */
 const CAMERA_TAU_MS = 200
 const PAN_TAU_MS = 110
@@ -98,9 +91,9 @@ export class HQScene extends Phaser.Scene {
   private readonly map: HqMap
   private readonly walkable: Polygon[]
   private readonly blocked: Polygon[]
+  private actor!: PlayerActor
   private player!: Phaser.GameObjects.Sprite
   private keys!: Keys
-  private facing: Facing = 'S'
   private target: Target | null = null
   private paused = false
   /** Set while walking through a portal: input off, camera pans to this room. */
@@ -115,7 +108,6 @@ export class HQScene extends Phaser.Scene {
   private debug: Phaser.GameObjects.Graphics | null = null
   private marker: Phaser.GameObjects.Graphics | null = null
   private cam = { x: 0, y: 0 }
-  private stepMs = 0
   private saved = { at: 0, x: 0, y: 0 }
 
   /** Crew standing in the HQ (the debrief in the Briefing room); idle, no collision. */
@@ -143,6 +135,7 @@ export class HQScene extends Phaser.Scene {
       const url = getAsset('sprites', `maincharacter/${SHEET_FILE[motion]}`, 'png')
       this.load.spritesheet(motion, url, { frameWidth: FRAME_SIZE, frameHeight: FRAME_SIZE })
     }
+    PlayerActor.preload(this)
     this.load.on('loaderror', (file: Phaser.Loader.File) =>
       console.warn(`[world] could not load "${file.src}"`),
     )
@@ -164,19 +157,17 @@ export class HQScene extends Phaser.Scene {
 
     this.createAnims()
     const [sx, sy] = this.spawn
-    this.player = this.add
-      .sprite(sx, sy, 'idle')
-      .setOrigin(0.5, FOOT_Y / FRAME_SIZE)
-      .setScale(this.map.lobby.room.playerScale)
-      .setDepth(5)
-    this.playAnim('idle')
+    // The player is drawn from the player pack (cabin suit: helmet off inside the HQ).
+    this.actor = new PlayerActor(this, sx, sy)
+    this.actor.setVariant('cabin')
+    this.player = this.actor.sprite.setDepth(5 + sy / 10000)
     for (const c of this.crew) {
       const { dir, flip } = sheetDir(c.facing)
       const npc = this.add
         .sprite(c.at[0], c.at[1], 'idle')
         .setOrigin(0.5, FOOT_Y / FRAME_SIZE)
         .setScale(this.map.lobby.room.playerScale)
-        .setDepth(4.5)
+        .setDepth(5 + c.at[1] / 10000)
         .setTint(tokenColor(c.color))
         .setFlipX(flip)
       if (this.anims.exists(animKey('idle', dir))) npc.play(animKey('idle', dir))
@@ -218,20 +209,14 @@ export class HQScene extends Phaser.Scene {
     const k = this.keys
     const dx = Number(k.right.isDown || k.d.isDown) - Number(k.left.isDown || k.a.isDown)
     const dy = Number(k.down.isDown || k.s.isDown) - Number(k.up.isDown || k.w.isDown)
-    if (!this.paused && !this.transit && (dx || dy)) {
-      const running = k.shift.isDown
-      const step = ((running ? RUN_SPEED : WALK_SPEED) * deltaMs) / 1000 / Math.hypot(dx, dy)
-      this.move(dx * step, dy * step)
-      this.stepMs += deltaMs
-      if (this.stepMs >= (running ? RUN_STEP_MS : WALK_STEP_MS)) {
-        this.stepMs = 0
-        playSound('footstep')
-      }
-      this.facing = facingFrom(dx, dy)
-      this.playAnim(running ? 'run' : 'walk')
-    } else {
-      this.playAnim('idle')
-    }
+    const input = !this.paused && !this.transit ? { dx, dy, running: k.shift.isDown } : null
+    this.actor.update(
+      deltaMs,
+      input,
+      (mx, my) => this.move(mx, my),
+      () => playSound('footstep'),
+    )
+    this.player.setDepth(5 + this.player.y / 10000)
     if (!this.transit) {
       this.room = this.roomAt([this.player.x, this.player.y]) ?? this.room
       this.checkDoor()
@@ -471,7 +456,7 @@ export class HQScene extends Phaser.Scene {
     this.cam.y += (t.y - this.cam.y) * k
     const cam = this.cameras.main
     cam.centerOn(this.cam.x, this.cam.y)
-    const headY = this.player.y - (FOOT_Y - HEAD_Y) * this.player.scaleY
+    const headY = this.actor.headY()
     this.cb().onPlayerScreen(
       (this.player.x - cam.worldView.x) * cam.zoom,
       (headY - cam.worldView.y) * cam.zoom,
@@ -523,12 +508,6 @@ export class HQScene extends Phaser.Scene {
         })
       })
     }
-  }
-
-  private playAnim(motion: Motion) {
-    const { dir, flip } = sheetDir(this.facing)
-    this.player.setFlipX(flip)
-    if (this.anims.exists(animKey(motion, dir))) this.player.play(animKey(motion, dir), true)
   }
 
   private fit() {

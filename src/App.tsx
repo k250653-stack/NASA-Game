@@ -16,6 +16,7 @@ import PlanningBoard from '@/screens/PlanningBoard'
 import LaunchCheck from '@/screens/LaunchCheck'
 import FailureReview from '@/screens/FailureReview'
 import Codex from '@/screens/Codex'
+import ChooseAstronaut from '@/screens/ChooseAstronaut'
 import Styleguide from '@/screens/styleguide/Styleguide'
 // Also installs the "finishing a step closes the station popup" rule.
 import { useWorld } from '@/world/worldStore'
@@ -37,6 +38,7 @@ const SCREENS: Record<Phase, ComponentType> = {
   mission: HabitatWorld,
   review: FailureReview,
   codex: Codex,
+  appearance: ChooseAstronaut,
   hq: HQWorld,
   styleguide: Styleguide,
 }
